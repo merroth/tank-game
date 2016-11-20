@@ -1,0 +1,17 @@
+/* Global rules */
+html, head, body {
+	margin: 0px;
+	padding: 0px;
+}
+#app-container {
+	margin: 0 auto;
+	max-width: 1080px;
+	min-width: 640px;
+}
+/* Game view */
+#gameCanvas {
+	background-color: #cccccc;
+	min-height: 480px;
+	min-width: 640px;
+	width: 100%;
+}
