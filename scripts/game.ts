@@ -85,56 +85,47 @@ module tanks {
 			);
 			//Start "World"
 			//event listener
-			function listener(evt: KeyboardEvent) {
-				switch (evt.keyCode) {
-					//Player 1
-					case 38:
-						World.players[0].controls.forward = (evt.type == "keydown" ? true : false);
-						World.players[0].controls.backward = false;
-						break;
-					case 40:
-						World.players[0].controls.forward = false;
-						World.players[0].controls.backward = (evt.type == "keydown" ? true : false);
-						break;
-					case 37:
-						World.players[0].controls.left = (evt.type == "keydown" ? true : false);
-						World.players[0].controls.right = false;
-						break;
-					case 39:
-						World.players[0].controls.left = false;
-						World.players[0].controls.right = (evt.type == "keydown" ? true : false);
-						break;
-					//Player 2
-					case 87:
-						World.players[1].controls.forward = (evt.type == "keydown" ? true : false);
-						World.players[1].controls.backward = false;
-						break;
-					case 83:
-						World.players[1].controls.forward = false;
-						World.players[1].controls.backward = (evt.type == "keydown" ? true : false);
-						break;
-					case 65:
-						World.players[1].controls.left = (evt.type == "keydown" ? true : false);
-						World.players[1].controls.right = false;
-						break;
-					case 68:
-						World.players[1].controls.left = false;
-						World.players[1].controls.right = (evt.type == "keydown" ? true : false);
-				}
-
-			}
-			window.addEventListener("keydown", listener, false);
-			window.addEventListener("keyup", listener, false);
+			window.addEventListener("keydown", World.listener, false);
+			window.addEventListener("keyup", World.listener, false);
 			World.worldActive = true;
 			World.update(true);
 			return World;
+		}
+		public static listener(evt: KeyboardEvent) {
+			switch (evt.keyCode) {
+				//Player 1
+				case 38:
+					World.players[0].controls.forward = (evt.type == "keydown" ? true : false);
+					break;
+				case 40:
+					World.players[0].controls.backward = (evt.type == "keydown" ? true : false);
+					break;
+				case 37:
+					World.players[0].controls.left = (evt.type == "keydown" ? true : false);
+					break;
+				case 39:
+					World.players[0].controls.right = (evt.type == "keydown" ? true : false);
+					break;
+				//Player 2
+				case 87:
+					World.players[1].controls.forward = (evt.type == "keydown" ? true : false);
+					break;
+				case 83:
+					World.players[1].controls.backward = (evt.type == "keydown" ? true : false);
+					break;
+				case 65:
+					World.players[1].controls.left = (evt.type == "keydown" ? true : false);
+					break;
+				case 68:
+					World.players[1].controls.right = (evt.type == "keydown" ? true : false);
+			}
 		}
 		public static update(changes: boolean = false) {
 			//Runs every frame
 			if (World.worldActive !== true) {
 				return false;
 			}
-			World.updatehandle = requestAnimationFrame(World.update);
+			World.updatehandle = requestAnimationFrame(function () { World.update(); });
 
 			//Simulate terrain
 			//Simulate players
@@ -167,11 +158,7 @@ module tanks {
 			}
 			//Simulate bullets
 			if (changes === true) {
-				console.log("draw");
-
 				World.draw();
-			} else {
-				console.log("skip");
 			}
 		}
 		public static draw() {
@@ -203,6 +190,8 @@ module tanks {
 			cancelAnimationFrame(World.updatehandle);
 			World.worldActive = false;
 			World.players = [];
+			window.removeEventListener("keydown", World.listener, false);
+			window.removeEventListener("keyup", World.listener, false);
 		}
 	}
 }

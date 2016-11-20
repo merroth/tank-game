@@ -78,48 +78,40 @@ var tanks;
             World.players.push(new Player(new Coord(40, 40), "#0000ff"), new Player(new Coord(parseInt(canvas.getAttribute("width")) - 40, parseInt(canvas.getAttribute("height")) - 40), "#00ff00", new Angle(180)));
             //Start "World"
             //event listener
-            function listener(evt) {
-                switch (evt.keyCode) {
-                    //Player 1
-                    case 38:
-                        World.players[0].controls.forward = (evt.type == "keydown" ? true : false);
-                        World.players[0].controls.backward = false;
-                        break;
-                    case 40:
-                        World.players[0].controls.forward = false;
-                        World.players[0].controls.backward = (evt.type == "keydown" ? true : false);
-                        break;
-                    case 37:
-                        World.players[0].controls.left = (evt.type == "keydown" ? true : false);
-                        World.players[0].controls.right = false;
-                        break;
-                    case 39:
-                        World.players[0].controls.left = false;
-                        World.players[0].controls.right = (evt.type == "keydown" ? true : false);
-                        break;
-                    //Player 2
-                    case 87:
-                        World.players[1].controls.forward = (evt.type == "keydown" ? true : false);
-                        World.players[1].controls.backward = false;
-                        break;
-                    case 83:
-                        World.players[1].controls.forward = false;
-                        World.players[1].controls.backward = (evt.type == "keydown" ? true : false);
-                        break;
-                    case 65:
-                        World.players[1].controls.left = (evt.type == "keydown" ? true : false);
-                        World.players[1].controls.right = false;
-                        break;
-                    case 68:
-                        World.players[1].controls.left = false;
-                        World.players[1].controls.right = (evt.type == "keydown" ? true : false);
-                }
-            }
-            window.addEventListener("keydown", listener, false);
-            window.addEventListener("keyup", listener, false);
+            window.addEventListener("keydown", World.listener, false);
+            window.addEventListener("keyup", World.listener, false);
             World.worldActive = true;
             World.update(true);
             return World;
+        };
+        World.listener = function (evt) {
+            switch (evt.keyCode) {
+                //Player 1
+                case 38:
+                    World.players[0].controls.forward = (evt.type == "keydown" ? true : false);
+                    break;
+                case 40:
+                    World.players[0].controls.backward = (evt.type == "keydown" ? true : false);
+                    break;
+                case 37:
+                    World.players[0].controls.left = (evt.type == "keydown" ? true : false);
+                    break;
+                case 39:
+                    World.players[0].controls.right = (evt.type == "keydown" ? true : false);
+                    break;
+                //Player 2
+                case 87:
+                    World.players[1].controls.forward = (evt.type == "keydown" ? true : false);
+                    break;
+                case 83:
+                    World.players[1].controls.backward = (evt.type == "keydown" ? true : false);
+                    break;
+                case 65:
+                    World.players[1].controls.left = (evt.type == "keydown" ? true : false);
+                    break;
+                case 68:
+                    World.players[1].controls.right = (evt.type == "keydown" ? true : false);
+            }
         };
         World.update = function (changes) {
             if (changes === void 0) { changes = false; }
@@ -127,7 +119,7 @@ var tanks;
             if (World.worldActive !== true) {
                 return false;
             }
-            World.updatehandle = requestAnimationFrame(World.update);
+            World.updatehandle = requestAnimationFrame(function () { World.update(); });
             //Simulate terrain
             //Simulate players
             for (var playerIndex = 0; playerIndex < World.players.length; playerIndex++) {
@@ -161,11 +153,7 @@ var tanks;
             }
             //Simulate bullets
             if (changes === true) {
-                console.log("draw");
                 World.draw();
-            }
-            else {
-                console.log("skip");
             }
         };
         World.draw = function () {
@@ -197,6 +185,8 @@ var tanks;
             cancelAnimationFrame(World.updatehandle);
             World.worldActive = false;
             World.players = [];
+            window.removeEventListener("keydown", World.listener, false);
+            window.removeEventListener("keyup", World.listener, false);
         };
         World.worldActive = false;
         World.canvas = null;

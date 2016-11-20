@@ -27,12 +27,12 @@ module tanks {
 		////Game-page
 		//Controller
 		.controller('gameCtrl', ['$scope', function ($scope) {
-			
+
 			//Generate world paramenters
-			var canvas = document.getElementById("gameCanvas");
+			var canvas: HTMLCanvasElement = document.getElementById("gameCanvas");
 
 			//Create world
-			var world = World.create(canvas, 1);
+			var world = World.create(canvas);
 
 			//Listen for "destroy"
 			$scope.$on("$destroy", function (event) {

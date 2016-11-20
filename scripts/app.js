@@ -23,7 +23,7 @@ var tanks;
             //Generate world paramenters
             var canvas = document.getElementById("gameCanvas");
             //Create world
-            var world = tanks.World.create(canvas, 1);
+            var world = tanks.World.create(canvas);
             //Listen for "destroy"
             $scope.$on("$destroy", function (event) {
                 //Kill world
