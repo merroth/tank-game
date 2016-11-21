@@ -1,50 +1,25 @@
+/// <reference path="game.utility.ts" />
+//This file contains core classes for the game engine.
+//This file is dependent upon "game.utility.ts", which describes utility elements like "Angle"
 module tanks {
-	class Angle {
-		constructor(public degree: number = 0) {
-			this.degree = this.degree % 360;
-		}
-		public set(degree: number) {
-			this.degree = (this.degree + degree) % 360;
-			return this;
-		}
-		public get() {
-			return this.degree;
-		}
-		public static degreetoRadian(degree: number) {
-			return degree * (Math.PI / 180);
-		}
-		public static radianToDegree(radian: number) {
-			return radian * (180 / Math.PI);
-		}
-	}
-	class Coord {
-		public static distance(coordA: Coord, coordB: Coord): number {
-			return Math.sqrt(Math.pow(coordA.x - coordB.x, 2) + Math.pow(coordA.y - coordB.y, 2));
-		}
-		public static angle(coordA: Coord, coordB: Coord): Angle {
-			var angle = Math.atan2(coordA.y - coordB.y, coordA.x - coordB.x) * 180 / Math.PI;
-			if (angle < 0) {
-				angle = Math.abs(angle - 180);
-			}
 
-			return new Angle(angle);
-		}
-		constructor(public x: number = 0, public y: number = 0) {
-
-		}
-	}
-
-	interface IPlayerControls {
+	export interface IPlayerControls {
 		forward: boolean;
 		backward: boolean;
 		left: boolean;
 		right: boolean;
 		shoot: boolean;
 	}
-	class Player {
+	export interface IPlayerAnimation {
+		name: string;
+		count: number;
+	}
+	export class Player {
+		public sprite: Ressource = Ressource.get("tanksprite");
+		public anim: IPlayerAnimation = { name: "idle", count: 0 };
 		public size: number = 32;
-		public movespeed: number = 4;
-		public turnrate: number = 4;
+		public movespeed: number = 1;
+		public turnrate: number = 1;
 		constructor(public position: Coord, public color: string = (function () {
 			var keys: string[] = "123456789abcdef".split("");
 			var color: string = "#";
@@ -62,6 +37,8 @@ module tanks {
 
 		}
 	}
+	//initial load of player statics:
+
 	export class World {
 		public static worldActive: boolean = false;
 		public static canvas: HTMLCanvasElement = null;
@@ -88,36 +65,25 @@ module tanks {
 			window.addEventListener("keydown", World.listener, false);
 			window.addEventListener("keyup", World.listener, false);
 			World.worldActive = true;
-			World.update(true);
+
+			setTimeout(function () {
+				World.update(true);
+			}, 2500);
 			return World;
 		}
 		public static listener(evt: KeyboardEvent) {
+			var value: boolean = (evt.type == "keydown" ? true : false);
 			switch (evt.keyCode) {
 				//Player 1
-				case 38:
-					World.players[0].controls.forward = (evt.type == "keydown" ? true : false);
-					break;
-				case 40:
-					World.players[0].controls.backward = (evt.type == "keydown" ? true : false);
-					break;
-				case 37:
-					World.players[0].controls.left = (evt.type == "keydown" ? true : false);
-					break;
-				case 39:
-					World.players[0].controls.right = (evt.type == "keydown" ? true : false);
-					break;
+				case 38: World.players[0].controls.forward = value; break;
+				case 40: World.players[0].controls.backward = value; break;
+				case 37: World.players[0].controls.left = value; break;
+				case 39: World.players[0].controls.right = value; break;
 				//Player 2
-				case 87:
-					World.players[1].controls.forward = (evt.type == "keydown" ? true : false);
-					break;
-				case 83:
-					World.players[1].controls.backward = (evt.type == "keydown" ? true : false);
-					break;
-				case 65:
-					World.players[1].controls.left = (evt.type == "keydown" ? true : false);
-					break;
-				case 68:
-					World.players[1].controls.right = (evt.type == "keydown" ? true : false);
+				case 87: World.players[1].controls.forward = value; break;
+				case 83: World.players[1].controls.backward = value; break;
+				case 65: World.players[1].controls.left = value; break;
+				case 68: World.players[1].controls.right = value; break;
 			}
 		}
 		public static update(changes: boolean = false) {
@@ -138,19 +104,25 @@ module tanks {
 						var key = player.controls[keyIndex];
 						if (key == true) {
 							var direction = 1;
+							var turn = 1;
 							switch (keyIndex) {
 								case "backward": direction = 0 - direction;
 								case "forward":
+									player.anim.name = "move";
+									player.anim.count += direction;
+
 									player.position.x += (player.movespeed * cos) * direction;
 									player.position.y += (player.movespeed * sin) * direction;
 									changes = true;
 									break;
-								case "left":
-									player.angle.set(0 - player.turnrate);
-									changes = true; break;
+								case "left": turn = 0 - 1;
 								case "right":
-									player.angle.set(player.turnrate);
-									changes = true; break;
+									player.anim.name = "move";
+									player.anim.count += turn;
+
+									player.angle.set(player.turnrate * turn);
+									changes = true;
+									break;
 							}
 						}
 					}
@@ -170,14 +142,40 @@ module tanks {
 			//Paint players
 			for (var playerIndex = 0; playerIndex < World.players.length; playerIndex++) {
 				var player = World.players[playerIndex];
+
 				//Modify canvas
-				ctx.fillStyle = player.color;
 				ctx.translate(player.position.x, player.position.y);
 				ctx.rotate(Angle.degreetoRadian(player.angle.get()));
-				//Draw shape
-				ctx.fillRect(0 - player.size / 2, 0 - player.size / 2, player.size, player.size);
-				ctx.fillStyle = "#ff0000";
-				ctx.fillRect(player.size / 2 - 1, -1, 2, 2);
+
+				//Draw image
+				var animation = player.sprite.descriptor.anim
+					.filter(function findAnimation(anim) {
+						return anim.name === player.anim.name;
+					})[0]
+				var animationState = Math.floor(
+					player.anim.count /
+					animation.rate
+				);
+				if (animationState >= animation.count) {
+					animationState = 0;
+					player.anim.count = animationState;
+				} else if (animationState < 0) {
+					animationState = animation.count - 1;
+					player.anim.count = animationState;
+				}
+
+				ctx.drawImage(
+					player.sprite.ressource,
+					animationState * player.sprite.descriptor.width,
+					animation.top,
+					player.sprite.descriptor.width,
+					player.sprite.descriptor.height,
+					0 - Math.floor(player.sprite.descriptor.width / 2),
+					0 - Math.floor(player.sprite.descriptor.height / 2),
+					player.sprite.descriptor.width,
+					player.sprite.descriptor.height
+				);
+
 				//Reset canvas
 				ctx.rotate(0 - Angle.degreetoRadian(player.angle.get()));
 				ctx.translate(0 - player.position.x, 0 - player.position.y);

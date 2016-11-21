@@ -1,7 +1,7 @@
 /// <reference path="definitions/jquery/jquery.d.ts" />
 /// <reference path="definitions/angularjs/angular.d.ts" />
 /// <reference path="definitions/angular-ui-router/angular-ui-router.d.ts" />
-/// <reference path="game.ts" />
+/// <reference path="game/game.core.ts" />
 var tanks;
 (function (tanks) {
     tanks.tankApp = angular
