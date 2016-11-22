@@ -100,11 +100,12 @@ var tanks;
                 for (var keyIndex in player.controls) {
                     if (player.controls.hasOwnProperty(keyIndex)) {
                         var key = player.controls[keyIndex];
-                        if (key == true) {
+                        if (key === true) {
                             var direction = 1;
                             var turn = 1;
                             switch (keyIndex) {
-                                case "backward": direction = 0 - direction;
+                                case "backward":
+                                    direction = 0 - direction;
                                 case "forward":
                                     player.anim.name = "move";
                                     player.anim.count += direction;
@@ -112,7 +113,8 @@ var tanks;
                                     player.position.y += (player.movespeed * sin) * direction;
                                     changes = true;
                                     break;
-                                case "left": turn = 0 - 1;
+                                case "left":
+                                    turn = 0 - 1;
                                 case "right":
                                     player.anim.name = "move";
                                     player.anim.count += turn;
@@ -129,8 +131,12 @@ var tanks;
                 World.draw();
             }
         };
+
         World.draw = function () {
             var ctx = World.canvas.getContext("2d");
+            ctx.mozImageSmoothingEnabled = false;
+            ctx.msImageSmoothingEnabled = false;
+            ctx.imageSmoothingEnabled = false;
             ctx.save();
             //clear rect
             ctx.clearRect(0, 0, parseInt(World.canvas.getAttribute("width")), parseInt(World.canvas.getAttribute("height")));
