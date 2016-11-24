@@ -1,8 +1,39 @@
 /* Global rules */
+@font-face {
+	font-family: 'PressStart2P';
+
+	src:
+		url('../fonts/PressStart2P.woff2') format('woff2'),
+		url('../fonts/PressStart2P.woff') format('woff');
+
+	font-weight: normal;
+	font-style: normal;
+}
+
 html, head, body {
 	margin: 0px;
 	padding: 0px;
 }
+
+body {
+	font-family: 'PressStart2P', 'sans-serif';
+	font-size: 16px;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover:before {
+	content: '\25b6\00a0';
+	display: inline-block;
+	color: #000;
+}
+
+a:hover {
+	margin-left: -2em;
+}
+
 #app-container {
 	margin: 0 auto;
 	max-width: 1080px;
