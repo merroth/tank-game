@@ -19,11 +19,17 @@ body {
 	font-family: 'PressStart2P', 'sans-serif';
 	font-size: 16px;
 	background-color: #000;
+	text-transform: uppercase;
 	color: #fff;
 }
 
 a {
 	text-decoration: none;
+	padding-left: 2em;
+}
+
+a {
+	color: #fff;
 }
 
 a:hover:before {
@@ -34,6 +40,7 @@ a:hover:before {
 
 a:hover {
 	margin-left: -2em;
+	color: #ff0;
 }
 
 #app-container {
