@@ -18,6 +18,8 @@ html, head, body {
 body {
 	font-family: 'PressStart2P', 'sans-serif';
 	font-size: 16px;
+	background-color: #000;
+	color: #fff;
 }
 
 a {
@@ -27,7 +29,7 @@ a {
 a:hover:before {
 	content: '\25b6\00a0';
 	display: inline-block;
-	color: #000;
+	color: #fff;
 }
 
 a:hover {
