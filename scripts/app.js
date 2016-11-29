@@ -19,17 +19,6 @@ var tanks;
                 controller: 'homeCtrl'
             });
         }])
-        .controller('optionsCtrl', ['$scope', function ($scope) {
-        }])
-        .config(['$urlRouterProvider', '$stateProvider', function ($urlRouterProvider, $stateProvider) {
-            $urlRouterProvider.otherwise('/');
-            $stateProvider
-                .state('options', {
-                url: '/options',
-                templateUrl: 'view/options',
-                controller: 'optionsCtrl'
-            });
-        }])
         .controller('gameCtrl', ['$scope', function ($scope) {
             //Generate world paramenters
             var canvas = document.getElementById("gameCanvas");

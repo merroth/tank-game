@@ -1,7 +1,7 @@
 //This file contains utility elements for the game engine.
 var tanks;
 (function (tanks) {
-    //Defines the concept of an "angle" and utility functions concerning said points
+    //Defines the concept of an "angle" and utility functions
     var Angle = (function () {
         function Angle(degree) {
             if (degree === void 0) { degree = 0; }
@@ -24,7 +24,7 @@ var tanks;
         return Angle;
     }());
     tanks.Angle = Angle;
-    //Defines a point in space and utility functions concerning said points
+    //Defines a point in space and utility functions
     var Coord = (function () {
         function Coord(x, y) {
             if (x === void 0) { x = 0; }
@@ -45,6 +45,50 @@ var tanks;
         return Coord;
     }());
     tanks.Coord = Coord;
+    //Defines a force in space, based upon Coord
+    var Vector = (function () {
+        function Vector(velocity, max, degradeForce) {
+            if (velocity === void 0) { velocity = new Coord(); }
+            if (max === void 0) { max = Infinity; }
+            if (degradeForce === void 0) { degradeForce = 0.95; }
+            this.velocity = velocity;
+            this.max = max;
+            this.degradeForce = degradeForce;
+        }
+        //Degrade the current momentum by an overridable factor
+        Vector.prototype.degrade = function (degradeForce) {
+            if (degradeForce === void 0) { degradeForce = this.degradeForce; }
+            this.velocity.x *= this.degradeForce;
+            this.velocity.y *= this.degradeForce;
+            return this;
+        };
+        //Add a force based upon Coord
+        Vector.prototype.addForce = function (force) {
+            if (force === void 0) { force = new Coord(); }
+            this.velocity.x += force.x;
+            if (Math.abs(this.velocity.x) > this.max) {
+                this.velocity.x = (this.velocity.x > 0 ? this.max : 0 - this.max);
+            }
+            this.velocity.y += force.y;
+            if (Math.abs(this.velocity.y) > this.max) {
+                this.velocity.y = (this.velocity.y > 0 ? this.max : 0 - this.max);
+            }
+            return this;
+        };
+        Vector.prototype.get = function () {
+            return this.velocity;
+        };
+        Vector.prototype.set = function (force) {
+            if (force === void 0) { force = this.velocity; }
+            this.velocity = force;
+            return this;
+        };
+        Vector.prototype.getAngle = function () {
+            return Coord.angleBetweenCoords(new Coord(), this.velocity);
+        };
+        return Vector;
+    }());
+    tanks.Vector = Vector;
     //Ressources consists of a graphic file and optionally a descriptor JSON file
     //Ressources are loaded before game launch and referenced by assigned ID
     var Ressource = (function () {
@@ -60,7 +104,7 @@ var tanks;
             var self = this;
             var ready = 2;
             if (descriptorLocation == null) {
-                ready--;
+                testReady();
             }
             function testReady() {
                 ready--;
@@ -133,4 +177,5 @@ var tanks;
 var tanks;
 (function (tanks) {
     new tanks.Ressource("resources/single-tank-red.png", "resources/single-tank-red.json", "tanksprite");
+    new tanks.Ressource("resources/bullet_normal.png", "resources/bullet_normal.json", "bulletsprite");
 })(tanks || (tanks = {}));

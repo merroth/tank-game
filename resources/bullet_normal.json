@@ -1,0 +1,18 @@
+{
+    "width": 10,
+    "height": 10,
+    "anim": [
+        {
+            "name": "idle",
+            "count": 1,
+            "rate": 1,
+            "top": 0
+        },
+        {
+            "name": "move",
+            "count": 2,
+            "rate": 1,
+            "top": 0
+        }
+    ]
+}

@@ -5,6 +5,7 @@
     "files": [
         "scripts/app.ts",
         "scripts/game/game.utility.ts",
+        "scripts/game/game.classes.ts",
         "scripts/game/game.core.ts"
     ]
 }

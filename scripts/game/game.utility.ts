@@ -1,11 +1,11 @@
 //This file contains utility elements for the game engine.
 module tanks {
-	//Defines the concept of an "angle" and utility functions concerning said points
+	//Defines the concept of an "angle" and utility functions
 	export class Angle {
 		constructor(public degree: number = 0) {
 			this.degree = this.degree % 360;
 		}
-		public set(degree: number) {
+		public set(degree: number): Angle {
 			this.degree = (this.degree + degree) % 360;
 			return this;
 		}
@@ -19,8 +19,11 @@ module tanks {
 			return radian * (180 / Math.PI);
 		}
 	}
-	//Defines a point in space and utility functions concerning said points
+	//Defines a point in space and utility functions
 	export class Coord {
+		constructor(public x: number = 0, public y: number = 0) {
+
+		}
 		public static distanceBetweenCoords(coordA: Coord, coordB: Coord): number {
 			return Math.sqrt(Math.pow(coordA.x - coordB.x, 2) + Math.pow(coordA.y - coordB.y, 2));
 		}
@@ -32,11 +35,42 @@ module tanks {
 
 			return new Angle(angle);
 		}
-		constructor(public x: number = 0, public y: number = 0) {
+	}
+	//Defines a force in space, based upon Coord
+	export class Vector {
+		constructor(public velocity: Coord = new Coord(), public max: number = Infinity, public degradeForce: number = 0.95) {
 
 		}
-	}
+		//Degrade the current momentum by an overridable factor
+		public degrade(degradeForce: number = this.degradeForce): Vector {
+			this.velocity.x *= this.degradeForce;
+			this.velocity.y *= this.degradeForce;
+			return this;
+		}
+		//Add a force based upon Coord
+		public addForce(force: Coord = new Coord()): Vector {
 
+			this.velocity.x += force.x;
+			if (Math.abs(this.velocity.x) > this.max) {
+				this.velocity.x = (this.velocity.x > 0 ? this.max : 0 - this.max);
+			}
+			this.velocity.y += force.y;
+			if (Math.abs(this.velocity.y) > this.max) {
+				this.velocity.y = (this.velocity.y > 0 ? this.max : 0 - this.max);
+			}
+			return this;
+		}
+		public get() {
+			return this.velocity;
+		}
+		public set(force: Coord = this.velocity): Vector {
+			this.velocity = force;
+			return this;
+		}
+		public getAngle() {
+			return Coord.angleBetweenCoords(new Coord(), this.velocity);
+		}
+	}
 
 	export interface IDescriptorAnimation {
 		name: string;
@@ -70,7 +104,7 @@ module tanks {
 			var self = this;
 			var ready = 2;
 			if (descriptorLocation == null) {
-				ready--;
+				testReady();
 			}
 			function testReady() {
 				ready--;
@@ -130,4 +164,5 @@ module tanks {
 //in the future this should be elsewhere
 module tanks {
 	new Ressource("resources/single-tank-red.png", "resources/single-tank-red.json", "tanksprite");
+	new Ressource("resources/bullet_normal.png", "resources/bullet_normal.json", "bulletsprite");
 }
