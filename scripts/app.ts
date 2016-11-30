@@ -29,7 +29,7 @@ module tanks {
 		.controller('gameCtrl', ['$scope', function ($scope) {
 
 			//Generate world paramenters
-			var canvas: HTMLCanvasElement = document.getElementById("gameCanvas");
+			var canvas: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById("gameCanvas");
 
 			//Create world
 			var world = World.create(canvas);

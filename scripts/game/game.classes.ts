@@ -14,7 +14,7 @@ module tanks {
 		momentum?: Vector;
 		acceleration?: number;
 		size?: number;
-		sprite?: Ressource;
+		sprite?: Resource;
 		turnrate?: number;
 		anim?: IActorAnimation;
 	}
@@ -24,7 +24,7 @@ module tanks {
 		public momentum: Vector = new Vector();
 		public acceleration: number = 0;
 		public size: number = 0;
-		public sprite: Ressource;
+		public sprite: Resource;
 		public anim: IActorAnimation = { name: "", count: 0 };
 		public turnrate: number = 1;
 		constructor(parameters: IActor = {}) {
@@ -43,8 +43,8 @@ module tanks {
 	class Projectile extends Actor {
 		public lifespan: number = 1;
 		public owner: Player;
-		public size = 10;
-		public sprite: Ressource = Ressource.get("bulletsprite");
+		public size = 8;
+		public sprite: Resource = Resource.get("bulletsprite");
 		public anim: IActorAnimation = { name: "move", count: 0 };
 		constructor(parameters: IProjectile = {}) {
 			super(parameters);
@@ -68,7 +68,7 @@ module tanks {
 	}
 	export class Player extends Actor {
 		public projectiles: Projectile[] = [];
-		public sprite: Ressource = Ressource.get("tanksprite");
+		public sprite: Resource = Resource.get("tanksprite");
 		public anim: IActorAnimation = { name: "idle", count: 0 };
 		public momentum: Vector = new Vector(new Coord(), 2, 0.95);
 		public acceleration: number = 0.05;

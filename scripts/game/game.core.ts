@@ -38,7 +38,7 @@ module tanks {
 			World.worldActive = true;
 
 			var startInterval = setInterval(function () {
-				if (Ressource.Ressources.filter(function (a) { return a.ready == false })) {
+				if (Resource.Resources.filter(function (a) { return a.ready == false })) {
 					clearInterval(startInterval);
 					World.update(true);
 				}
@@ -142,6 +142,7 @@ module tanks {
 					changes = true;
 					var projectile = player.projectiles[projectileIndex];
 					projectile.lifespan--;
+					projectile.anim.count += 1;
 					if (projectile.lifespan < 1) {
 						player.projectiles.splice(projectileIndex, 1);
 						continue;
@@ -187,7 +188,7 @@ module tanks {
 				}
 
 				ctx.drawImage(
-					player.sprite.ressource,
+					player.sprite.resource,
 					animationState * player.sprite.descriptor.width,
 					animation.top,
 					player.sprite.descriptor.width,
@@ -230,7 +231,7 @@ module tanks {
 					}
 
 					ctx.drawImage(
-						projectile.sprite.ressource,
+						projectile.sprite.resource,
 						animationState * projectile.sprite.descriptor.width,
 						animation.top,
 						projectile.sprite.descriptor.width,

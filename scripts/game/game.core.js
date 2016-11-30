@@ -22,7 +22,7 @@ var tanks;
             window.addEventListener("keyup", World.listener, false);
             World.worldActive = true;
             var startInterval = setInterval(function () {
-                if (tanks.Ressource.Ressources.filter(function (a) { return a.ready == false; })) {
+                if (tanks.Resource.Resources.filter(function (a) { return a.ready == false; })) {
                     clearInterval(startInterval);
                     World.update(true);
                 }
@@ -132,6 +132,7 @@ var tanks;
                     changes = true;
                     var projectile = player.projectiles[projectileIndex];
                     projectile.lifespan--;
+                    projectile.anim.count += 1;
                     if (projectile.lifespan < 1) {
                         player.projectiles.splice(projectileIndex, 1);
                         continue;
@@ -172,7 +173,7 @@ var tanks;
                     animationState = animation.count - 1;
                     player.anim.count = animationState;
                 }
-                ctx.drawImage(player.sprite.ressource, animationState * player.sprite.descriptor.width, animation.top, player.sprite.descriptor.width, player.sprite.descriptor.height, 0 - Math.floor(player.sprite.descriptor.width / 2), 0 - Math.floor(player.sprite.descriptor.height / 2), player.sprite.descriptor.width, player.sprite.descriptor.height);
+                ctx.drawImage(player.sprite.resource, animationState * player.sprite.descriptor.width, animation.top, player.sprite.descriptor.width, player.sprite.descriptor.height, 0 - Math.floor(player.sprite.descriptor.width / 2), 0 - Math.floor(player.sprite.descriptor.height / 2), player.sprite.descriptor.width, player.sprite.descriptor.height);
                 //Reset canvas
                 ctx.rotate(0 - tanks.Angle.degreetoRadian(player.angle.get()));
                 ctx.translate(0 - player.position.x, 0 - player.position.y);
@@ -200,7 +201,7 @@ var tanks;
                         animationState = animation.count - 1;
                         projectile.anim.count = animationState;
                     }
-                    ctx.drawImage(projectile.sprite.ressource, animationState * projectile.sprite.descriptor.width, animation.top, projectile.sprite.descriptor.width, projectile.sprite.descriptor.height, 0 - Math.floor(projectile.sprite.descriptor.width / 2), 0 - Math.floor(projectile.sprite.descriptor.height / 2), projectile.sprite.descriptor.width, projectile.sprite.descriptor.height);
+                    ctx.drawImage(projectile.sprite.resource, animationState * projectile.sprite.descriptor.width, animation.top, projectile.sprite.descriptor.width, projectile.sprite.descriptor.height, 0 - Math.floor(projectile.sprite.descriptor.width / 2), 0 - Math.floor(projectile.sprite.descriptor.height / 2), projectile.sprite.descriptor.width, projectile.sprite.descriptor.height);
                     //Reset canvas
                     ctx.rotate(0 - tanks.Angle.degreetoRadian(projectile.angle.get()));
                     ctx.translate(0 - projectile.position.x, 0 - projectile.position.y);

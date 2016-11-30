@@ -83,24 +83,24 @@ module tanks {
 		height: number;
 		anim: IDescriptorAnimation[];
 	}
-	//Ressources consists of a graphic file and optionally a descriptor JSON file
-	//Ressources are loaded before game launch and referenced by assigned ID
-	export class Ressource {
+	//Resources consists of a graphic file and optionally a descriptor JSON file
+	//Resources are loaded before game launch and referenced by assigned ID
+	export class Resource {
 		private static id: 0;
-		public static Ressources: Ressource[] = [];
-		public ressource: HTMLImageElement | string | any = null;
+		public static Resources: Resource[] = [];
+		public resource: HTMLImageElement | string | any = null;
 		public descriptor: IDescriptor = null;
 		public ready: boolean = false;
-		public static get(id: string): Ressource {
-			var ressource = this.Ressources
+		public static get(id: string): Resource {
+			var resource = this.Resources
 				.filter(function (a) {
 					return a.id == id;
 				});
-			if (ressource.length > 0) {
-				return ressource[0];
+			if (resource.length > 0) {
+				return resource[0];
 			}
 		}
-		constructor(public fileLocation: string, public descriptorLocation: string = null, public id: string = "#" + (Ressource.id++)) {
+		constructor(public fileLocation: string, public descriptorLocation: string = null, public id: string = "#" + (Resource.id++)) {
 			var self = this;
 			var ready = 2;
 			if (descriptorLocation == null) {
@@ -113,20 +113,30 @@ module tanks {
 				}
 			}
 
-			//ressource
-			if (fileLocation.match(/\.png$|.jpg$|.bmp$|.gif$/ig) !== null) {
+			//resource
+			if (fileLocation.match(/\.png$|\.jpg$|\.bmp$|\.gif$/ig) !== null) {
 				//Image
-				this.ressource = document.createElement("img");
-				this.ressource.onload = function loaded() {
+				this.resource = document.createElement("img");
+				this.resource.onload = function loaded() {
 					testReady();
 				}
-				this.ressource.src = this.fileLocation;
+				this.resource.src = this.fileLocation;
 			} else if (fileLocation.match(/\.json$/ig) !== null) {
 				//JSON
 				var req = new XMLHttpRequest();
 				req.open('GET', fileLocation);
+				req.overrideMimeType("application/json");
 				req.onreadystatechange = function loaded() {
-					self.ressource = JSON.parse(req.responseText.replace(/\n|\t/ig, " "));
+					self.resource = JSON.parse(req.responseText.replace(/\n|\t/ig, " "));
+					testReady()
+				}
+				req.send();
+			} else if (fileLocation.match(/\.m4a$|\.mp3$|\.ogg/ig) !== null) {
+				//Sound
+				var req = new XMLHttpRequest();
+				req.open('GET', fileLocation);
+				req.onreadystatechange = function loaded() {
+					self.resource = req.responseText;
 					testReady()
 				}
 				req.send();
@@ -135,7 +145,7 @@ module tanks {
 				var req = new XMLHttpRequest();
 				req.open('GET', fileLocation);
 				req.onreadystatechange = function loaded() {
-					self.ressource = req.responseText;
+					self.resource = req.responseText;
 					testReady()
 				}
 				req.send();
@@ -147,6 +157,7 @@ module tanks {
 					//JSON
 					var req = new XMLHttpRequest();
 					req.open('GET', descriptorLocation);
+					req.overrideMimeType("application/json");
 					req.onreadystatechange = function () {
 						if (req.readyState === 4) {
 							self.descriptor = JSON.parse(req.responseText);
@@ -156,13 +167,13 @@ module tanks {
 					req.send();
 				}
 			}
-			Ressource.Ressources.push(this);
+			Resource.Resources.push(this);
 		}
 	}
 }
 //initialize load
 //in the future this should be elsewhere
 module tanks {
-	new Ressource("resources/single-tank-red.png", "resources/single-tank-red.json", "tanksprite");
-	new Ressource("resources/bullet_normal.png", "resources/bullet_normal.json", "bulletsprite");
+	new Resource("resources/single-tank-red.png", "resources/single-tank-red.json", "tanksprite");
+	new Resource("resources/bullet_normal.png", "resources/bullet_normal.json", "bulletsprite");
 }

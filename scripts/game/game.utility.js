@@ -89,16 +89,16 @@ var tanks;
         return Vector;
     }());
     tanks.Vector = Vector;
-    //Ressources consists of a graphic file and optionally a descriptor JSON file
-    //Ressources are loaded before game launch and referenced by assigned ID
-    var Ressource = (function () {
-        function Ressource(fileLocation, descriptorLocation, id) {
+    //Resources consists of a graphic file and optionally a descriptor JSON file
+    //Resources are loaded before game launch and referenced by assigned ID
+    var Resource = (function () {
+        function Resource(fileLocation, descriptorLocation, id) {
             if (descriptorLocation === void 0) { descriptorLocation = null; }
-            if (id === void 0) { id = "#" + (Ressource.id++); }
+            if (id === void 0) { id = "#" + (Resource.id++); }
             this.fileLocation = fileLocation;
             this.descriptorLocation = descriptorLocation;
             this.id = id;
-            this.ressource = null;
+            this.resource = null;
             this.descriptor = null;
             this.ready = false;
             var self = this;
@@ -112,21 +112,32 @@ var tanks;
                     self.ready = true;
                 }
             }
-            //ressource
-            if (fileLocation.match(/\.png$|.jpg$|.bmp$|.gif$/ig) !== null) {
+            //resource
+            if (fileLocation.match(/\.png$|\.jpg$|\.bmp$|\.gif$/ig) !== null) {
                 //Image
-                this.ressource = document.createElement("img");
-                this.ressource.onload = function loaded() {
+                this.resource = document.createElement("img");
+                this.resource.onload = function loaded() {
                     testReady();
                 };
-                this.ressource.src = this.fileLocation;
+                this.resource.src = this.fileLocation;
             }
             else if (fileLocation.match(/\.json$/ig) !== null) {
                 //JSON
                 var req = new XMLHttpRequest();
                 req.open('GET', fileLocation);
+                req.overrideMimeType("application/json");
                 req.onreadystatechange = function loaded() {
-                    self.ressource = JSON.parse(req.responseText.replace(/\n|\t/ig, " "));
+                    self.resource = JSON.parse(req.responseText.replace(/\n|\t/ig, " "));
+                    testReady();
+                };
+                req.send();
+            }
+            else if (fileLocation.match(/\.m4a$|\.mp3$|\.ogg/ig) !== null) {
+                //Sound
+                var req = new XMLHttpRequest();
+                req.open('GET', fileLocation);
+                req.onreadystatechange = function loaded() {
+                    self.resource = req.responseText;
                     testReady();
                 };
                 req.send();
@@ -136,7 +147,7 @@ var tanks;
                 var req = new XMLHttpRequest();
                 req.open('GET', fileLocation);
                 req.onreadystatechange = function loaded() {
-                    self.ressource = req.responseText;
+                    self.resource = req.responseText;
                     testReady();
                 };
                 req.send();
@@ -147,6 +158,7 @@ var tanks;
                     //JSON
                     var req = new XMLHttpRequest();
                     req.open('GET', descriptorLocation);
+                    req.overrideMimeType("application/json");
                     req.onreadystatechange = function () {
                         if (req.readyState === 4) {
                             self.descriptor = JSON.parse(req.responseText);
@@ -156,26 +168,26 @@ var tanks;
                     req.send();
                 }
             }
-            Ressource.Ressources.push(this);
+            Resource.Resources.push(this);
         }
-        Ressource.get = function (id) {
-            var ressource = this.Ressources
+        Resource.get = function (id) {
+            var resource = this.Resources
                 .filter(function (a) {
                 return a.id == id;
             });
-            if (ressource.length > 0) {
-                return ressource[0];
+            if (resource.length > 0) {
+                return resource[0];
             }
         };
-        Ressource.Ressources = [];
-        return Ressource;
+        Resource.Resources = [];
+        return Resource;
     }());
-    tanks.Ressource = Ressource;
+    tanks.Resource = Resource;
 })(tanks || (tanks = {}));
 //initialize load
 //in the future this should be elsewhere
 var tanks;
 (function (tanks) {
-    new tanks.Ressource("resources/single-tank-red.png", "resources/single-tank-red.json", "tanksprite");
-    new tanks.Ressource("resources/bullet_normal.png", "resources/bullet_normal.json", "bulletsprite");
+    new tanks.Resource("resources/single-tank-red.png", "resources/single-tank-red.json", "tanksprite");
+    new tanks.Resource("resources/bullet_normal.png", "resources/bullet_normal.json", "bulletsprite");
 })(tanks || (tanks = {}));

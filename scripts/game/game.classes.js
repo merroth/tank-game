@@ -33,8 +33,8 @@ var tanks;
             if (parameters === void 0) { parameters = {}; }
             _super.call(this, parameters);
             this.lifespan = 1;
-            this.size = 10;
-            this.sprite = tanks.Ressource.get("bulletsprite");
+            this.size = 8;
+            this.sprite = tanks.Resource.get("bulletsprite");
             this.anim = { name: "move", count: 0 };
             for (var key in parameters) {
                 if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
@@ -50,7 +50,7 @@ var tanks;
             if (parameters === void 0) { parameters = {}; }
             _super.call(this, parameters);
             this.projectiles = [];
-            this.sprite = tanks.Ressource.get("tanksprite");
+            this.sprite = tanks.Resource.get("tanksprite");
             this.anim = { name: "idle", count: 0 };
             this.momentum = new tanks.Vector(new tanks.Coord(), 2, 0.95);
             this.acceleration = 0.05;
