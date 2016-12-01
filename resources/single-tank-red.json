@@ -13,6 +13,12 @@
             "count": 3,
             "rate": 6,
             "top": 0
+        },
+        {
+            "name": "turn",
+            "count": 3,
+            "rate": 6,
+            "top": 32
         }
     ]
 }

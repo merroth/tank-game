@@ -134,13 +134,11 @@ var tanks;
             }
             else if (fileLocation.match(/\.m4a$|\.mp3$|\.ogg/ig) !== null) {
                 //Sound
-                var req = new XMLHttpRequest();
-                req.open('GET', fileLocation);
-                req.onreadystatechange = function loaded() {
-                    self.resource = req.responseText;
+                this.resource = document.createElement("audio");
+                this.resource.onload = function loaded() {
                     testReady();
                 };
-                req.send();
+                this.resource.src = this.fileLocation;
             }
             else {
                 //Unkown filetype
@@ -190,4 +188,10 @@ var tanks;
 (function (tanks) {
     new tanks.Resource("resources/single-tank-red.png", "resources/single-tank-red.json", "tanksprite");
     new tanks.Resource("resources/bullet_normal.png", "resources/bullet_normal.json", "bulletsprite");
+    new tanks.Resource("resources/sfx/menu_back.m4a", null, "menuback");
+    new tanks.Resource("resources/sfx/menu_select.m4a", null, "menuselect");
+    new tanks.Resource("resources/sfx/bullet_bounce.m4a", null, "bulletbounce");
+    new tanks.Resource("resources/sfx/bullet_spawn.m4a", null, "bulletspawn");
+    new tanks.Resource("resources/sfx/tank_hit.m4a", null, "tankhit");
+    new tanks.Resource("resources/sfx/tank_die.m4a", null, "tankdie");
 })(tanks || (tanks = {}));

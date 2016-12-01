@@ -9,6 +9,7 @@ module tanks {
 		.module('tankApp', [
 			'ui.router',
 		])
+
 		////Front-page
 		//Controller
 		.controller('homeCtrl', ['$scope', function ($scope) {
@@ -24,6 +25,23 @@ module tanks {
 					controller: 'homeCtrl'
 				})
 		}])
+
+		////Options-page
+		//Controller
+		.controller('optionsCtrl', ['$scope', function ($scope) {
+
+		}])
+		//Route
+		.config(['$urlRouterProvider', '$stateProvider', function ($urlRouterProvider, $stateProvider) {
+			$urlRouterProvider.otherwise('/');
+			$stateProvider
+				.state('options', {
+					url: '/options',
+					templateUrl: 'view/options',
+					controller: 'optionsCtrl'
+				})
+		}])
+
 		////Game-page
 		//Controller
 		.controller('gameCtrl', ['$scope', function ($scope) {

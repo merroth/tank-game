@@ -88,7 +88,7 @@ module tanks {
 	export class Resource {
 		private static id: 0;
 		public static Resources: Resource[] = [];
-		public resource: HTMLImageElement | string | any = null;
+		public resource: HTMLImageElement | HTMLAudioElement | string | any = null;
 		public descriptor: IDescriptor = null;
 		public ready: boolean = false;
 		public static get(id: string): Resource {
@@ -133,13 +133,11 @@ module tanks {
 				req.send();
 			} else if (fileLocation.match(/\.m4a$|\.mp3$|\.ogg/ig) !== null) {
 				//Sound
-				var req = new XMLHttpRequest();
-				req.open('GET', fileLocation);
-				req.onreadystatechange = function loaded() {
-					self.resource = req.responseText;
-					testReady()
+				this.resource = document.createElement("audio");
+				this.resource.onload = function loaded() {
+					testReady();
 				}
-				req.send();
+				this.resource.src = this.fileLocation;
 			} else {
 				//Unkown filetype
 				var req = new XMLHttpRequest();
@@ -176,4 +174,10 @@ module tanks {
 module tanks {
 	new Resource("resources/single-tank-red.png", "resources/single-tank-red.json", "tanksprite");
 	new Resource("resources/bullet_normal.png", "resources/bullet_normal.json", "bulletsprite");
+	new Resource("resources/sfx/menu_back.m4a", null, "menuback");
+	new Resource("resources/sfx/menu_select.m4a", null, "menuselect");
+	new Resource("resources/sfx/bullet_bounce.m4a", null, "bulletbounce");
+	new Resource("resources/sfx/bullet_spawn.m4a", null, "bulletspawn");
+	new Resource("resources/sfx/tank_hit.m4a", null, "tankhit");
+	new Resource("resources/sfx/tank_die.m4a", null, "tankdie");
 }

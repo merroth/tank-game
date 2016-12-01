@@ -45,7 +45,7 @@ module tanks {
 		public owner: Player;
 		public size = 8;
 		public sprite: Resource = Resource.get("bulletsprite");
-		public anim: IActorAnimation = { name: "move", count: 0 };
+		public anim: IActorAnimation = { name: "idle", count: 0 };
 		constructor(parameters: IProjectile = {}) {
 			super(parameters);
 			for (var key in parameters) {
@@ -70,7 +70,7 @@ module tanks {
 		public projectiles: Projectile[] = [];
 		public sprite: Resource = Resource.get("tanksprite");
 		public anim: IActorAnimation = { name: "idle", count: 0 };
-		public momentum: Vector = new Vector(new Coord(), 2, 0.95);
+		public momentum: Vector = new Vector(new Coord(), 2, 0.92);
 		public acceleration: number = 0.05;
 		public size: number = 32;
 		public turnrate: number = 1;
@@ -90,12 +90,15 @@ module tanks {
 			}
 		}
 		public shoot() {
+			var cos = Math.cos(Angle.degreetoRadian(this.angle.degree));
+			var sin = Math.sin(Angle.degreetoRadian(this.angle.degree));
+
 			var projectile = new Projectile({
 				lifespan: 100,
 				owner: this,
-				position: new Coord(this.position.x, this.position.y),
+				position: new Coord(this.position.x + cos * 10, this.position.y + sin * 10),
 				angle: new Angle(this.angle.degree),
-				momentum: new Vector(new Coord(Math.cos(Angle.degreetoRadian(this.angle.degree)) * 4, Math.sin(Angle.degreetoRadian(this.angle.degree)) * 4), 4, 1)
+				momentum: new Vector(new Coord(cos * 4, sin * 4), 4, 1)
 			});
 			this.projectiles.push(projectile);
 

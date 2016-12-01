@@ -99,8 +99,8 @@ var tanks;
                 if (player.controls.left || player.controls.right) {
                     var turn = (player.controls.left ? 0 - 1 : 1);
                     if (!player.controls.forward && !player.controls.backward) {
-                        player.anim.name = "move";
-                        player.anim.count += 1;
+                        player.anim.name = "turn";
+                        player.anim.count += turn;
                     }
                     player.angle.set(player.turnrate * turn);
                     changes = true;

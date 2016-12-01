@@ -35,7 +35,7 @@ var tanks;
             this.lifespan = 1;
             this.size = 8;
             this.sprite = tanks.Resource.get("bulletsprite");
-            this.anim = { name: "move", count: 0 };
+            this.anim = { name: "idle", count: 0 };
             for (var key in parameters) {
                 if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
                     this[key] = parameters[key];
@@ -52,7 +52,7 @@ var tanks;
             this.projectiles = [];
             this.sprite = tanks.Resource.get("tanksprite");
             this.anim = { name: "idle", count: 0 };
-            this.momentum = new tanks.Vector(new tanks.Coord(), 2, 0.95);
+            this.momentum = new tanks.Vector(new tanks.Coord(), 2, 0.92);
             this.acceleration = 0.05;
             this.size = 32;
             this.turnrate = 1;
@@ -70,12 +70,14 @@ var tanks;
             }
         }
         Player.prototype.shoot = function () {
+            var cos = Math.cos(tanks.Angle.degreetoRadian(this.angle.degree));
+            var sin = Math.sin(tanks.Angle.degreetoRadian(this.angle.degree));
             var projectile = new Projectile({
                 lifespan: 100,
                 owner: this,
-                position: new tanks.Coord(this.position.x, this.position.y),
+                position: new tanks.Coord(this.position.x + cos * 10, this.position.y + sin * 10),
                 angle: new tanks.Angle(this.angle.degree),
-                momentum: new tanks.Vector(new tanks.Coord(Math.cos(tanks.Angle.degreetoRadian(this.angle.degree)) * 4, Math.sin(tanks.Angle.degreetoRadian(this.angle.degree)) * 4), 4, 1)
+                momentum: new tanks.Vector(new tanks.Coord(cos * 4, sin * 4), 4, 1)
             });
             this.projectiles.push(projectile);
         };

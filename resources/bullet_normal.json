@@ -4,15 +4,15 @@
     "anim": [
         {
             "name": "idle",
-            "count": 1,
-            "rate": 1,
+            "count": 2,
+            "rate": 6,
             "top": 0
         },
         {
-            "name": "move",
+            "name": "despawn",
             "count": 2,
-            "rate": 1,
-            "top": 0
+            "rate": 6,
+            "top": 8
         }
     ]
 }
