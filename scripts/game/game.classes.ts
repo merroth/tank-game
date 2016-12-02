@@ -3,11 +3,11 @@
 //This file is dependent upon "game.utility.ts", which describes utility elements like "Angle"
 module tanks {
 
-
 	export interface IActorAnimation {
 		name: string;
 		count: number;
 	}
+
 	export interface IActor {
 		position?: Coord;
 		angle?: Angle;
@@ -18,6 +18,7 @@ module tanks {
 		turnrate?: number;
 		anim?: IActorAnimation;
 	}
+
 	export class Actor {
 		public position: Coord = new Coord();
 		public angle: Angle = new Angle();
@@ -40,6 +41,7 @@ module tanks {
 		lifespan?: number;
 		owner?: Player;
 	}
+
 	class Projectile extends Actor {
 		public lifespan: number = 1;
 		public owner: Player;
@@ -63,9 +65,11 @@ module tanks {
 		right: boolean;
 		shoot: boolean;
 	}
+
 	export interface IPlayer extends IActor {
 		controls?: IPlayerControls;
 	}
+
 	export class Player extends Actor {
 		public projectiles: Projectile[] = [];
 		public sprite: Resource = Resource.get("tanksprite");
@@ -74,6 +78,9 @@ module tanks {
 		public acceleration: number = 0.05;
 		public size: number = 32;
 		public turnrate: number = 1;
+		public canShoot: boolean = true;
+		public fireRate: number = 500;
+		public maxProjectiles: number = 10;
 		public controls: IPlayerControls = {
 			forward: false,
 			backward: false,
@@ -81,6 +88,7 @@ module tanks {
 			right: false,
 			shoot: false
 		}
+
 		constructor(parameters: IPlayer = {}) {
 			super(parameters);
 			for (var key in parameters) {
@@ -89,9 +97,16 @@ module tanks {
 				}
 			}
 		}
+
 		public shoot() {
+			this.canShoot = false;
+
 			var cos = Math.cos(Angle.degreetoRadian(this.angle.degree));
 			var sin = Math.sin(Angle.degreetoRadian(this.angle.degree));
+
+			var sfx = Resource.get('sfxBulletSpawn');
+			sfx.resource.currentTime = 0;
+			sfx.resource.play();
 
 			var projectile = new Projectile({
 				lifespan: 100,
@@ -102,6 +117,9 @@ module tanks {
 			});
 			this.projectiles.push(projectile);
 
+			var player = this;
+
+			setTimeout(function() {player.canShoot = true}, this.fireRate);
 		}
 	}
 }

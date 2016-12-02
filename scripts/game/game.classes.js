@@ -56,6 +56,9 @@ var tanks;
             this.acceleration = 0.05;
             this.size = 32;
             this.turnrate = 1;
+            this.canShoot = true;
+            this.fireRate = 500;
+            this.maxProjectiles = 10;
             this.controls = {
                 forward: false,
                 backward: false,
@@ -70,8 +73,12 @@ var tanks;
             }
         }
         Player.prototype.shoot = function () {
+            this.canShoot = false;
             var cos = Math.cos(tanks.Angle.degreetoRadian(this.angle.degree));
             var sin = Math.sin(tanks.Angle.degreetoRadian(this.angle.degree));
+            var sfx = tanks.Resource.get('sfxBulletSpawn');
+            sfx.resource.currentTime = 0;
+            sfx.resource.play();
             var projectile = new Projectile({
                 lifespan: 100,
                 owner: this,
@@ -80,6 +87,8 @@ var tanks;
                 momentum: new tanks.Vector(new tanks.Coord(cos * 4, sin * 4), 4, 1)
             });
             this.projectiles.push(projectile);
+            var player = this;
+            setTimeout(function () { player.canShoot = true; }, this.fireRate);
         };
         return Player;
     }(Actor));

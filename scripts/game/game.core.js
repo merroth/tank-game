@@ -105,7 +105,7 @@ var tanks;
                     player.angle.set(player.turnrate * turn);
                     changes = true;
                 }
-                if (player.controls.shoot) {
+                if (player.controls.shoot && player.canShoot && player.projectiles.length < player.maxProjectiles) {
                     player.shoot();
                     changes = true;
                 }
@@ -134,6 +134,9 @@ var tanks;
                     projectile.lifespan--;
                     projectile.anim.count += 1;
                     if (projectile.lifespan < 1) {
+                        var sfx = tanks.Resource.get('sfxBulletBounce');
+                        sfx.resource.currentTime = 0;
+                        sfx.resource.play();
                         player.projectiles.splice(projectileIndex, 1);
                         continue;
                     }

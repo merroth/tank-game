@@ -188,10 +188,10 @@ var tanks;
 (function (tanks) {
     new tanks.Resource("resources/single-tank-red.png", "resources/single-tank-red.json", "tanksprite");
     new tanks.Resource("resources/bullet_normal.png", "resources/bullet_normal.json", "bulletsprite");
-    new tanks.Resource("resources/sfx/menu_back.m4a", null, "menuback");
-    new tanks.Resource("resources/sfx/menu_select.m4a", null, "menuselect");
-    new tanks.Resource("resources/sfx/bullet_bounce.m4a", null, "bulletbounce");
-    new tanks.Resource("resources/sfx/bullet_spawn.m4a", null, "bulletspawn");
-    new tanks.Resource("resources/sfx/tank_hit.m4a", null, "tankhit");
-    new tanks.Resource("resources/sfx/tank_die.m4a", null, "tankdie");
+    new tanks.Resource("resources/sfx/menu_back.m4a", null, "sfxMenuBack");
+    new tanks.Resource("resources/sfx/menu_select.m4a", null, "sfxMenuSelect");
+    new tanks.Resource("resources/sfx/bullet_bounce.m4a", null, "sfxBulletBounce");
+    new tanks.Resource("resources/sfx/bullet_spawn.m4a", null, "sfxBulletSpawn");
+    new tanks.Resource("resources/sfx/tank_hit.m4a", null, "sfxTankHit");
+    new tanks.Resource("resources/sfx/tank_die.m4a", null, "sfxTankDie");
 })(tanks || (tanks = {}));

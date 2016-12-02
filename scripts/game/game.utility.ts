@@ -174,10 +174,10 @@ module tanks {
 module tanks {
 	new Resource("resources/single-tank-red.png", "resources/single-tank-red.json", "tanksprite");
 	new Resource("resources/bullet_normal.png", "resources/bullet_normal.json", "bulletsprite");
-	new Resource("resources/sfx/menu_back.m4a", null, "menuback");
-	new Resource("resources/sfx/menu_select.m4a", null, "menuselect");
-	new Resource("resources/sfx/bullet_bounce.m4a", null, "bulletbounce");
-	new Resource("resources/sfx/bullet_spawn.m4a", null, "bulletspawn");
-	new Resource("resources/sfx/tank_hit.m4a", null, "tankhit");
-	new Resource("resources/sfx/tank_die.m4a", null, "tankdie");
+	new Resource("resources/sfx/menu_back.m4a", null, "sfxMenuBack");
+	new Resource("resources/sfx/menu_select.m4a", null, "sfxMenuSelect");
+	new Resource("resources/sfx/bullet_bounce.m4a", null, "sfxBulletBounce");
+	new Resource("resources/sfx/bullet_spawn.m4a", null, "sfxBulletSpawn");
+	new Resource("resources/sfx/tank_hit.m4a", null, "sfxTankHit");
+	new Resource("resources/sfx/tank_die.m4a", null, "sfxTankDie");
 }
