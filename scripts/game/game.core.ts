@@ -195,7 +195,7 @@ module tanks {
 				ctx.drawImage(
 					player.sprite.resource,
 					animationState * player.sprite.descriptor.width,
-					animation.top,
+					animation.top * player.sprite.descriptor.height,
 					player.sprite.descriptor.width,
 					player.sprite.descriptor.height,
 					0 - Math.floor(player.sprite.descriptor.width / 2),

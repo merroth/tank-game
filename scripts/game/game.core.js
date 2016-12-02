@@ -176,7 +176,7 @@ var tanks;
                     animationState = animation.count - 1;
                     player.anim.count = animationState;
                 }
-                ctx.drawImage(player.sprite.resource, animationState * player.sprite.descriptor.width, animation.top, player.sprite.descriptor.width, player.sprite.descriptor.height, 0 - Math.floor(player.sprite.descriptor.width / 2), 0 - Math.floor(player.sprite.descriptor.height / 2), player.sprite.descriptor.width, player.sprite.descriptor.height);
+                ctx.drawImage(player.sprite.resource, animationState * player.sprite.descriptor.width, animation.top * player.sprite.descriptor.height, player.sprite.descriptor.width, player.sprite.descriptor.height, 0 - Math.floor(player.sprite.descriptor.width / 2), 0 - Math.floor(player.sprite.descriptor.height / 2), player.sprite.descriptor.width, player.sprite.descriptor.height);
                 //Reset canvas
                 ctx.rotate(0 - tanks.Angle.degreetoRadian(player.angle.get()));
                 ctx.translate(0 - player.position.x, 0 - player.position.y);
