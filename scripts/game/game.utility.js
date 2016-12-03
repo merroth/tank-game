@@ -1,6 +1,39 @@
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 //This file contains utility elements for the game engine.
 var tanks;
 (function (tanks) {
+    /* utility interfaces & enums */
+    (function (EZindex) {
+        //Dont assign values, simply move lines up or down to change rendering order
+        EZindex[EZindex["background"] = 0] = "background";
+        EZindex[EZindex["terrain"] = 1] = "terrain";
+        EZindex[EZindex["sub-sfx"] = 2] = "sub-sfx";
+        EZindex[EZindex["actor"] = 3] = "actor";
+        EZindex[EZindex["actor-sfx"] = 4] = "actor-sfx";
+        EZindex[EZindex["projectile"] = 5] = "projectile";
+        EZindex[EZindex["top-sfx"] = 6] = "top-sfx";
+        EZindex[EZindex["ui"] = 7] = "ui";
+    })(tanks.EZindex || (tanks.EZindex = {}));
+    var EZindex = tanks.EZindex;
+    var Basics;
+    (function (Basics) {
+        function distance(x1, y1, x2, y2) {
+            return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+        }
+        Basics.distance = distance;
+        function angleBetweenPoints(x1, y1, x2, y2) {
+            var angle = (Math.atan2(y1 - y2, x1 - x2) * 180 / Math.PI) % 360;
+            if (angle < 0) {
+                angle = Math.abs(angle - 180);
+            }
+            return angle;
+        }
+        Basics.angleBetweenPoints = angleBetweenPoints;
+    })(Basics = tanks.Basics || (tanks.Basics = {}));
     //Defines the concept of an "angle" and utility functions
     var Angle = (function () {
         function Angle(degree) {
@@ -33,14 +66,10 @@ var tanks;
             this.y = y;
         }
         Coord.distanceBetweenCoords = function (coordA, coordB) {
-            return Math.sqrt(Math.pow(coordA.x - coordB.x, 2) + Math.pow(coordA.y - coordB.y, 2));
+            return Basics.distance(coordA.x, coordA.y, coordB.x, coordB.y);
         };
         Coord.angleBetweenCoords = function (coordA, coordB) {
-            var angle = Math.atan2(coordA.y - coordB.y, coordA.x - coordB.x) * 180 / Math.PI;
-            if (angle < 0) {
-                angle = Math.abs(angle - 180);
-            }
-            return new Angle(angle);
+            return new Angle(Basics.angleBetweenPoints(coordA.x, coordA.y, coordB.x, coordB.y));
         };
         return Coord;
     }());
@@ -89,21 +118,91 @@ var tanks;
         return Vector;
     }());
     tanks.Vector = Vector;
+    var Basics;
+    (function (Basics) {
+        var Shape = (function () {
+            function Shape() {
+            }
+            return Shape;
+        }());
+        var Circle = (function (_super) {
+            __extends(Circle, _super);
+            function Circle(origo, radius) {
+                if (origo === void 0) { origo = new Coord(); }
+                if (radius === void 0) { radius = 0; }
+                _super.call(this);
+                this.origo = origo;
+                this.radius = radius;
+            }
+            Circle.areaToRadius = function (area) {
+                return area / Math.PI;
+            };
+            //omkreds
+            Circle.prototype.circumference = function () {
+                return 2 * this.radius * Math.PI;
+            };
+            //areal
+            Circle.prototype.area = function () {
+                return Math.PI * (this.radius * this.radius);
+            };
+            //korde
+            Circle.prototype.chord = function (v) {
+                if (v === void 0) { v = 1; }
+                return 2 * this.radius * Math.sin(Angle.degreetoRadian(v) / 2);
+            };
+            return Circle;
+        }(Shape));
+        Basics.Circle = Circle;
+        var c = new Circle(new Coord(), 1);
+        console.log(
+        //c,
+        c.area(), c.area() / Math.PI);
+        var Rect = (function (_super) {
+            __extends(Rect, _super);
+            function Rect(top, right, bottom, left, angle) {
+                if (angle === void 0) { angle = new Angle(); }
+                _super.call(this);
+                this.top = top;
+                this.right = right;
+                this.bottom = bottom;
+                this.left = left;
+                this.angle = angle;
+            }
+            Rect.prototype.circumference = function () {
+                return 2 * (Basics.distance(this.left, this.top, this.left, this.bottom) +
+                    Basics.distance(this.left, this.top, this.right, this.top));
+            };
+            Rect.prototype.area = function () {
+                return Basics.distance(this.left, this.top, this.left, this.bottom) *
+                    Basics.distance(this.left, this.top, this.right, this.top);
+            };
+            Rect.prototype.diagonal = function () {
+                return Math.sqrt(Math.pow(Basics.distance(this.left, this.top, this.left, this.bottom), 2) +
+                    Math.pow(Basics.distance(this.left, this.top, this.right, this.top), 2));
+            };
+            return Rect;
+        }(Shape));
+        Basics.Rect = Rect;
+    })(Basics = tanks.Basics || (tanks.Basics = {}));
     //Resources consists of a graphic file and optionally a descriptor JSON file
     //Resources are loaded before game launch and referenced by assigned ID
     var Resource = (function () {
-        function Resource(fileLocation, descriptorLocation, id) {
-            if (descriptorLocation === void 0) { descriptorLocation = null; }
-            if (id === void 0) { id = "#" + (Resource.id++); }
-            this.fileLocation = fileLocation;
-            this.descriptorLocation = descriptorLocation;
-            this.id = id;
+        function Resource(parameters) {
+            if (parameters === void 0) { parameters = { fileLocation: "" }; }
             this.resource = null;
             this.descriptor = null;
             this.ready = false;
+            this.fileLocation = "";
+            this.descriptorLocation = null;
+            this.id = "#" + (Resource.id++);
             var self = this;
             var ready = 2;
-            if (descriptorLocation == null) {
+            for (var key in parameters) {
+                if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
+                    this[key] = parameters[key];
+                }
+            }
+            if (this.descriptorLocation == null) {
                 testReady();
             }
             function testReady() {
@@ -113,7 +212,7 @@ var tanks;
                 }
             }
             //resource
-            if (fileLocation.match(/\.png$|\.jpg$|\.bmp$|\.gif$/ig) !== null) {
+            if (this.fileLocation.match(/\.png$|\.jpg$|\.bmp$|\.gif$/ig) !== null) {
                 //Image
                 this.resource = document.createElement("img");
                 this.resource.onload = function loaded() {
@@ -121,10 +220,10 @@ var tanks;
                 };
                 this.resource.src = this.fileLocation;
             }
-            else if (fileLocation.match(/\.json$/ig) !== null) {
+            else if (this.fileLocation.match(/\.json$/ig) !== null) {
                 //JSON
                 var req = new XMLHttpRequest();
-                req.open('GET', fileLocation);
+                req.open('GET', this.fileLocation);
                 req.overrideMimeType("application/json");
                 req.onreadystatechange = function loaded() {
                     self.resource = JSON.parse(req.responseText.replace(/\n|\t/ig, " "));
@@ -132,7 +231,7 @@ var tanks;
                 };
                 req.send();
             }
-            else if (fileLocation.match(/\.m4a$|\.mp3$|\.ogg/ig) !== null) {
+            else if (this.fileLocation.match(/\.m4a$|\.mp3$|\.ogg/ig) !== null) {
                 //Sound
                 this.resource = document.createElement("audio");
                 this.resource.onload = function loaded() {
@@ -143,7 +242,7 @@ var tanks;
             else {
                 //Unkown filetype
                 var req = new XMLHttpRequest();
-                req.open('GET', fileLocation);
+                req.open('GET', this.fileLocation);
                 req.onreadystatechange = function loaded() {
                     self.resource = req.responseText;
                     testReady();
@@ -151,11 +250,11 @@ var tanks;
                 req.send();
             }
             //descriptor
-            if (descriptorLocation != null) {
-                if (descriptorLocation.match(/\.json$/ig) !== null) {
+            if (this.descriptorLocation != null) {
+                if (this.descriptorLocation.match(/\.json$/ig) !== null) {
                     //JSON
                     var req = new XMLHttpRequest();
-                    req.open('GET', descriptorLocation);
+                    req.open('GET', this.descriptorLocation);
                     req.overrideMimeType("application/json");
                     req.onreadystatechange = function () {
                         if (req.readyState === 4) {
@@ -181,17 +280,84 @@ var tanks;
         return Resource;
     }());
     tanks.Resource = Resource;
+    //A class to hold sound specific attributes
+    var Sound = (function () {
+        function Sound(parameters) {
+            if (parameters === void 0) { parameters = { id: "#" + (Sound._id++).toString() }; }
+            this.soundBankCount = 1;
+            this.soundBanks = [];
+            this.resource = null;
+            this.id = null;
+            for (var key in parameters) {
+                if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
+                    this[key] = parameters[key];
+                }
+            }
+            this.soundBanks.push(this.resource.resource);
+            while (this.soundBanks.length < this.soundBankCount) {
+                this.soundBanks.push(this.resource.resource.cloneNode());
+            }
+            Sound.Sounds.push(this);
+        }
+        Sound.get = function (id) {
+            var sound = this.Sounds
+                .filter(function (a) {
+                return a.id == id;
+            });
+            if (sound.length > 0) {
+                return sound[0];
+            }
+        };
+        Sound.prototype.play = function (force) {
+            if (force === void 0) { force = false; }
+            for (var soundBankIndex = 0; soundBankIndex < this.soundBanks.length; soundBankIndex++) {
+                var soundBank = this.soundBanks[soundBankIndex];
+                if (soundBank.paused) {
+                    soundBank.play();
+                    return this;
+                }
+            }
+            if (force) {
+                var sfx = this.soundBanks[0];
+                sfx.currentTime = 0;
+                sfx.play();
+            }
+            return this;
+        };
+        Sound.prototype.pause = function (rewind) {
+            if (rewind === void 0) { rewind = false; }
+            for (var soundBankIndex = 0; soundBankIndex < this.soundBanks.length; soundBankIndex++) {
+                this.soundBanks[soundBankIndex].pause();
+                if (rewind) {
+                    this.soundBanks[soundBankIndex].currentTime = 0;
+                }
+            }
+            return this;
+        };
+        Sound._id = 0;
+        Sound.Sounds = [];
+        return Sound;
+    }());
+    tanks.Sound = Sound;
 })(tanks || (tanks = {}));
 //initialize load
 //in the future this should be elsewhere
 var tanks;
 (function (tanks) {
-    new tanks.Resource("resources/single-tank-red.png", "resources/single-tank-red.json", "tanksprite");
-    new tanks.Resource("resources/bullet_normal.png", "resources/bullet_normal.json", "bulletsprite");
-    new tanks.Resource("resources/sfx/menu_back.m4a", null, "sfxMenuBack");
-    new tanks.Resource("resources/sfx/menu_select.m4a", null, "sfxMenuSelect");
-    new tanks.Resource("resources/sfx/bullet_bounce.m4a", null, "sfxBulletBounce");
-    new tanks.Resource("resources/sfx/bullet_spawn.m4a", null, "sfxBulletSpawn");
-    new tanks.Resource("resources/sfx/tank_hit.m4a", null, "sfxTankHit");
-    new tanks.Resource("resources/sfx/tank_die.m4a", null, "sfxTankDie");
+    //Resources
+    new tanks.Resource({ fileLocation: "resources/single-tank-red.png", descriptorLocation: "resources/single-tank-red.json", id: "tanksprite" });
+    new tanks.Resource({ fileLocation: "resources/bullet_normal.png", descriptorLocation: "resources/bullet_normal.json", id: "bulletsprite" });
+    new tanks.Resource({ fileLocation: "resources/sfx/menu_back.m4a", id: "sfxMenuBack" });
+    new tanks.Resource({ fileLocation: "resources/sfx/menu_select.m4a", id: "sfxMenuSelect" });
+    new tanks.Resource({ fileLocation: "resources/sfx/bullet_bounce.m4a", id: "sfxBulletBounce" });
+    new tanks.Resource({ fileLocation: "resources/sfx/bullet_spawn.m4a", id: "sfxBulletSpawn" });
+    new tanks.Resource({ fileLocation: "resources/sfx/tank_hit.m4a", id: "sfxTankHit" });
+    new tanks.Resource({ fileLocation: "resources/sfx/tank_die.m4a", id: "sfxTankDie" });
+    //Sound
+    new tanks.Sound({ id: "sfxMenuBack", resource: tanks.Resource.get("sfxMenuBack") });
+    new tanks.Sound({ id: "sfxMenuSelect", resource: tanks.Resource.get("sfxMenuSelect") });
+    new tanks.Sound({ id: "sfxBulletBounce", resource: tanks.Resource.get("sfxBulletBounce") });
+    new tanks.Sound({ id: "sfxBulletSpawn", resource: tanks.Resource.get("sfxBulletSpawn"), soundBankCount: 10 });
+    new tanks.Sound({ id: "sfxTankHit", resource: tanks.Resource.get("sfxTankHit"), soundBankCount: 4 });
+    new tanks.Sound({ id: "sfxTankDie", resource: tanks.Resource.get("sfxTankDie"), soundBankCount: 4 });
 })(tanks || (tanks = {}));

@@ -17,9 +17,12 @@ module tanks {
 		sprite?: Resource;
 		turnrate?: number;
 		anim?: IActorAnimation;
+		zIndex?: EZindex;
+		render?: boolean;
 	}
 
 	export class Actor {
+		static _actors: Actor[] = [];
 		public position: Coord = new Coord();
 		public angle: Angle = new Angle();
 		public momentum: Vector = new Vector();
@@ -28,12 +31,25 @@ module tanks {
 		public sprite: Resource;
 		public anim: IActorAnimation = { name: "", count: 0 };
 		public turnrate: number = 1;
+		public zIndex: EZindex = EZindex.actor;
+		public render: boolean = true;
 		constructor(parameters: IActor = {}) {
 			for (var key in parameters) {
 				if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
 					this[key] = parameters[key];
 				}
 			}
+			Actor._actors.push(this);
+		}
+		//Do thing on each frame
+		public update(): boolean {
+			return false;
+		}
+		protected _die() {
+			Actor._actors.splice(Actor._actors.indexOf(this), 1);
+		}
+		public die() {
+			this._die();
 		}
 	}
 
@@ -44,10 +60,11 @@ module tanks {
 
 	class Projectile extends Actor {
 		public lifespan: number = 1;
-		public owner: Player;
+		public owner: Player = null;
 		public size = 8;
 		public sprite: Resource = Resource.get("bulletsprite");
 		public anim: IActorAnimation = { name: "idle", count: 0 };
+		public zIndex: EZindex = EZindex.projectile;
 		constructor(parameters: IProjectile = {}) {
 			super(parameters);
 			for (var key in parameters) {
@@ -55,6 +72,27 @@ module tanks {
 					this[key] = parameters[key];
 				}
 			}
+		}
+		public update(): boolean {
+			var self = this;
+			self.lifespan--;
+			self.anim.count += 1;
+			if (self.lifespan < 1) {
+				Sound.get('sfxBulletBounce').play();
+
+				self.die();
+				return false;
+			}
+			self.position.x += self.momentum.get().x;
+			self.position.y += self.momentum.get().y;
+			return true;
+		}
+		public die() {
+			var self = this;
+			//Remove from owner
+			self.owner.projectiles.splice(self.owner.projectiles.indexOf(self), 1);
+			//die
+			self._die();
 		}
 	}
 
@@ -78,8 +116,8 @@ module tanks {
 		public acceleration: number = 0.05;
 		public size: number = 32;
 		public turnrate: number = 1;
-		public canShoot: boolean = true;
-		public fireRate: number = 500;
+		public canShoot: number = 0;
+		public fireRate: number = 5;
 		public maxProjectiles: number = 10;
 		public controls: IPlayerControls = {
 			forward: false,
@@ -97,16 +135,85 @@ module tanks {
 				}
 			}
 		}
+		public update(): boolean {
+			var self = this;
+			var changes = false;
+
+			//cooldowns
+			if (self.canShoot > 0) {
+				self.canShoot--;
+			}
+
+			var cos = Math.cos(Angle.degreetoRadian(self.angle.get()));
+			var sin = Math.sin(Angle.degreetoRadian(self.angle.get()));
+
+			//Controls
+			if (Math.abs(self.momentum.velocity.x) + Math.abs(self.momentum.velocity.y) > 0) {
+				self.momentum.degrade();
+
+				self.position.x += self.momentum.get().x;
+				self.position.y += self.momentum.get().y;
+
+				changes = true;
+			}
+			if (self.controls.forward || self.controls.backward) {
+				var direction = (self.controls.backward ? 0 - 1 : 1);
+				self.anim.name = "move";
+				self.anim.count += direction;
+
+				self.momentum.addForce(new Coord(
+					(self.acceleration * cos) * direction,
+					(self.acceleration * sin) * direction
+				));
+
+				self.position.x += self.momentum.get().x;
+				self.position.y += self.momentum.get().y;
+				changes = true;
+			}
+			if (self.controls.left || self.controls.right) {
+				var turn = (self.controls.left ? 0 - 1 : 1);
+				if (!self.controls.forward && !self.controls.backward) {
+					self.anim.name = "turn";
+					self.anim.count += turn;
+				}
+
+				self.angle.set(self.turnrate * turn);
+
+				changes = true;
+			}
+
+			if (self.controls.shoot && self.canShoot < 1 && self.projectiles.length < self.maxProjectiles) {
+				self.shoot();
+				changes = true;
+			}
+
+			if (changes) {
+				//Fix self animation overflow
+				var animation = self.sprite.descriptor.anim
+					.filter(function findAnimation(anim) {
+						return anim.name === self.anim.name;
+					})[0];
+				var animationState = Math.floor(
+					self.anim.count /
+					animation.rate
+				);
+				if (animationState < 0) {
+					self.anim.count = (animation.count * animation.rate) - 1;
+				} else if (animationState >= animation.count) {
+					self.anim.count = 0;
+				}
+			}
+
+			return changes;
+		}
 
 		public shoot() {
-			this.canShoot = false;
+			this.canShoot = this.fireRate;
 
 			var cos = Math.cos(Angle.degreetoRadian(this.angle.degree));
 			var sin = Math.sin(Angle.degreetoRadian(this.angle.degree));
 
-			var sfx = Resource.get('sfxBulletSpawn');
-			sfx.resource.currentTime = 0;
-			sfx.resource.play();
+			Sound.get('sfxBulletSpawn').play();
 
 			var projectile = new Projectile({
 				lifespan: 100,
@@ -115,11 +222,10 @@ module tanks {
 				angle: new Angle(this.angle.degree),
 				momentum: new Vector(new Coord(cos * 4, sin * 4), 4, 1)
 			});
+
 			this.projectiles.push(projectile);
 
 			var player = this;
-
-			setTimeout(function() {player.canShoot = true}, this.fireRate);
 		}
 	}
 }

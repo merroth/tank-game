@@ -18,12 +18,26 @@ var tanks;
             this.size = 0;
             this.anim = { name: "", count: 0 };
             this.turnrate = 1;
+            this.zIndex = tanks.EZindex.actor;
+            this.render = true;
             for (var key in parameters) {
                 if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
                     this[key] = parameters[key];
                 }
             }
+            Actor._actors.push(this);
         }
+        //Do thing on each frame
+        Actor.prototype.update = function () {
+            return false;
+        };
+        Actor.prototype._die = function () {
+            Actor._actors.splice(Actor._actors.indexOf(this), 1);
+        };
+        Actor.prototype.die = function () {
+            this._die();
+        };
+        Actor._actors = [];
         return Actor;
     }());
     tanks.Actor = Actor;
@@ -33,15 +47,37 @@ var tanks;
             if (parameters === void 0) { parameters = {}; }
             _super.call(this, parameters);
             this.lifespan = 1;
+            this.owner = null;
             this.size = 8;
             this.sprite = tanks.Resource.get("bulletsprite");
             this.anim = { name: "idle", count: 0 };
+            this.zIndex = tanks.EZindex.projectile;
             for (var key in parameters) {
                 if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
                     this[key] = parameters[key];
                 }
             }
         }
+        Projectile.prototype.update = function () {
+            var self = this;
+            self.lifespan--;
+            self.anim.count += 1;
+            if (self.lifespan < 1) {
+                tanks.Sound.get('sfxBulletBounce').play();
+                self.die();
+                return false;
+            }
+            self.position.x += self.momentum.get().x;
+            self.position.y += self.momentum.get().y;
+            return true;
+        };
+        Projectile.prototype.die = function () {
+            var self = this;
+            //Remove from owner
+            self.owner.projectiles.splice(self.owner.projectiles.indexOf(self), 1);
+            //die
+            self._die();
+        };
         return Projectile;
     }(Actor));
     var Player = (function (_super) {
@@ -56,8 +92,8 @@ var tanks;
             this.acceleration = 0.05;
             this.size = 32;
             this.turnrate = 1;
-            this.canShoot = true;
-            this.fireRate = 500;
+            this.canShoot = 0;
+            this.fireRate = 5;
             this.maxProjectiles = 10;
             this.controls = {
                 forward: false,
@@ -72,13 +108,66 @@ var tanks;
                 }
             }
         }
+        Player.prototype.update = function () {
+            var self = this;
+            var changes = false;
+            //cooldowns
+            if (self.canShoot > 0) {
+                self.canShoot--;
+            }
+            var cos = Math.cos(tanks.Angle.degreetoRadian(self.angle.get()));
+            var sin = Math.sin(tanks.Angle.degreetoRadian(self.angle.get()));
+            //Controls
+            if (Math.abs(self.momentum.velocity.x) + Math.abs(self.momentum.velocity.y) > 0) {
+                self.momentum.degrade();
+                self.position.x += self.momentum.get().x;
+                self.position.y += self.momentum.get().y;
+                changes = true;
+            }
+            if (self.controls.forward || self.controls.backward) {
+                var direction = (self.controls.backward ? 0 - 1 : 1);
+                self.anim.name = "move";
+                self.anim.count += direction;
+                self.momentum.addForce(new tanks.Coord((self.acceleration * cos) * direction, (self.acceleration * sin) * direction));
+                self.position.x += self.momentum.get().x;
+                self.position.y += self.momentum.get().y;
+                changes = true;
+            }
+            if (self.controls.left || self.controls.right) {
+                var turn = (self.controls.left ? 0 - 1 : 1);
+                if (!self.controls.forward && !self.controls.backward) {
+                    self.anim.name = "turn";
+                    self.anim.count += turn;
+                }
+                self.angle.set(self.turnrate * turn);
+                changes = true;
+            }
+            if (self.controls.shoot && self.canShoot < 1 && self.projectiles.length < self.maxProjectiles) {
+                self.shoot();
+                changes = true;
+            }
+            if (changes) {
+                //Fix self animation overflow
+                var animation = self.sprite.descriptor.anim
+                    .filter(function findAnimation(anim) {
+                    return anim.name === self.anim.name;
+                })[0];
+                var animationState = Math.floor(self.anim.count /
+                    animation.rate);
+                if (animationState < 0) {
+                    self.anim.count = (animation.count * animation.rate) - 1;
+                }
+                else if (animationState >= animation.count) {
+                    self.anim.count = 0;
+                }
+            }
+            return changes;
+        };
         Player.prototype.shoot = function () {
-            this.canShoot = false;
+            this.canShoot = this.fireRate;
             var cos = Math.cos(tanks.Angle.degreetoRadian(this.angle.degree));
             var sin = Math.sin(tanks.Angle.degreetoRadian(this.angle.degree));
-            var sfx = tanks.Resource.get('sfxBulletSpawn');
-            sfx.resource.currentTime = 0;
-            sfx.resource.play();
+            tanks.Sound.get('sfxBulletSpawn').play();
             var projectile = new Projectile({
                 lifespan: 100,
                 owner: this,
@@ -88,7 +177,6 @@ var tanks;
             });
             this.projectiles.push(projectile);
             var player = this;
-            setTimeout(function () { player.canShoot = true; }, this.fireRate);
         };
         return Player;
     }(Actor));
