@@ -7,6 +7,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var tanks;
 (function (tanks) {
     /* utility interfaces & enums */
+    //Enum for rendering order
     (function (EZindex) {
         //Dont assign values, simply move lines up or down to change rendering order
         EZindex[EZindex["background"] = 0] = "background";
@@ -19,12 +20,15 @@ var tanks;
         EZindex[EZindex["ui"] = 7] = "ui";
     })(tanks.EZindex || (tanks.EZindex = {}));
     var EZindex = tanks.EZindex;
+    //Container for basic elements like funtions or shapes
     var Basics;
     (function (Basics) {
+        //Distance betweem two coordinates
         function distance(x1, y1, x2, y2) {
             return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
         }
         Basics.distance = distance;
+        //Angle betweem two coordinates
         function angleBetweenPoints(x1, y1, x2, y2) {
             var angle = (Math.atan2(y1 - y2, x1 - x2) * 180 / Math.PI) % 360;
             if (angle < 0) {
@@ -65,9 +69,11 @@ var tanks;
             this.x = x;
             this.y = y;
         }
+        //Distance between points wrapped for Coords
         Coord.distanceBetweenCoords = function (coordA, coordB) {
             return Basics.distance(coordA.x, coordA.y, coordB.x, coordB.y);
         };
+        //Angle between points formular wrapped for Coords
         Coord.angleBetweenCoords = function (coordA, coordB) {
             return new Angle(Basics.angleBetweenPoints(coordA.x, coordA.y, coordB.x, coordB.y));
         };
@@ -91,7 +97,13 @@ var tanks;
             this.velocity.y *= this.degradeForce;
             return this;
         };
-        //Add a force based upon Coord
+        //Reverse the Vector to point in the opposite direction
+        Vector.prototype.reverse = function () {
+            this.velocity.x = -1 * this.velocity.x;
+            this.velocity.y = -1 * this.velocity.y;
+            return this;
+        };
+        //Add a Coord force to the Vector
         Vector.prototype.addForce = function (force) {
             if (force === void 0) { force = new Coord(); }
             this.velocity.x += force.x;
@@ -112,19 +124,25 @@ var tanks;
             this.velocity = force;
             return this;
         };
+        //Get angle of force
         Vector.prototype.getAngle = function () {
             return Coord.angleBetweenCoords(new Coord(), this.velocity);
         };
         return Vector;
     }());
     tanks.Vector = Vector;
+    //More Basics
     var Basics;
     (function (Basics) {
+        //Shape is a base class for other Shapes
+        //This class isn't exported because it shouldn't be used raw
         var Shape = (function () {
             function Shape() {
             }
             return Shape;
         }());
+        //Circle contains mathematical formulars and data for a circle
+        //This can easily be used for range factors and collisions
         var Circle = (function (_super) {
             __extends(Circle, _super);
             function Circle(origo, radius) {
@@ -153,10 +171,7 @@ var tanks;
             return Circle;
         }(Shape));
         Basics.Circle = Circle;
-        var c = new Circle(new Coord(), 1);
-        console.log(
-        //c,
-        c.area(), c.area() / Math.PI);
+        //Rect contains mathematical formulars and data for a rectangle
         var Rect = (function (_super) {
             __extends(Rect, _super);
             function Rect(top, right, bottom, left, angle) {
@@ -168,21 +183,99 @@ var tanks;
                 this.left = left;
                 this.angle = angle;
             }
+            //omkreds
             Rect.prototype.circumference = function () {
                 return 2 * (Basics.distance(this.left, this.top, this.left, this.bottom) +
                     Basics.distance(this.left, this.top, this.right, this.top));
             };
+            //areal
             Rect.prototype.area = function () {
                 return Basics.distance(this.left, this.top, this.left, this.bottom) *
                     Basics.distance(this.left, this.top, this.right, this.top);
             };
+            //Diagonal length of box
             Rect.prototype.diagonal = function () {
-                return Math.sqrt(Math.pow(Basics.distance(this.left, this.top, this.left, this.bottom), 2) +
-                    Math.pow(Basics.distance(this.left, this.top, this.right, this.top), 2));
+                return Basics.distance(this.left, this.top, this.right, this.bottom);
             };
             return Rect;
         }(Shape));
         Basics.Rect = Rect;
+        //Shortest length between any point on a line and and a circle
+        function shortestDistanceBetweenLineAndCircle(circleOrigo, startPoint, endPoint) {
+            var A = circleOrigo.x - startPoint.x;
+            var B = circleOrigo.y - startPoint.y;
+            var C = endPoint.x - startPoint.x;
+            var D = endPoint.y - startPoint.y;
+            var dot = A * C + B * D;
+            var len_sq = C * C + D * D;
+            var param = -1;
+            if (len_sq != 0) {
+                param = dot / len_sq;
+            }
+            var xx, yy;
+            if (param < 0) {
+                xx = startPoint.x;
+                yy = startPoint.y;
+            }
+            else if (param > 1) {
+                xx = endPoint.x;
+                yy = endPoint.y;
+            }
+            else {
+                xx = startPoint.x + param * C;
+                yy = startPoint.y + param * D;
+            }
+            var dx = circleOrigo.x - xx;
+            var dy = circleOrigo.y - yy;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+        Basics.shortestDistanceBetweenLineAndCircle = shortestDistanceBetweenLineAndCircle;
+        //Calculate if a Circle overlaps a Rect
+        function overlapCircleRect(c, r) {
+            //If topleft of Rect is more than Circle radius + Rect diagonal away, then there is no way they overlap
+            if (c.radius + r.diagonal() > Coord.distanceBetweenCoords(c.origo, new Coord(r.left, r.top))) {
+                return false;
+            }
+            //if Circle origo is inside rect, return true
+            if (r.left <= c.origo.x && c.origo.x <= r.right && c.origo.y >= r.top && c.origo.y <= r.bottom) {
+                return true;
+            }
+            //if any wall intersects the circle
+            if (shortestDistanceBetweenLineAndCircle(c.origo, new Coord(r.left, r.top), new Coord(r.right, r.top)) < c.radius) {
+                return true;
+            }
+            else if (shortestDistanceBetweenLineAndCircle(c.origo, new Coord(r.left, r.top), new Coord(r.left, r.bottom)) < c.radius) {
+                return true;
+            }
+            else if (shortestDistanceBetweenLineAndCircle(c.origo, new Coord(r.left, r.bottom), new Coord(r.right, r.bottom)) < c.radius) {
+                return true;
+            }
+            else if (shortestDistanceBetweenLineAndCircle(c.origo, new Coord(r.right, r.top), new Coord(r.right, r.bottom)) < c.radius) {
+                return true;
+            }
+            //Return false if no overlap found
+            return false;
+        }
+        Basics.overlapCircleRect = overlapCircleRect;
+        //Shape overlap
+        //Used for collisions
+        function shapeOverlap(objA, objB) {
+            if (objA instanceof Rect && objB instanceof Rect) {
+                return objA.right >= objB.left && objA.bottom >= objB.top
+                    && objB.right >= objA.left && objB.bottom >= objA.top;
+            }
+            else if (objA instanceof Circle && objB instanceof Circle) {
+                return Coord.distanceBetweenCoords(objA.origo, objB.origo) <= objA.radius + objB.radius;
+            }
+            else if (objA instanceof Rect && objB instanceof Circle) {
+                return overlapCircleRect(objB, objA);
+            }
+            else if (objA instanceof Circle && objB instanceof Rect) {
+                return overlapCircleRect(objA, objB);
+            }
+            return false;
+        }
+        Basics.shapeOverlap = shapeOverlap;
     })(Basics = tanks.Basics || (tanks.Basics = {}));
     //Resources consists of a graphic file and optionally a descriptor JSON file
     //Resources are loaded before game launch and referenced by assigned ID

@@ -2,6 +2,7 @@
 module tanks {
 	/* utility interfaces & enums */
 
+	//Enum for rendering order
 	export enum EZindex {
 		//Dont assign values, simply move lines up or down to change rendering order
 		"background",
@@ -14,10 +15,13 @@ module tanks {
 		"ui"
 	}
 
+	//Container for basic elements like funtions or shapes
 	export module Basics {
+		//Distance betweem two coordinates
 		export function distance(x1: number, y1: number, x2: number, y2: number): number {
 			return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 		}
+		//Angle betweem two coordinates
 		export function angleBetweenPoints(x1: number, y1: number, x2: number, y2: number): number {
 			var angle = (Math.atan2(y1 - y2, x1 - x2) * 180 / Math.PI) % 360;
 			if (angle < 0) {
@@ -36,13 +40,13 @@ module tanks {
 			this.degree = (this.degree + degree) % 360;
 			return this;
 		}
-		public get() {
+		public get(): number {
 			return this.degree;
 		}
-		public static degreetoRadian(degree: number) {
+		public static degreetoRadian(degree: number): number {
 			return degree * (Math.PI / 180);
 		}
-		public static radianToDegree(radian: number) {
+		public static radianToDegree(radian: number): number {
 			return radian * (180 / Math.PI);
 		}
 	}
@@ -51,9 +55,11 @@ module tanks {
 		constructor(public x: number = 0, public y: number = 0) {
 
 		}
+		//Distance between points wrapped for Coords
 		public static distanceBetweenCoords(coordA: Coord, coordB: Coord): number {
 			return Basics.distance(coordA.x, coordA.y, coordB.x, coordB.y);
 		}
+		//Angle between points formular wrapped for Coords
 		public static angleBetweenCoords(coordA: Coord, coordB: Coord): Angle {
 			return new Angle(Basics.angleBetweenPoints(coordA.x, coordA.y, coordB.x, coordB.y));
 		}
@@ -69,7 +75,13 @@ module tanks {
 			this.velocity.y *= this.degradeForce;
 			return this;
 		}
-		//Add a force based upon Coord
+		//Reverse the Vector to point in the opposite direction
+		public reverse(): Vector {
+			this.velocity.x = -1 * this.velocity.x;
+			this.velocity.y = -1 * this.velocity.y;
+			return this;
+		}
+		//Add a Coord force to the Vector
 		public addForce(force: Coord = new Coord()): Vector {
 
 			this.velocity.x += force.x;
@@ -82,27 +94,32 @@ module tanks {
 			}
 			return this;
 		}
-		public get() {
+		public get(): Coord {
 			return this.velocity;
 		}
 		public set(force: Coord = this.velocity): Vector {
 			this.velocity = force;
 			return this;
 		}
-		public getAngle() {
+		//Get angle of force
+		public getAngle(): Angle {
 			return Coord.angleBetweenCoords(new Coord(), this.velocity);
 		}
 	}
 
+	//More Basics
 	export module Basics {
+		//Shape is a base class for other Shapes
+		//This class isn't exported because it shouldn't be used raw
 		class Shape {
 			constructor() {
 
 			}
 		}
-
+		//Circle contains mathematical formulars and data for a circle
+		//This can easily be used for range factors and collisions
 		export class Circle extends Shape {
-			static areaToRadius(area: number) {
+			static areaToRadius(area: number): number {
 				return area / Math.PI;
 			}
 			//omkreds
@@ -110,54 +127,115 @@ module tanks {
 				return 2 * this.radius * Math.PI;
 			}
 			//areal
-			public area() {
+			public area(): number {
 				return Math.PI * (this.radius * this.radius);
 			}
 			//korde
-			public chord(v: number = 1) {
+			public chord(v: number = 1): number {
 				return 2 * this.radius * Math.sin(Angle.degreetoRadian(v) / 2);
 			}
 			constructor(public origo: Coord = new Coord(), public radius: number = 0) {
 				super();
 			}
 		}
-
-		var c = new Circle(new Coord(), 1);
-		console.log(
-			//c,
-			c.area(),
-			c.area() / Math.PI
-		);
-
-
+		//Rect contains mathematical formulars and data for a rectangle
 		export class Rect extends Shape {
+			//omkreds
 			public circumference(): number {
 				return 2 * (
 					Basics.distance(this.left, this.top, this.left, this.bottom) +
 					Basics.distance(this.left, this.top, this.right, this.top)
 				)
 			}
+			//areal
 			public area(): number {
 				return Basics.distance(this.left, this.top, this.left, this.bottom) *
 					Basics.distance(this.left, this.top, this.right, this.top)
 			}
+			//Diagonal length of box
 			public diagonal(): number {
-				return Math.sqrt(
-					Math.pow(
-						Basics.distance(this.left, this.top, this.left, this.bottom),
-						2
-					) +
-					Math.pow(
-						Basics.distance(this.left, this.top, this.right, this.top),
-						2
-					)
-				)
+				return Basics.distance(this.left, this.top, this.right, this.bottom);
+
 			}
 			constructor(public top: number, public right: number, public bottom: number, public left: number, public angle: Angle = new Angle()) {
 				super();
 			}
 		}
 
+		//Shortest length between any point on a line and and a circle
+		export function shortestDistanceBetweenLineAndCircle(circleOrigo: Coord, startPoint: Coord, endPoint: Coord): number {
+			var A = circleOrigo.x - startPoint.x;
+			var B = circleOrigo.y - startPoint.y;
+			var C = endPoint.x - startPoint.x;
+			var D = endPoint.y - startPoint.y;
+
+			var dot = A * C + B * D;
+			var len_sq = C * C + D * D;
+			var param = -1;
+			if (len_sq != 0) { //in case of 0 length line
+				param = dot / len_sq;
+			}
+			var xx: number, yy: number;
+
+			if (param < 0) {
+				xx = startPoint.x;
+				yy = startPoint.y;
+			} else if (param > 1) {
+				xx = endPoint.x;
+				yy = endPoint.y;
+			} else {
+				xx = startPoint.x + param * C;
+				yy = startPoint.y + param * D;
+			}
+
+			var dx = circleOrigo.x - xx;
+			var dy = circleOrigo.y - yy;
+			return Math.sqrt(dx * dx + dy * dy);
+		}
+
+		//Calculate if a Circle overlaps a Rect
+		export function overlapCircleRect(c: Circle, r: Rect): boolean {
+
+			//If topleft of Rect is more than Circle radius + Rect diagonal away, then there is no way they overlap
+			if (c.radius + r.diagonal() > Coord.distanceBetweenCoords(c.origo, new Coord(r.left, r.top))) {
+				return false;
+			}
+
+			//if Circle origo is inside rect, return true
+			if (r.left <= c.origo.x && c.origo.x <= r.right && c.origo.y >= r.top && c.origo.y <= r.bottom) {
+				return true;
+			}
+			//if any wall intersects the circle
+			if (shortestDistanceBetweenLineAndCircle(c.origo, new Coord(r.left, r.top), new Coord(r.right, r.top)) < c.radius) {//Top line
+				return true;
+			} else if (shortestDistanceBetweenLineAndCircle(c.origo, new Coord(r.left, r.top), new Coord(r.left, r.bottom)) < c.radius) {//Left line
+				return true;
+			} else if (shortestDistanceBetweenLineAndCircle(c.origo, new Coord(r.left, r.bottom), new Coord(r.right, r.bottom)) < c.radius) {//Bottom line
+				return true;
+			} else if (shortestDistanceBetweenLineAndCircle(c.origo, new Coord(r.right, r.top), new Coord(r.right, r.bottom)) < c.radius) {//Right line
+				return true;
+			}
+			//Return false if no overlap found
+			return false;
+		}
+
+		//Shape overlap
+		//Used for collisions
+		export function shapeOverlap(objA: Shape, objB: Shape): boolean {
+
+			if (objA instanceof Rect && objB instanceof Rect) {
+				return objA.right >= objB.left && objA.bottom >= objB.top
+					&& objB.right >= objA.left && objB.bottom >= objA.top;
+			} else if (objA instanceof Circle && objB instanceof Circle) {
+				return Coord.distanceBetweenCoords(objA.origo, objB.origo) <= objA.radius + objB.radius;
+			} else if (objA instanceof Rect && objB instanceof Circle) {
+				return overlapCircleRect(objB, objA);
+			} else if (objA instanceof Circle && objB instanceof Rect) {
+				return overlapCircleRect(objA, objB);
+			}
+
+			return false;
+		}
 	}
 
 	export interface IDescriptorAnimation {
@@ -171,8 +249,6 @@ module tanks {
 		height: number;
 		anim: IDescriptorAnimation[];
 	}
-
-
 
 	export interface IResource {
 		fileLocation: string,

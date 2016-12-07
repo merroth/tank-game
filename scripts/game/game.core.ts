@@ -63,10 +63,10 @@ module tanks {
 				case 32: World.players[1].controls.shoot = value; break;
 			}
 		}
-		public static update(changes: boolean = false) {
+		public static update(changes: boolean = false): World {
 			//Runs every frame
 			if (World.worldActive !== true) {
-				return false;
+				return this;
 			}
 			World.updatehandle = requestAnimationFrame(function () { World.update(); });
 
@@ -74,8 +74,97 @@ module tanks {
 
 			//Simulate terrain
 			//Simulate actors
-			for (var actorIndex = 0; actorIndex < Actor._actors.length; actorIndex++) {
-				var actor = Actor._actors[actorIndex];
+
+			//find actors who can actually collide
+			var collisionSuspects = Actor._actors
+				.filter(function collisionSuspectsFilter(actor) {
+					return actor.collision != null;
+				});
+
+			//Return the largest collision radius to test against
+			//We can use this to filter later
+			var maxCollisonDistanceToCheck = collisionSuspects
+				.map(function maxCollisonToCheckMap(actor) {
+					if (actor.collision instanceof Basics.Circle) {
+						return actor.collision.radius;
+					} else if (actor.collision instanceof Basics.Rect) {
+						return actor.collision.diagonal() / 2;
+					}
+				})
+				.sort()
+				.slice(0, 1)[0] * 2;
+
+			//Load actors and sort by rendering order
+			var actors = Actor._actors
+				.sort(function (a, b) {
+					return b.zIndex - a.zIndex;
+				});
+
+			for (let actorIndex = 0; actorIndex < actors.length; actorIndex++) {
+				let actor = actors[actorIndex];
+
+				//Remove current actor from collision suspects
+				//This way we greatly reduces the amount of checks from n^n to n^log(n)
+				collisionSuspects.splice(collisionSuspects.indexOf(actor), 1);
+
+				//Only test collision on object within a realistic vicinity
+				let localCollisionSuspects = collisionSuspects
+					.filter(function (suspect) {
+						return Coord.distanceBetweenCoords(
+							suspect.position,
+							actor.position
+						) <= maxCollisonDistanceToCheck;
+					})
+
+				//Test for collision
+				for (let collisionSuspectsIndex = 0; collisionSuspectsIndex < localCollisionSuspects.length; collisionSuspectsIndex++) {
+					//current suspect
+					let collisionSuspect = localCollisionSuspects[collisionSuspectsIndex];
+
+					if (actor === collisionSuspect) { //Shouldn't be possible but just in case:
+						continue;
+					}
+					//Test if collision shapes overlap
+					if (Basics.shapeOverlap(collisionSuspect.collision, actor.collision)) {
+						//If Projectile on Player collision
+						if (actor instanceof Projectile && collisionSuspect instanceof Player && collisionSuspect != actor.owner) {
+							collisionSuspect.hitPoints -= actor.damage;
+							actor.lifespan = 0;
+						}
+						//If Player on Player collision
+						else if (actor instanceof Player && collisionSuspect instanceof Player) {
+							//Calculate a force based upon the angle between actors
+							let force = new Coord(
+								Math.abs(Math.cos(
+									Angle.degreetoRadian(
+										Coord.angleBetweenCoords(
+											actor.position, collisionSuspect.position
+										).degree
+									)
+								)),
+								Math.abs(Math.sin(
+									Angle.degreetoRadian(
+										Coord.angleBetweenCoords(
+											actor.position, collisionSuspect.position
+										).degree
+									)
+								))
+							);
+							//Align the force
+							if (actor.position.x < collisionSuspect.position.x) {
+								force.x *= -1
+							}
+							if (actor.position.y < collisionSuspect.position.y) {
+								force.y *= -1
+							}
+							//Add the force to the colliding actor
+							actor.momentum.addForce(force);
+							//Add an equal and opposite force to the collisionSuspect
+							collisionSuspect.momentum.addForce(new Coord(force.x * -1, force.y * -1));
+						}
+					}
+				}
+				//Run update and listen for changes
 				changes = (actor.update() ? true : changes);
 			}
 			//Simulate UI?
@@ -84,8 +173,10 @@ module tanks {
 			if (changes === true) {
 				World.draw();
 			}
+
+			return this;
 		}
-		public static draw() {
+		public static draw(): World {
 			var ctx: CanvasRenderingContext2D = World.canvas.getContext("2d");
 			ctx.save();
 			//clear rect
@@ -107,18 +198,25 @@ module tanks {
 			for (var actorIndex = 0; actorIndex < actorsToDraw.length; actorIndex++) {
 				var actor = actorsToDraw[actorIndex];
 
+				//Move and rotate canvas to object
 				ctx.translate(actor.position.x, actor.position.y);
 				ctx.rotate(Angle.degreetoRadian(actor.angle.get()));
 
 				//Draw image
+
+				//Get current animation
 				var animation = actor.sprite.descriptor.anim
 					.filter(function findAnimation(anim) {
 						return anim.name === actor.anim.name;
-					})[0]
+					})[0];
+
+				//Get current animation state
 				var animationState = Math.floor(
 					actor.anim.count /
 					animation.rate
 				);
+
+				//Loop animation
 				if (animationState >= animation.count) {
 					animationState = 0;
 					actor.anim.count = animationState;
@@ -127,6 +225,7 @@ module tanks {
 					actor.anim.count = animationState;
 				}
 
+				//Draw sprite image
 				ctx.drawImage(
 					actor.sprite.resource,
 					animationState * actor.sprite.descriptor.width,
@@ -146,12 +245,16 @@ module tanks {
 			}
 			//Paint ui
 			ctx.restore();
+
+			return this;
 		}
 		public static kill() {
+			//Destroy World
 			cancelAnimationFrame(World.updatehandle);
 			World.worldActive = false;
 			World.players = [];
 			World.frame = 0;
+			Actor._actors = [];
 			window.removeEventListener("keydown", World.listener, false);
 			window.removeEventListener("keyup", World.listener, false);
 		}

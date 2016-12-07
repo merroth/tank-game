@@ -16,10 +16,12 @@ var tanks;
             this.momentum = new tanks.Vector();
             this.acceleration = 0;
             this.size = 0;
+            this.sprite = null;
             this.anim = { name: "", count: 0 };
             this.turnrate = 1;
             this.zIndex = tanks.EZindex.actor;
             this.render = true;
+            this.collision = null;
             for (var key in parameters) {
                 if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
                     this[key] = parameters[key];
@@ -48,6 +50,7 @@ var tanks;
             _super.call(this, parameters);
             this.lifespan = 1;
             this.owner = null;
+            this.damage = 34;
             this.size = 8;
             this.sprite = tanks.Resource.get("bulletsprite");
             this.anim = { name: "idle", count: 0 };
@@ -57,6 +60,7 @@ var tanks;
                     this[key] = parameters[key];
                 }
             }
+            this.collision = new tanks.Basics.Circle(this.position, this.size / 2);
         }
         Projectile.prototype.update = function () {
             var self = this;
@@ -80,6 +84,7 @@ var tanks;
         };
         return Projectile;
     }(Actor));
+    tanks.Projectile = Projectile;
     var Player = (function (_super) {
         __extends(Player, _super);
         function Player(parameters) {
@@ -93,7 +98,8 @@ var tanks;
             this.size = 32;
             this.turnrate = 1;
             this.canShoot = 0;
-            this.fireRate = 5;
+            this.hitPoints = 100;
+            this.fireRate = 20;
             this.maxProjectiles = 10;
             this.controls = {
                 forward: false,
@@ -107,10 +113,15 @@ var tanks;
                     this[key] = parameters[key];
                 }
             }
+            this.collision = new tanks.Basics.Circle(this.position, this.size / 2);
         }
         Player.prototype.update = function () {
             var self = this;
             var changes = false;
+            if (self.hitPoints < 1) {
+                alert("PLAYER " + (tanks.World.players.indexOf(self) * 1 + 1) + " IS DEAD!");
+                self.hitPoints = 100;
+            }
             //cooldowns
             if (self.canShoot > 0) {
                 self.canShoot--;
@@ -176,7 +187,7 @@ var tanks;
                 momentum: new tanks.Vector(new tanks.Coord(cos * 4, sin * 4), 4, 1)
             });
             this.projectiles.push(projectile);
-            var player = this;
+            return this;
         };
         return Player;
     }(Actor));

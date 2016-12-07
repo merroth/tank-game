@@ -19,6 +19,7 @@ module tanks {
 		anim?: IActorAnimation;
 		zIndex?: EZindex;
 		render?: boolean;
+		collision?: Basics.Circle | Basics.Rect;
 	}
 
 	export class Actor {
@@ -28,11 +29,13 @@ module tanks {
 		public momentum: Vector = new Vector();
 		public acceleration: number = 0;
 		public size: number = 0;
-		public sprite: Resource;
+		public sprite: Resource = null;
 		public anim: IActorAnimation = { name: "", count: 0 };
 		public turnrate: number = 1;
 		public zIndex: EZindex = EZindex.actor;
 		public render: boolean = true;
+		public collision: Basics.Circle | Basics.Rect = null;
+
 		constructor(parameters: IActor = {}) {
 			for (var key in parameters) {
 				if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
@@ -55,16 +58,19 @@ module tanks {
 
 	export interface IProjectile extends IActor {
 		lifespan?: number;
+		damage?: number;
 		owner?: Player;
 	}
 
-	class Projectile extends Actor {
+	export class Projectile extends Actor {
 		public lifespan: number = 1;
 		public owner: Player = null;
+		public damage: number = 34;
 		public size = 8;
 		public sprite: Resource = Resource.get("bulletsprite");
 		public anim: IActorAnimation = { name: "idle", count: 0 };
 		public zIndex: EZindex = EZindex.projectile;
+		public collision: Basics.Circle | Basics.Rect;
 		constructor(parameters: IProjectile = {}) {
 			super(parameters);
 			for (var key in parameters) {
@@ -72,6 +78,7 @@ module tanks {
 					this[key] = parameters[key];
 				}
 			}
+			this.collision = new Basics.Circle(this.position, this.size / 2);
 		}
 		public update(): boolean {
 			var self = this;
@@ -117,7 +124,8 @@ module tanks {
 		public size: number = 32;
 		public turnrate: number = 1;
 		public canShoot: number = 0;
-		public fireRate: number = 5;
+		public hitPoints: number = 100;
+		public fireRate: number = 20;
 		public maxProjectiles: number = 10;
 		public controls: IPlayerControls = {
 			forward: false,
@@ -126,6 +134,7 @@ module tanks {
 			right: false,
 			shoot: false
 		}
+		public collision: Basics.Circle | Basics.Rect;
 
 		constructor(parameters: IPlayer = {}) {
 			super(parameters);
@@ -134,10 +143,16 @@ module tanks {
 					this[key] = parameters[key];
 				}
 			}
+			this.collision = new Basics.Circle(this.position, this.size / 2);
 		}
 		public update(): boolean {
 			var self = this;
 			var changes = false;
+
+			if (self.hitPoints < 1) {
+				alert("PLAYER " + (World.players.indexOf(self) * 1 + 1) + " IS DEAD!");
+				self.hitPoints = 100;
+			}
 
 			//cooldowns
 			if (self.canShoot > 0) {
@@ -207,7 +222,7 @@ module tanks {
 			return changes;
 		}
 
-		public shoot() {
+		public shoot(): Player {
 			this.canShoot = this.fireRate;
 
 			var cos = Math.cos(Angle.degreetoRadian(this.angle.degree));
@@ -225,7 +240,7 @@ module tanks {
 
 			this.projectiles.push(projectile);
 
-			var player = this;
+			return this;
 		}
 	}
 }

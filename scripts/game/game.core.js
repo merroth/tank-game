@@ -70,21 +70,88 @@ var tanks;
             if (changes === void 0) { changes = false; }
             //Runs every frame
             if (World.worldActive !== true) {
-                return false;
+                return this;
             }
             World.updatehandle = requestAnimationFrame(function () { World.update(); });
             World.frame++;
             //Simulate terrain
             //Simulate actors
-            for (var actorIndex = 0; actorIndex < tanks.Actor._actors.length; actorIndex++) {
-                var actor = tanks.Actor._actors[actorIndex];
+            //find actors who can actually collide
+            var collisionSuspects = tanks.Actor._actors
+                .filter(function collisionSuspectsFilter(actor) {
+                return actor.collision != null;
+            });
+            //Return the largest collision radius to test against
+            //We can use this to filter later
+            var maxCollisonDistanceToCheck = collisionSuspects
+                .map(function maxCollisonToCheckMap(actor) {
+                if (actor.collision instanceof tanks.Basics.Circle) {
+                    return actor.collision.radius;
+                }
+                else if (actor.collision instanceof tanks.Basics.Rect) {
+                    return actor.collision.diagonal() / 2;
+                }
+            })
+                .sort()
+                .slice(0, 1)[0] * 2;
+            //Load actors and sort by rendering order
+            var actors = tanks.Actor._actors
+                .sort(function (a, b) {
+                return b.zIndex - a.zIndex;
+            });
+            var _loop_1 = function(actorIndex) {
+                var actor = actors[actorIndex];
+                //Remove current actor from collision suspects
+                //This way we greatly reduces the amount of checks from n^n to n^log(n)
+                collisionSuspects.splice(collisionSuspects.indexOf(actor), 1);
+                //Only test collision on object within a realistic vicinity
+                var localCollisionSuspects = collisionSuspects
+                    .filter(function (suspect) {
+                    return tanks.Coord.distanceBetweenCoords(suspect.position, actor.position) <= maxCollisonDistanceToCheck;
+                });
+                //Test for collision
+                for (var collisionSuspectsIndex = 0; collisionSuspectsIndex < localCollisionSuspects.length; collisionSuspectsIndex++) {
+                    //current suspect
+                    var collisionSuspect = localCollisionSuspects[collisionSuspectsIndex];
+                    if (actor === collisionSuspect) {
+                        continue;
+                    }
+                    //Test if collision shapes overlap
+                    if (tanks.Basics.shapeOverlap(collisionSuspect.collision, actor.collision)) {
+                        //If Projectile on Player collision
+                        if (actor instanceof tanks.Projectile && collisionSuspect instanceof tanks.Player && collisionSuspect != actor.owner) {
+                            collisionSuspect.hitPoints -= actor.damage;
+                            actor.lifespan = 0;
+                        }
+                        else if (actor instanceof tanks.Player && collisionSuspect instanceof tanks.Player) {
+                            //Calculate a force based upon the angle between actors
+                            var force = new tanks.Coord(Math.abs(Math.cos(tanks.Angle.degreetoRadian(tanks.Coord.angleBetweenCoords(actor.position, collisionSuspect.position).degree))), Math.abs(Math.sin(tanks.Angle.degreetoRadian(tanks.Coord.angleBetweenCoords(actor.position, collisionSuspect.position).degree))));
+                            //Align the force
+                            if (actor.position.x < collisionSuspect.position.x) {
+                                force.x *= -1;
+                            }
+                            if (actor.position.y < collisionSuspect.position.y) {
+                                force.y *= -1;
+                            }
+                            //Add the force to the colliding actor
+                            actor.momentum.addForce(force);
+                            //Add an equal and opposite force to the collisionSuspect
+                            collisionSuspect.momentum.addForce(new tanks.Coord(force.x * -1, force.y * -1));
+                        }
+                    }
+                }
+                //Run update and listen for changes
                 changes = (actor.update() ? true : changes);
+            };
+            for (var actorIndex = 0; actorIndex < actors.length; actorIndex++) {
+                _loop_1(actorIndex);
             }
             //Simulate UI?
             //Draw if changes
             if (changes === true) {
                 World.draw();
             }
+            return this;
         };
         World.draw = function () {
             var ctx = World.canvas.getContext("2d");
@@ -102,15 +169,19 @@ var tanks;
             });
             for (var actorIndex = 0; actorIndex < actorsToDraw.length; actorIndex++) {
                 var actor = actorsToDraw[actorIndex];
+                //Move and rotate canvas to object
                 ctx.translate(actor.position.x, actor.position.y);
                 ctx.rotate(tanks.Angle.degreetoRadian(actor.angle.get()));
                 //Draw image
+                //Get current animation
                 var animation = actor.sprite.descriptor.anim
                     .filter(function findAnimation(anim) {
                     return anim.name === actor.anim.name;
                 })[0];
+                //Get current animation state
                 var animationState = Math.floor(actor.anim.count /
                     animation.rate);
+                //Loop animation
                 if (animationState >= animation.count) {
                     animationState = 0;
                     actor.anim.count = animationState;
@@ -119,6 +190,7 @@ var tanks;
                     animationState = animation.count - 1;
                     actor.anim.count = animationState;
                 }
+                //Draw sprite image
                 ctx.drawImage(actor.sprite.resource, animationState * actor.sprite.descriptor.width, animation.top * actor.sprite.descriptor.height, actor.sprite.descriptor.width, actor.sprite.descriptor.height, 0 - Math.floor(actor.sprite.descriptor.width / 2), 0 - Math.floor(actor.sprite.descriptor.height / 2), actor.sprite.descriptor.width, actor.sprite.descriptor.height);
                 //Reset canvas
                 ctx.rotate(0 - tanks.Angle.degreetoRadian(actor.angle.get()));
@@ -126,12 +198,15 @@ var tanks;
             }
             //Paint ui
             ctx.restore();
+            return this;
         };
         World.kill = function () {
+            //Destroy World
             cancelAnimationFrame(World.updatehandle);
             World.worldActive = false;
             World.players = [];
             World.frame = 0;
+            tanks.Actor._actors = [];
             window.removeEventListener("keydown", World.listener, false);
             window.removeEventListener("keyup", World.listener, false);
         };
