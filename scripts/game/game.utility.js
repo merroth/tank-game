@@ -444,13 +444,13 @@ var tanks;
     new tanks.Resource({ fileLocation: "resources/sfx/menu_select.m4a", id: "sfxMenuSelect" });
     new tanks.Resource({ fileLocation: "resources/sfx/bullet_bounce.m4a", id: "sfxBulletBounce" });
     new tanks.Resource({ fileLocation: "resources/sfx/bullet_spawn.m4a", id: "sfxBulletSpawn" });
-    new tanks.Resource({ fileLocation: "resources/sfx/tank_hit.m4a", id: "sfxTankHit" });
+    new tanks.Resource({ fileLocation: "resources/sfx/bullet_hit.m4a", id: "sfxBulletHit" });
     new tanks.Resource({ fileLocation: "resources/sfx/tank_die.m4a", id: "sfxTankDie" });
     //Sound
     new tanks.Sound({ id: "sfxMenuBack", resource: tanks.Resource.get("sfxMenuBack") });
     new tanks.Sound({ id: "sfxMenuSelect", resource: tanks.Resource.get("sfxMenuSelect") });
     new tanks.Sound({ id: "sfxBulletBounce", resource: tanks.Resource.get("sfxBulletBounce") });
     new tanks.Sound({ id: "sfxBulletSpawn", resource: tanks.Resource.get("sfxBulletSpawn"), soundBankCount: 10 });
-    new tanks.Sound({ id: "sfxTankHit", resource: tanks.Resource.get("sfxTankHit"), soundBankCount: 4 });
+    new tanks.Sound({ id: "sfxBulletHit", resource: tanks.Resource.get("sfxBulletHit"), soundBankCount: 4 });
     new tanks.Sound({ id: "sfxTankDie", resource: tanks.Resource.get("sfxTankDie"), soundBankCount: 4 });
 })(tanks || (tanks = {}));

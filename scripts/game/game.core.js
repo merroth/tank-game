@@ -122,6 +122,7 @@ var tanks;
                         if (actor instanceof tanks.Projectile && collisionSuspect instanceof tanks.Player && collisionSuspect != actor.owner) {
                             collisionSuspect.hitPoints -= actor.damage;
                             actor.lifespan = 0;
+                            actor.hit = true;
                         }
                         else if (actor instanceof tanks.Player && collisionSuspect instanceof tanks.Player) {
                             //Calculate a force based upon the angle between actors

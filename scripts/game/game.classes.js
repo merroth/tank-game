@@ -52,6 +52,7 @@ var tanks;
             this.owner = null;
             this.damage = 34;
             this.size = 8;
+            this.hit = false;
             this.sprite = tanks.Resource.get("bulletsprite");
             this.anim = { name: "idle", count: 0 };
             this.zIndex = tanks.EZindex.projectile;
@@ -67,7 +68,12 @@ var tanks;
             self.lifespan--;
             self.anim.count += 1;
             if (self.lifespan < 1) {
-                tanks.Sound.get('sfxBulletBounce').play();
+                if (self.hit) {
+                    tanks.Sound.get('sfxBulletHit').play();
+                }
+                else {
+                    tanks.Sound.get('sfxBulletBounce').play();
+                }
                 self.die();
                 return false;
             }
@@ -113,14 +119,15 @@ var tanks;
                     this[key] = parameters[key];
                 }
             }
-            this.collision = new tanks.Basics.Circle(this.position, this.size / 2);
+            this.collision = new tanks.Basics.Circle(this.position, this.size / 2.2);
         }
         Player.prototype.update = function () {
             var self = this;
             var changes = false;
             if (self.hitPoints < 1) {
+                tanks.Sound.get('sfxTankDie').play();
+                self.die();
                 alert("PLAYER " + (tanks.World.players.indexOf(self) * 1 + 1) + " IS DEAD!");
-                self.hitPoints = 100;
             }
             //cooldowns
             if (self.canShoot > 0) {

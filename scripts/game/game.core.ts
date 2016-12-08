@@ -130,6 +130,7 @@ module tanks {
 						if (actor instanceof Projectile && collisionSuspect instanceof Player && collisionSuspect != actor.owner) {
 							collisionSuspect.hitPoints -= actor.damage;
 							actor.lifespan = 0;
+							actor.hit = true;
 						}
 						//If Player on Player collision
 						else if (actor instanceof Player && collisionSuspect instanceof Player) {

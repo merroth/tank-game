@@ -67,6 +67,7 @@ module tanks {
 		public owner: Player = null;
 		public damage: number = 34;
 		public size = 8;
+		public hit: boolean = false;
 		public sprite: Resource = Resource.get("bulletsprite");
 		public anim: IActorAnimation = { name: "idle", count: 0 };
 		public zIndex: EZindex = EZindex.projectile;
@@ -85,7 +86,11 @@ module tanks {
 			self.lifespan--;
 			self.anim.count += 1;
 			if (self.lifespan < 1) {
-				Sound.get('sfxBulletBounce').play();
+				if (self.hit) {
+					Sound.get('sfxBulletHit').play();
+				} else {
+					Sound.get('sfxBulletBounce').play();
+				}
 
 				self.die();
 				return false;
@@ -143,15 +148,16 @@ module tanks {
 					this[key] = parameters[key];
 				}
 			}
-			this.collision = new Basics.Circle(this.position, this.size / 2);
+			this.collision = new Basics.Circle(this.position, this.size / 2.2);
 		}
 		public update(): boolean {
 			var self = this;
 			var changes = false;
 
 			if (self.hitPoints < 1) {
+				Sound.get('sfxTankDie').play();
+				self.die();
 				alert("PLAYER " + (World.players.indexOf(self) * 1 + 1) + " IS DEAD!");
-				self.hitPoints = 100;
 			}
 
 			//cooldowns
