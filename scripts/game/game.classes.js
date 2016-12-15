@@ -88,6 +88,7 @@ var tanks;
             //die
             self._die();
         };
+        Projectile.repeatFire = false;
         return Projectile;
     }(Actor));
     tanks.Projectile = Projectile;
@@ -96,6 +97,7 @@ var tanks;
         function Player(parameters) {
             if (parameters === void 0) { parameters = {}; }
             _super.call(this, parameters);
+            this.projectileType = Projectile;
             this.projectiles = [];
             this.sprite = tanks.Resource.get("tanksprite");
             this.anim = { name: "idle", count: 0 };
@@ -162,6 +164,9 @@ var tanks;
             }
             if (self.controls.shoot && self.canShoot < 1 && self.projectiles.length < self.maxProjectiles) {
                 self.shoot();
+                if (!self.projectileType.repeatFire) {
+                    self.controls.shoot = false;
+                }
                 changes = true;
             }
             if (changes) {
@@ -183,10 +188,11 @@ var tanks;
         };
         Player.prototype.shoot = function () {
             this.canShoot = this.fireRate;
+            this.projectileType.repeatFire;
             var cos = Math.cos(tanks.Angle.degreetoRadian(this.angle.degree));
             var sin = Math.sin(tanks.Angle.degreetoRadian(this.angle.degree));
             tanks.Sound.get('sfxBulletSpawn').play();
-            var projectile = new Projectile({
+            var projectile = new this.projectileType({
                 lifespan: 100,
                 owner: this,
                 position: new tanks.Coord(this.position.x + cos * 10, this.position.y + sin * 10),

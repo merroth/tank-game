@@ -68,10 +68,12 @@ module tanks {
 		public damage: number = 34;
 		public size = 8;
 		public hit: boolean = false;
+		static repeatFire: boolean = false;
 		public sprite: Resource = Resource.get("bulletsprite");
 		public anim: IActorAnimation = { name: "idle", count: 0 };
 		public zIndex: EZindex = EZindex.projectile;
 		public collision: Basics.Circle | Basics.Rect;
+
 		constructor(parameters: IProjectile = {}) {
 			super(parameters);
 			for (var key in parameters) {
@@ -121,6 +123,7 @@ module tanks {
 	}
 
 	export class Player extends Actor {
+		public projectileType = Projectile;
 		public projectiles: Projectile[] = [];
 		public sprite: Resource = Resource.get("tanksprite");
 		public anim: IActorAnimation = { name: "idle", count: 0 };
@@ -205,6 +208,11 @@ module tanks {
 
 			if (self.controls.shoot && self.canShoot < 1 && self.projectiles.length < self.maxProjectiles) {
 				self.shoot();
+
+				if (!self.projectileType.repeatFire) {
+					self.controls.shoot = false;
+				}
+
 				changes = true;
 			}
 
@@ -231,12 +239,14 @@ module tanks {
 		public shoot(): Player {
 			this.canShoot = this.fireRate;
 
+			this.projectileType.repeatFire;
+
 			var cos = Math.cos(Angle.degreetoRadian(this.angle.degree));
 			var sin = Math.sin(Angle.degreetoRadian(this.angle.degree));
 
 			Sound.get('sfxBulletSpawn').play();
 
-			var projectile = new Projectile({
+			var projectile = new this.projectileType({
 				lifespan: 100,
 				owner: this,
 				position: new Coord(this.position.x + cos * 10, this.position.y + sin * 10),
