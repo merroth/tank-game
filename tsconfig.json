@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "removeComments": false,
-		"outFile": "main.js"
+		"outFile": "scripts/main.js"
     },
     "files": [
         "scripts/app.ts",
