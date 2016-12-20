@@ -1,4 +1,5 @@
 /// <reference path="game.utility.ts" />
+/// <reference path="game.utility.ts" />
 //This file contains core classes for the game engine.
 //This file is dependent upon "game.utility.ts", which describes utility elements like "Angle"
 module tanks {
@@ -63,7 +64,7 @@ module tanks {
 				case 32: World.players[1].controls.shoot = value; break;
 			}
 		}
-		public static update(changes: boolean = false): World {
+		public static update(changes: boolean = World.frame % 15 === 0): World {
 			//Runs every frame
 			if (World.worldActive !== true) {
 				return this;
@@ -127,7 +128,7 @@ module tanks {
 					//Test if collision shapes overlap
 					if (Basics.shapeOverlap(collisionSuspect.collision, actor.collision)) {
 						//If Projectile on Player collision
-						if (actor instanceof Projectile && collisionSuspect instanceof Player && collisionSuspect != actor.owner) {
+						if (actor instanceof Projectile && collisionSuspect instanceof Player && collisionSuspect != actor.owner.owner) {
 							collisionSuspect.hitPoints -= actor.damage;
 							actor.lifespan = 0;
 							actor.hit = true;
