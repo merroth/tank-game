@@ -1,11 +1,15 @@
 {
     "compilerOptions": {
-        "removeComments": false
+        "removeComments": false,
+		"outFile": "main.js"
     },
     "files": [
         "scripts/app.ts",
         "scripts/game/game.utility.ts",
-        "scripts/game/game.classes.ts",
+        "scripts/game/classes/actor.class.ts",
+        "scripts/game/classes/projectiles.class.ts",
+        "scripts/game/classes/weapon.class.ts",
+        "scripts/game/classes/player.class.ts",
         "scripts/game/game.core.ts"
     ]
 }

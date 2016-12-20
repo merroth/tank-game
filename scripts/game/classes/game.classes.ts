@@ -1,4 +1,5 @@
-/// <reference path="game.core.ts" />
+/// <reference path="../game.utility.ts" />
+/// <reference path="../game.core.ts" />
 //This file contains gameobject classes for the game engine.
 //This file is dependent upon "game.utility.ts", which describes utility elements like "Angle"
 module tanks {
