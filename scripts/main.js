@@ -781,7 +781,7 @@ var tanks;
     var Projectile = (function (_super) {
         __extends(Projectile, _super);
         function Projectile(parameters) {
-            if (parameters === void 0) { parameters = {}; }
+            if (parameters === void 0) { parameters = { owner: null }; }
             var _this = _super.call(this, parameters) || this;
             _this.lifespan = 1;
             _this.owner = null;
@@ -840,7 +840,7 @@ var tanks;
     var Weapon = (function (_super) {
         __extends(Weapon, _super);
         function Weapon(parameters) {
-            if (parameters === void 0) { parameters = {}; }
+            if (parameters === void 0) { parameters = { owner: null }; }
             var _this = _super.call(this, parameters) || this;
             //Lifespan of projectiles
             _this.lifespan = 100;
@@ -911,6 +911,44 @@ var tanks;
         return Weapon;
     }(tanks.Actor));
     tanks.Weapon = Weapon;
+    var WeaponTankFlameThrower = (function (_super) {
+        __extends(WeaponTankFlameThrower, _super);
+        function WeaponTankFlameThrower(parameters) {
+            if (parameters === void 0) { parameters = { owner: null }; }
+            var _this = _super.call(this, parameters) || this;
+            _this.lifespan = 20;
+            _this.fireRateMax = 20;
+            _this.speed = 1.3;
+            _this.fireArc = new tanks.Angle(45);
+            for (var key in parameters) {
+                if (parameters.hasOwnProperty(key) && _this.hasOwnProperty(key)) {
+                    _this[key] = parameters[key];
+                }
+            }
+            return _this;
+        }
+        return WeaponTankFlameThrower;
+    }(Weapon));
+    tanks.WeaponTankFlameThrower = WeaponTankFlameThrower;
+    var WeaponTankMainGun = (function (_super) {
+        __extends(WeaponTankMainGun, _super);
+        function WeaponTankMainGun(parameters) {
+            if (parameters === void 0) { parameters = { owner: null }; }
+            var _this = _super.call(this, parameters) || this;
+            _this.lifespan = 100;
+            _this.fireRateMax = 200;
+            _this.speed = 4;
+            _this.fireArc = new tanks.Angle(10);
+            for (var key in parameters) {
+                if (parameters.hasOwnProperty(key) && _this.hasOwnProperty(key)) {
+                    _this[key] = parameters[key];
+                }
+            }
+            return _this;
+        }
+        return WeaponTankMainGun;
+    }(Weapon));
+    tanks.WeaponTankMainGun = WeaponTankMainGun;
 })(tanks || (tanks = {}));
 /// <reference path="../game.utility.ts" />
 /// <reference path="../game.core.ts" />
@@ -951,23 +989,15 @@ var tanks;
             //instead of modifying the existing one directly
             _this.weaponBanks.push(
             //Flamethrower
-            new tanks.Weapon({
+            new tanks.WeaponTankFlameThrower({
                 position: new tanks.Coord(10, 10),
-                lifespan: 20,
                 owner: _this,
-                fireRateMax: 20,
-                speed: 1.3,
-                fireArc: new tanks.Angle(45),
                 angle: new tanks.Angle(180)
             }), 
-            //Sniper
-            new tanks.Weapon({
-                position: new tanks.Coord(10, 10),
-                lifespan: 100,
-                fireRateMax: 200,
+            //Main gun
+            new tanks.WeaponTankMainGun({
                 owner: _this,
-                speed: 4,
-                fireArc: new tanks.Angle(10)
+                position: new tanks.Coord(10, 10)
             }));
             return _this;
         }

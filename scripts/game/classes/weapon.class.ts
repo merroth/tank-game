@@ -6,12 +6,14 @@
 module tanks {
 
 	export interface IWeapon extends IActor {
+		//Obligatory field
+		owner: Player;
+		//Optional fields
 		lifespan?: number;
 		projectileType?: Projectile;
 		fireArc?: Angle;
 		angle?: Angle;
 		position?: Coord;
-		owner?: Player;
 		hitpoint?: number;
 		fireRateMax?: number;
 		fireRate?: number;
@@ -45,7 +47,7 @@ module tanks {
 		public render: boolean = false;
 		//Speed of projectiles fired by this weapon
 		public speed: number = 4;
-		constructor(parameters: IWeapon = {}) {
+		constructor(parameters: IWeapon = { owner: null }) {
 			super(parameters);
 			for (var key in parameters) {
 				if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
@@ -90,6 +92,36 @@ module tanks {
 				self.projectiles.push(projectile);
 			}
 			return this;
+		}
+	}
+
+	export class WeaponTankFlameThrower extends Weapon {
+		public lifespan: number = 20;
+		public fireRateMax: number = 20;
+		public speed: number = 1.3;
+		public fireArc: Angle = new Angle(45);
+		constructor(parameters: IWeapon = { owner: null }) {
+			super(parameters);
+			for (var key in parameters) {
+				if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
+					this[key] = parameters[key];
+				}
+			}
+		}
+	}
+
+	export class WeaponTankMainGun extends Weapon {
+		public lifespan: number = 100;
+		public fireRateMax: number = 200;
+		public speed: number = 4;
+		public fireArc: Angle = new Angle(10);
+		constructor(parameters: IWeapon = { owner: null }) {
+			super(parameters);
+			for (var key in parameters) {
+				if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
+					this[key] = parameters[key];
+				}
+			}
 		}
 	}
 

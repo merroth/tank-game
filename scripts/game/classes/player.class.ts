@@ -49,23 +49,15 @@ module tanks {
 			//instead of modifying the existing one directly
 			this.weaponBanks.push(
 				//Flamethrower
-				new Weapon({
+				new WeaponTankFlameThrower({
 					position: new Coord(10, 10),
-					lifespan: 20,
 					owner: this,
-					fireRateMax: 20,
-					speed: 1.3,
-					fireArc: new Angle(45),
-					angle: new Angle(180)
+					angle: new Angle(180),
 				}),
-				//Sniper
-				new Weapon({
-					position: new Coord(10, 10),
-					lifespan: 100,
-					fireRateMax: 200,
+				//Main gun
+				new WeaponTankMainGun({
 					owner: this,
-					speed: 4,
-					fireArc: new Angle(10),
+					position: new Coord(10, 10),
 				})
 			);
 		}

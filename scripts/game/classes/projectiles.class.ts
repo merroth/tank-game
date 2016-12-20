@@ -5,9 +5,11 @@
 module tanks {
 
 	export interface IProjectile extends IActor {
+		//Obligatory field
+		owner: Weapon;
+		//Optional fields
 		lifespan?: number;
 		damage?: number;
-		owner?: Weapon;
 	}
 
 	export class Projectile extends Actor {
@@ -22,7 +24,7 @@ module tanks {
 		public zIndex: EZindex = EZindex.projectile;
 		public collision: Basics.Circle | Basics.Rect;
 
-		constructor(parameters: IProjectile = {}) {
+		constructor(parameters: IProjectile = { owner: null }) {
 			super(parameters);
 			for (var key in parameters) {
 				if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
