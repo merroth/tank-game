@@ -440,6 +440,8 @@ var tanks;
     //Resources
     new tanks.Resource({ fileLocation: "resources/single-tank-red.png", descriptorLocation: "resources/single-tank-red.json", id: "tanksprite" });
     new tanks.Resource({ fileLocation: "resources/bullet_normal.png", descriptorLocation: "resources/bullet_normal.json", id: "bulletsprite" });
+    new tanks.Resource({ fileLocation: "resources/bullet_burning.png", descriptorLocation: "resources/bullet_normal.json", id: "bulletburningsprite" });
+    new tanks.Resource({ fileLocation: "resources/wall.png", id: "wall" });
     new tanks.Resource({ fileLocation: "resources/sfx/menu_back.m4a", id: "sfxMenuBack" });
     new tanks.Resource({ fileLocation: "resources/sfx/menu_select.m4a", id: "sfxMenuSelect" });
     new tanks.Resource({ fileLocation: "resources/sfx/bullet_bounce.m4a", id: "sfxBulletBounce" });
@@ -771,6 +773,41 @@ var tanks;
     }());
     Actor._actors = [];
     tanks.Actor = Actor;
+})(tanks || (tanks = {}));
+/// <reference path="../game.utility.ts" />
+/// <reference path="../game.core.ts" />
+//Projectiles contains classes for each kind of projectile in the game
+//A projectile is a self propelling game object without direct user control, usually intended for dealing damage
+var tanks;
+(function (tanks) {
+    var Wall = (function (_super) {
+        __extends(Wall, _super);
+        function Wall(parameters) {
+            if (parameters === void 0) { parameters = { from: null, to: null }; }
+            var _this = _super.call(this, parameters) || this;
+            _this.size = 32;
+            _this.sprite = tanks.Resource.get("bulletsprite");
+            _this.from = null;
+            _this.to = null;
+            _this.render = false;
+            for (var key in parameters) {
+                if (parameters.hasOwnProperty(key) && _this.hasOwnProperty(key)) {
+                    _this[key] = parameters[key];
+                }
+            }
+            _this.angle = tanks.Coord.angleBetweenCoords(_this.from, _this.to);
+            return _this;
+            //this.collision = new Basics.Circle(this.position, this.size / 2);
+        }
+        Wall.prototype.update = function () {
+            var self = this;
+            return true;
+        };
+        Wall.prototype.die = function () {
+        };
+        return Wall;
+    }(tanks.Actor));
+    tanks.Wall = Wall;
 })(tanks || (tanks = {}));
 /// <reference path="../game.utility.ts" />
 /// <reference path="../game.core.ts" />

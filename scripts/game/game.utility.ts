@@ -419,6 +419,8 @@ module tanks {
 	//Resources
 	new Resource({ fileLocation: "resources/single-tank-red.png", descriptorLocation: "resources/single-tank-red.json", id: "tanksprite" });
 	new Resource({ fileLocation: "resources/bullet_normal.png", descriptorLocation: "resources/bullet_normal.json", id: "bulletsprite" });
+	new Resource({ fileLocation: "resources/bullet_burning.png", descriptorLocation: "resources/bullet_normal.json", id: "bulletburningsprite" });
+	new Resource({ fileLocation: "resources/wall.png", id: "wall" });
 	new Resource({ fileLocation: "resources/sfx/menu_back.m4a", id: "sfxMenuBack" });
 	new Resource({ fileLocation: "resources/sfx/menu_select.m4a", id: "sfxMenuSelect" });
 	new Resource({ fileLocation: "resources/sfx/bullet_bounce.m4a", id: "sfxBulletBounce" });
@@ -428,7 +430,7 @@ module tanks {
 	//Sound
 	new Sound({ id: "sfxMenuBack", resource: Resource.get("sfxMenuBack") });
 	new Sound({ id: "sfxMenuSelect", resource: Resource.get("sfxMenuSelect") });
-	new Sound({ id: "sfxBulletBounce", resource: Resource.get("sfxBulletBounce")});
+	new Sound({ id: "sfxBulletBounce", resource: Resource.get("sfxBulletBounce") });
 	new Sound({ id: "sfxBulletSpawn", resource: Resource.get("sfxBulletSpawn"), soundBankCount: 10 });
 	new Sound({ id: "sfxBulletHit", resource: Resource.get("sfxBulletHit"), soundBankCount: 4 });
 	new Sound({ id: "sfxTankDie", resource: Resource.get("sfxTankDie"), soundBankCount: 4 });
