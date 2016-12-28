@@ -438,10 +438,11 @@ var tanks;
 //in the future this should be elsewhere
 (function (tanks) {
     //Resources
-    new tanks.Resource({ fileLocation: "resources/single-tank-red.png", descriptorLocation: "resources/single-tank-red.json", id: "tanksprite" });
-    new tanks.Resource({ fileLocation: "resources/bullet_normal.png", descriptorLocation: "resources/bullet_normal.json", id: "bulletsprite" });
-    new tanks.Resource({ fileLocation: "resources/bullet_burning.png", descriptorLocation: "resources/bullet_normal.json", id: "bulletburningsprite" });
-    new tanks.Resource({ fileLocation: "resources/wall.png", id: "wall" });
+    new tanks.Resource({ fileLocation: "resources/single-tank-red.png", descriptorLocation: "resources/single-tank-red.json", id: "tankRedSprite" });
+    new tanks.Resource({ fileLocation: "resources/single-tank-blue.png", descriptorLocation: "resources/single-tank-red.json", id: "tankBlueSprite" });
+    new tanks.Resource({ fileLocation: "resources/bullet_normal.png", descriptorLocation: "resources/bullet_normal.json", id: "bulletSprite" });
+    new tanks.Resource({ fileLocation: "resources/bullet_burning.png", descriptorLocation: "resources/bullet_normal.json", id: "bulletBurningSprite" });
+    new tanks.Resource({ fileLocation: "resources/wall.png", id: "wallSprite" });
     new tanks.Resource({ fileLocation: "resources/sfx/menu_back.m4a", id: "sfxMenuBack" });
     new tanks.Resource({ fileLocation: "resources/sfx/menu_select.m4a", id: "sfxMenuSelect" });
     new tanks.Resource({ fileLocation: "resources/sfx/bullet_bounce.m4a", id: "sfxBulletBounce" });
@@ -472,6 +473,7 @@ var tanks;
             World.players.push(new tanks.Player({
                 position: new tanks.Coord(40, 40)
             }), new tanks.Player({
+                sprite: tanks.Resource.get("tankBlueSprite"),
                 position: new tanks.Coord(parseInt(canvas.getAttribute("width")) - 40, parseInt(canvas.getAttribute("height")) - 40),
                 angle: new tanks.Angle(180)
             }));
@@ -785,8 +787,8 @@ var tanks;
         function Wall(parameters) {
             if (parameters === void 0) { parameters = { from: null, to: null }; }
             var _this = _super.call(this, parameters) || this;
-            _this.size = 32;
-            _this.sprite = tanks.Resource.get("bulletsprite");
+            _this.size = 16;
+            _this.sprite = tanks.Resource.get("wallSprite");
             _this.from = null;
             _this.to = null;
             _this.render = false;
@@ -825,7 +827,7 @@ var tanks;
             _this.damage = 34;
             _this.size = 8;
             _this.hit = false;
-            _this.sprite = tanks.Resource.get("bulletsprite");
+            _this.sprite = tanks.Resource.get("bulletSprite");
             _this.anim = { name: "idle", count: 0 };
             _this.zIndex = tanks.EZindex.projectile;
             for (var key in parameters) {
@@ -1001,7 +1003,7 @@ var tanks;
             var _this = _super.call(this, parameters) || this;
             _this.weaponBanks = [];
             _this.projectiles = [];
-            _this.sprite = tanks.Resource.get("tanksprite");
+            _this.sprite = tanks.Resource.get("tankRedSprite");
             _this.anim = { name: "idle", count: 0 };
             _this.momentum = new tanks.Vector(new tanks.Coord(), 2, 0.92);
             _this.acceleration = 0.05;

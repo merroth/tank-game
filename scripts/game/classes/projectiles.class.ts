@@ -19,7 +19,7 @@ module tanks {
 		public size = 8;
 		public hit: boolean = false;
 		static repeatFire: boolean = false;
-		public sprite: Resource = Resource.get("bulletsprite");
+		public sprite: Resource = Resource.get("bulletSprite");
 		public anim: IActorAnimation = { name: "idle", count: 0 };
 		public zIndex: EZindex = EZindex.projectile;
 		public collision: Basics.Circle | Basics.Rect;

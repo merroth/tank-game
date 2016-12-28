@@ -25,6 +25,7 @@ module tanks {
 					)
 				}),
 				new Player({
+					sprite: Resource.get("tankBlueSprite"),
 					position: new Coord(
 						parseInt(canvas.getAttribute("width")) - 40,
 						parseInt(canvas.getAttribute("height")) - 40

@@ -11,8 +11,8 @@ module tanks {
 	}
 
 	export class Wall extends Actor {
-		public size = 32;
-		public sprite: Resource = Resource.get("bulletsprite");
+		public size = 16;
+		public sprite: Resource = Resource.get("wallSprite");
 		public collision: Basics.Circle | Basics.Rect;
 		public from: Coord = null;
 		public to: Coord = null;

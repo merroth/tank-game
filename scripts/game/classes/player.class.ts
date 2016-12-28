@@ -19,7 +19,7 @@ module tanks {
 	export class Player extends Actor {
 		public weaponBanks: Weapon[] = [];
 		public projectiles: Projectile[] = [];
-		public sprite: Resource = Resource.get("tanksprite");
+		public sprite: Resource = Resource.get("tankRedSprite");
 		public anim: IActorAnimation = { name: "idle", count: 0 };
 		public momentum: Vector = new Vector(new Coord(), 2, 0.92);
 		public acceleration: number = 0.05;
