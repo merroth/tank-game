@@ -15,6 +15,14 @@ module tanks {
 		"ui"
 	}
 
+	//Testing
+	function assert(label: string = "Unlabeled", statement: any, exptected: any = true) {
+		var str = label + " exptected " + exptected + " found " + statement;
+		if (statement != exptected) {
+			console.warn(label, "exptected", exptected, "found", statement);
+		}
+	}
+
 	//Container for basic elements like funtions or shapes
 	export module Basics {
 		//Distance betweem two coordinates
@@ -161,6 +169,39 @@ module tanks {
 				super();
 			}
 		}
+
+		enum EBounce {
+			//Moving in negative direction
+			"substractive",
+			//Moving in positive direction
+			"additive",
+		}
+		export function bounce(incomingAngle: number, angleOfCollisionTarget: number, solution: EBounce = EBounce.additive): number {
+			//The Normal is tangent to the angleOfCollisionTarget
+			var normal = (solution == EBounce.additive ? angleOfCollisionTarget - 90 : angleOfCollisionTarget + 90);
+			//Force between 0 and 360
+			if (normal <= 0) { normal += 360; }
+			if (incomingAngle <= 0) { incomingAngle += 360; }
+			//
+			var result = 90 * (1 + (angleOfCollisionTarget % 180 / 90)) - incomingAngle + normal;
+			//Force result to be a positive degree
+			while (result < 0) {
+				result += 360;
+			}
+			return result % 360;
+		}
+		/* // Unit Tests */
+		assert("45 on 0 is 315", bounce(45, 0), 315);
+		assert("135 on 0 is 225", bounce(135, 0), 225);
+		assert("225 on 0 is 135", bounce(225, 0), 135);
+		assert("315 on 0 is 45", bounce(315, 0), 45);
+
+		assert("45 on 90 is 135", bounce(45, 90), 135);
+		assert("135 on 90 is 45", bounce(135, 90), 45);
+		assert("225 on 90 is 315", bounce(225, 90), 315);
+		assert("315 on 90 is 225", bounce(315, 90), 225);
+
+		/* */
 
 		//Shortest length between any point on a line and and a circle
 		export function shortestDistanceBetweenLineAndCircle(circleOrigo: Coord, startPoint: Coord, endPoint: Coord): number {

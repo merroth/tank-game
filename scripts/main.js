@@ -20,6 +20,15 @@ var tanks;
         EZindex[EZindex["top-sfx"] = 6] = "top-sfx";
         EZindex[EZindex["ui"] = 7] = "ui";
     })(EZindex = tanks.EZindex || (tanks.EZindex = {}));
+    //Testing
+    function assert(label, statement, exptected) {
+        if (label === void 0) { label = "Unlabeled"; }
+        if (exptected === void 0) { exptected = true; }
+        var str = label + " exptected " + exptected + " found " + statement;
+        if (statement != exptected) {
+            console.warn(label, "exptected", exptected, "found", statement);
+        }
+    }
     //Container for basic elements like funtions or shapes
     var Basics;
     (function (Basics) {
@@ -201,6 +210,43 @@ var tanks;
             return Rect;
         }(Shape));
         Basics.Rect = Rect;
+        var EBounce;
+        (function (EBounce) {
+            //Moving in negative direction
+            EBounce[EBounce["substractive"] = 0] = "substractive";
+            //Moving in positive direction
+            EBounce[EBounce["additive"] = 1] = "additive";
+        })(EBounce || (EBounce = {}));
+        function bounce(incomingAngle, angleOfCollisionTarget, solution) {
+            if (solution === void 0) { solution = EBounce.additive; }
+            //The Normal is tangent to the angleOfCollisionTarget
+            var normal = (solution == EBounce.additive ? angleOfCollisionTarget - 90 : angleOfCollisionTarget + 90);
+            //Force between 0 and 360
+            if (normal <= 0) {
+                normal += 360;
+            }
+            if (incomingAngle <= 0) {
+                incomingAngle += 360;
+            }
+            //
+            var result = 90 * (1 + (angleOfCollisionTarget % 180 / 90)) - incomingAngle + normal;
+            //Force result to be a positive degree
+            while (result < 0) {
+                result += 360;
+            }
+            return result % 360;
+        }
+        Basics.bounce = bounce;
+        /* // Unit Tests */
+        assert("45 on 0 is 315", bounce(45, 0), 315);
+        assert("135 on 0 is 225", bounce(135, 0), 225);
+        assert("225 on 0 is 135", bounce(225, 0), 135);
+        assert("315 on 0 is 45", bounce(315, 0), 45);
+        assert("45 on 90 is 135", bounce(45, 90), 135);
+        assert("135 on 90 is 45", bounce(135, 90), 45);
+        assert("225 on 90 is 315", bounce(225, 90), 315);
+        assert("315 on 90 is 225", bounce(315, 90), 225);
+        /* */
         //Shortest length between any point on a line and and a circle
         function shortestDistanceBetweenLineAndCircle(circleOrigo, startPoint, endPoint) {
             var A = circleOrigo.x - startPoint.x;
