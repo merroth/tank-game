@@ -16,18 +16,18 @@
 			</div>
 			<!-- views -->
 			<script type="text/ng-template" id="view/frontpage">
-				<p><a href="#/game">Start</a></p>
-				<p><a href="#/options">Options</a></p>
+				<p><a ng-click="menuLink()" href="#/game">Start</a></p>
+				<p><a ng-click="menuLink()" href="#/options">Options</a></p>
 			</script>
 			<script type="text/ng-template" id="view/options">
 				<p>Options</p>
 				<p>*options go here*</p>
-				<p><a href="#/">Back</a></p>
+				<p><a ng-click="backLink()" href="#/">Back</a></p>
 			</script>
 			<script type="text/ng-template" id="view/gamepage">
 				<!-- <canvas id="gameCanvas" width="640" height="480"></canvas> -->
 				<canvas id="gameCanvas" width="360" height="240"></canvas>
-				<p><a href="#/">Back</a></p>
+				<p><a ng-click="backLink()" href="#/">Back</a></p>
 			</script>
 		</div>
 

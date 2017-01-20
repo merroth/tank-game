@@ -68,4 +68,21 @@ module tanks {
 					controller: 'gameCtrl'
 				})
 		}]);
+
+	tankApp.run(function($rootScope) {
+		$rootScope.menuLink = function() {
+			console.log('clicked a normal link');
+			Sound.get('sfxMenuSelect').play(true);
+		}
+
+		$rootScope.backLink = function() {
+			console.log('clicked a back link');
+			Sound.get('sfxMenuBack').play(true);
+		}
+	});
+
+	new Resource({ fileLocation: "resources/sfx/menu_select.m4a", id: "sfxMenuSelect" });
+	new Resource({ fileLocation: "resources/sfx/menu_back.m4a", id: "sfxMenuBack" });
+	new Sound({ id: "sfxMenuSelect", resource: Resource.get("sfxMenuSelect") });
+	new Sound({ id: "sfxMenuBack", resource: Resource.get("sfxMenuBack") });
 }

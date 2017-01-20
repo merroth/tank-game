@@ -779,6 +779,20 @@ var tanks;
                 controller: 'gameCtrl'
             });
         }]);
+    tanks.tankApp.run(function ($rootScope) {
+        $rootScope.menuLink = function () {
+            console.log('clicked a normal link');
+            tanks.Sound.get('sfxMenuSelect').play(true);
+        };
+        $rootScope.backLink = function () {
+            console.log('clicked a back link');
+            tanks.Sound.get('sfxMenuBack').play(true);
+        };
+    });
+    new tanks.Resource({ fileLocation: "resources/sfx/menu_select.m4a", id: "sfxMenuSelect" });
+    new tanks.Resource({ fileLocation: "resources/sfx/menu_back.m4a", id: "sfxMenuBack" });
+    new tanks.Sound({ id: "sfxMenuSelect", resource: tanks.Resource.get("sfxMenuSelect") });
+    new tanks.Sound({ id: "sfxMenuBack", resource: tanks.Resource.get("sfxMenuBack") });
 })(tanks || (tanks = {}));
 /// <reference path="../game.utility.ts" />
 /// <reference path="../game.core.ts" />
