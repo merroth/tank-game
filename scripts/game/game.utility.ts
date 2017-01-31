@@ -429,17 +429,19 @@ module tanks {
 			Sound.Sounds.push(this);
 		}
 		public play(force: boolean = false) {
-			for (var soundBankIndex = 0; soundBankIndex < this.soundBanks.length; soundBankIndex++) {
-				var soundBank = this.soundBanks[soundBankIndex];
-				if (soundBank.paused) {
-					soundBank.play();
-					return this;
+			if(tankApp.Options.soundEnabled) {
+				for (var soundBankIndex = 0; soundBankIndex < this.soundBanks.length; soundBankIndex++) {
+					var soundBank = this.soundBanks[soundBankIndex];
+					if (soundBank.paused) {
+						soundBank.play();
+						return this;
+					}
 				}
-			}
-			if (force) {
-				var sfx = this.soundBanks[0];
-				sfx.currentTime = 0;
-				sfx.play();
+				if (force) {
+					var sfx = this.soundBanks[0];
+					sfx.currentTime = 0;
+					sfx.play();
+				}
 			}
 			return this;
 		}

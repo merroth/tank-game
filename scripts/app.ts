@@ -30,6 +30,14 @@ module tanks {
 		//Controller
 		.controller('optionsCtrl', ['$scope', function ($scope) {
 
+			$scope.soundEnabled = tankApp.Options.soundEnabled;
+
+			$scope.setOption = function($option, $value) {
+				if(tankApp.Options.hasOwnProperty($option)) {
+					tankApp.Options[$option] = $value;
+				}
+				Sound.get('sfxMenuSelect').play(true);
+			}
 		}])
 		//Route
 		.config(['$urlRouterProvider', '$stateProvider', function ($urlRouterProvider, $stateProvider) {
@@ -71,15 +79,28 @@ module tanks {
 
 	tankApp.run(function($rootScope) {
 		$rootScope.menuLink = function() {
-			console.log('clicked a normal link');
 			Sound.get('sfxMenuSelect').play(true);
 		}
 
 		$rootScope.backLink = function() {
-			console.log('clicked a back link');
 			Sound.get('sfxMenuBack').play(true);
 		}
 	});
+
+	tankApp.directive('exclusiveSelect', function() {
+	    return {
+	        link: function(scope, element, attrs) {
+	            element.bind('click', function() {
+	                element.parent().children().removeClass('active');
+	                element.addClass('active');
+	            });
+	        },
+	    }
+	});
+
+	tankApp.Options = {
+		soundEnabled: true
+	};
 
 	new Resource({ fileLocation: "resources/sfx/menu_select.m4a", id: "sfxMenuSelect" });
 	new Resource({ fileLocation: "resources/sfx/menu_back.m4a", id: "sfxMenuBack" });

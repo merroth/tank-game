@@ -21,7 +21,11 @@
 			</script>
 			<script type="text/ng-template" id="view/options">
 				<p>Options</p>
-				<p>*options go here*</p>
+				<div>
+					<p>Sound</p>
+					<a ng-class="{active: soundEnabled == true}" exclusive-select ng-click="setOption('soundEnabled', 1)">On</a>
+					<a ng-class="{active: soundEnabled == false}" exclusive-select ng-click="setOption('soundEnabled', 0)">Off</a>
+				</div>
 				<p><a ng-click="backLink()" href="#/">Back</a></p>
 			</script>
 			<script type="text/ng-template" id="view/gamepage">

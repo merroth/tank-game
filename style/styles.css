@@ -26,10 +26,8 @@ body {
 a {
 	text-decoration: none;
 	padding-left: 2em;
-}
-
-a {
 	color: #fff;
+	cursor: pointer;
 }
 
 a:hover:before {
@@ -40,6 +38,9 @@ a:hover:before {
 
 a:hover {
 	margin-left: -2em;
+}
+
+a:hover, a.active {
 	color: #ff0;
 }
 

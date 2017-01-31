@@ -450,17 +450,19 @@ var tanks;
         };
         Sound.prototype.play = function (force) {
             if (force === void 0) { force = false; }
-            for (var soundBankIndex = 0; soundBankIndex < this.soundBanks.length; soundBankIndex++) {
-                var soundBank = this.soundBanks[soundBankIndex];
-                if (soundBank.paused) {
-                    soundBank.play();
-                    return this;
+            if (tanks.tankApp.Options.soundEnabled) {
+                for (var soundBankIndex = 0; soundBankIndex < this.soundBanks.length; soundBankIndex++) {
+                    var soundBank = this.soundBanks[soundBankIndex];
+                    if (soundBank.paused) {
+                        soundBank.play();
+                        return this;
+                    }
                 }
-            }
-            if (force) {
-                var sfx = this.soundBanks[0];
-                sfx.currentTime = 0;
-                sfx.play();
+                if (force) {
+                    var sfx = this.soundBanks[0];
+                    sfx.currentTime = 0;
+                    sfx.play();
+                }
             }
             return this;
         };
@@ -749,6 +751,13 @@ var tanks;
             });
         }])
         .controller('optionsCtrl', ['$scope', function ($scope) {
+            $scope.soundEnabled = tanks.tankApp.Options.soundEnabled;
+            $scope.setOption = function ($option, $value) {
+                if (tanks.tankApp.Options.hasOwnProperty($option)) {
+                    tanks.tankApp.Options[$option] = $value;
+                }
+                tanks.Sound.get('sfxMenuSelect').play(true);
+            };
         }])
         .config(['$urlRouterProvider', '$stateProvider', function ($urlRouterProvider, $stateProvider) {
             $urlRouterProvider.otherwise('/');
@@ -781,14 +790,25 @@ var tanks;
         }]);
     tanks.tankApp.run(function ($rootScope) {
         $rootScope.menuLink = function () {
-            console.log('clicked a normal link');
             tanks.Sound.get('sfxMenuSelect').play(true);
         };
         $rootScope.backLink = function () {
-            console.log('clicked a back link');
             tanks.Sound.get('sfxMenuBack').play(true);
         };
     });
+    tanks.tankApp.directive('exclusiveSelect', function () {
+        return {
+            link: function (scope, element, attrs) {
+                element.bind('click', function () {
+                    element.parent().children().removeClass('active');
+                    element.addClass('active');
+                });
+            }
+        };
+    });
+    tanks.tankApp.Options = {
+        soundEnabled: true
+    };
     new tanks.Resource({ fileLocation: "resources/sfx/menu_select.m4a", id: "sfxMenuSelect" });
     new tanks.Resource({ fileLocation: "resources/sfx/menu_back.m4a", id: "sfxMenuBack" });
     new tanks.Sound({ id: "sfxMenuSelect", resource: tanks.Resource.get("sfxMenuSelect") });
