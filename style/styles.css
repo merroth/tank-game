@@ -21,7 +21,7 @@ body {
 	background-color: #000;
 	text-transform: uppercase;
 	color: #fff;
-	line-height: 1em;
+	line-height: 1;
 }
 
 a {
@@ -40,12 +40,40 @@ a:hover:before {
 	content: '\25b6\00a0';
 }
 
-a:hover, a.active {
+a:hover {
 	color: #ff0;
 }
 
+div.bordered, input, button {
+	border: 8px solid #fff;
+	border-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAD///+l2Z/dAAAAAXRSTlMAQObYZgAAACFJREFUCNdjsP//B4z///8PxkAeGH9g4CcFw/TBzIGZCwAelSW9WQqVDAAAAABJRU5ErkJggg==) 8 round;
+}
+
+a.active .option-content {
+	border-bottom: 2px solid #fff;
+}
+
+div.bordered {
+	margin-bottom: 8px;
+	padding-bottom: 8px;
+}
+
+input, button {
+	color: #fff;
+	background-color: #000;
+	font-family: 'PressStart2P', 'sans-serif';
+	line-height: 1;
+	font-size: 16px;
+	text-transform: uppercase;
+}
+
+button:active {
+	color: #ff0;
+	padding: 0 6px;
+}
+
 #app-container {
-	margin: 0 auto;
+	margin: 2em auto;
 	max-width: 1080px;
 	min-width: 640px;
 }

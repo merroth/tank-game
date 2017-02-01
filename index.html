@@ -21,10 +21,19 @@
 			</script>
 			<script type="text/ng-template" id="view/options">
 				<p>Options</p>
-				<div>
+				<div class="bordered">
 					<p>Sound</p>
-					<a ng-class="{active: soundEnabled == true}" exclusive-select ng-click="setOption('soundEnabled', 1)">On</a>
-					<a ng-class="{active: soundEnabled == false}" exclusive-select ng-click="setOption('soundEnabled', 0)">Off</a>
+					<a ng-class="{active: soundEnabled == true}" exclusive-select ng-click="setOption('soundEnabled', 1)"><span class="option-content">On</span></a>
+					<a ng-class="{active: soundEnabled == false}" exclusive-select ng-click="setOption('soundEnabled', 0)"><span class="option-content">Off</span></a>
+				</div>
+				<div class="bordered">
+					<p>Password</p>
+					<p>Text</p>
+					<p>Text</p>
+					<div class="input-option">
+						<input type="text" name="password">
+						<button>OK</button>
+					</div>
 				</div>
 				<p><a ng-click="backLink()" href="#/">Back</a></p>
 			</script>
