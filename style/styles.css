@@ -25,19 +25,18 @@ body {
 
 a {
 	text-decoration: none;
-	padding-left: 2em;
 	color: #fff;
 	cursor: pointer;
 }
 
-a:hover:before {
-	content: '\25b6\00a0';
+a:before {
+	content: '\2003\00a0';
 	display: inline-block;
 	color: #fff;
 }
 
-a:hover {
-	margin-left: -2em;
+a:hover:before {
+	content: '\25b6\00a0';
 }
 
 a:hover, a.active {
