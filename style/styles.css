@@ -58,6 +58,11 @@ div.bordered {
 	padding-bottom: 8px;
 }
 
+input {
+	padding-left: 8px;
+	padding-right: 8px;
+}
+
 input, button {
 	color: #fff;
 	background-color: #000;
