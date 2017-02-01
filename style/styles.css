@@ -11,8 +11,15 @@
 }
 
 html, head, body {
-	margin: 0px;
-	padding: 0px;
+	margin: 0;
+	padding: 0;
+
+	image-rendering: -moz-crisp-edges;
+	image-rendering:   -o-crisp-edges;
+	image-rendering: -webkit-optimize-contrast;
+	image-rendering: pixelated;
+	image-rendering: crisp-edges;
+	-ms-interpolation-mode: nearest-neighbor;
 }
 
 body {
@@ -40,13 +47,13 @@ a:hover:before {
 	content: '\25b6\00a0';
 }
 
-a:hover {
+a:hover, button:active {
 	color: #ff0;
 }
 
 div.bordered, input, button {
 	border: 8px solid #fff;
-	border-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAD///+l2Z/dAAAAAXRSTlMAQObYZgAAACFJREFUCNdjsP//B4z///8PxkAeGH9g4CcFw/TBzIGZCwAelSW9WQqVDAAAAABJRU5ErkJggg==) 8 round;
+	border-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAD///+l2Z/dAAAAAXRSTlMAQObYZgAAACFJREFUCNdjsP//B4z///8PxkAeGH9g4CcFw/TBzIGZCwAelSW9WQqVDAAAAABJRU5ErkJggg==) 8 repeat;
 }
 
 a.active .option-content {
@@ -58,9 +65,16 @@ div.bordered {
 	padding: 0 8px 8px 8px;
 }
 
+button {
+	padding: 0 6px;
+}
+
 input {
-	padding-left: 8px;
-	padding-right: 8px;
+	padding: 0 8px;
+}
+
+input, button {
+	outline: none;
 }
 
 input, button {
@@ -72,9 +86,10 @@ input, button {
 	text-transform: uppercase;
 }
 
-button:active {
-	color: #ff0;
-	padding: 0 6px;
+input::-moz-focus-inner,
+button::-moz-focus-inner {
+    border: 0;
+    padding: 0;
 }
 
 #app-container {
