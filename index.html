@@ -27,20 +27,20 @@
 					<a ng-class="{active: soundEnabled == false}" exclusive-select ng-click="setOption('soundEnabled', 0)"><span class="option-content">Off</span></a>
 				</div>
 				<div class="bordered">
-					<p>Password</p>
+					<p>Instructions</p>
 					<ul>
 						<li>This is just to test out some styling components</li>
 						<li>Don't take anything you read here too seriously!</li>
 					</ul>
-					<p>Instructions</p>
+					<p>Type something:<p>
+					<input placeholder="Something" type="text" name="nonsense">
+					<p>Password</p>
 					<ol>
-						<li>Enter password</li>
-						<li>Press OK</li>
+						<li>Enter a password</li>
+						<li>Press "OK"</li>
 					</ol>
-					<div class="input-option">
-						<input type="text" name="password">
-						<button>OK</button>
-					</div>
+					<input type="password" name="password">
+					<button>OK</button>
 				</div>
 				<p><a ng-click="backLink()" href="#/">Back</a></p>
 			</script>

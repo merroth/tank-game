@@ -79,6 +79,19 @@ a:hover, button:active {
 	color: #ff0;
 }
 
+button:active {
+	border-image-source: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAD//wCI23BQAAAAAXRSTlMAQObYZgAAACFJREFUCNdjsP//B4z///8PxkAeGH9g4CcFw/TBzIGZCwAelSW9WQqVDAAAAABJRU5ErkJggg==);
+	border-color: #ff0;
+}
+
+div.bordered p:first-child {
+	margin-top: 0;
+}
+
+div.bordered p:last-child {
+	margin-bottom: 0;
+}
+
 div.bordered, input, button {
 	border: 8px solid #fff;
 	border-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAD///+l2Z/dAAAAAXRSTlMAQObYZgAAACFJREFUCNdjsP//B4z///8PxkAeGH9g4CcFw/TBzIGZCwAelSW9WQqVDAAAAABJRU5ErkJggg==) 8 repeat;
@@ -90,22 +103,20 @@ a.active .option-content {
 
 div.bordered {
 	margin-bottom: 8px;
-	padding: 0 8px 8px 8px;
-}
-
-button {
-	padding: 0 6px;
+	padding: 8px;
 }
 
 input {
 	padding: 0 8px;
 }
 
-input, button {
-	outline: none;
+button {
+	padding: 0 6px;
 }
 
 input, button {
+	outline: none;
+	padding-top: 2px;
 	color: #fff;
 	background-color: #000;
 	font-family: 'PressStart2P', 'sans-serif';
@@ -120,6 +131,24 @@ button::-moz-focus-inner {
     padding: 0;
 }
 
+input::-moz-placeholder,
+input:-moz-placeholder {
+	color: #777;
+	opacity: 1;
+}
+
+input::-webkit-input-placeholder {
+	color: #777;
+}
+
+input:-ms-input-placeholder {
+	color: #777;
+}
+
+input::placeholder {
+	color: #777;
+}
+
 #app-container {
 	margin: 2em auto;
 	max-width: 1080px;
@@ -127,7 +156,7 @@ button::-moz-focus-inner {
 }
 /* Game view */
 #gameCanvas {
-	background-color: #cccccc;
+	background-color: #ccc;
 	min-height: 480px;
 	min-width: 640px;
 	width: 100%;
