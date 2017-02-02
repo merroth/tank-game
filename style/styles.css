@@ -24,7 +24,7 @@ html, head, body {
 
 body {
 	font-family: 'PressStart2P', 'sans-serif';
-	font-size: 16px;
+	font-size: 1rem;
 	background-color: #000;
 	text-transform: uppercase;
 	color: #fff;
@@ -32,31 +32,31 @@ body {
 }
 
 li {
-	margin-top: 16px;
-	margin-bottom: 16px;
+	margin-top: 1rem;
+	margin-bottom: 1rem;
 }
 
 ol, ul {
-	padding-left: 2em;
+	padding-left: 2rem;
 	list-style-type: none;
 }
 
 ol > li {
-	counter-increment: customlistcounter;
+	counter-increment: listCount;
 }
 
 ol > li:before {
-	content: counter(customlistcounter);
-	margin-right: 1em;
+	content: counter(listCount);
+	margin-right: 1rem;
 }
 
 ol:first-child {
-	counter-reset: customlistcounter;
+	counter-reset: listCount;
 }
 
 ul > li:before {
 	content: "\2022";
-	margin-right: 1em;
+	margin-right: 1rem;
 }
 
 a {
@@ -79,11 +79,6 @@ a:hover, button:active {
 	color: #ff0;
 }
 
-button:active {
-	border-image-source: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAD//wCI23BQAAAAAXRSTlMAQObYZgAAACFJREFUCNdjsP//B4z///8PxkAeGH9g4CcFw/TBzIGZCwAelSW9WQqVDAAAAABJRU5ErkJggg==);
-	border-color: #ff0;
-}
-
 div.bordered p:first-child {
 	margin-top: 0;
 }
@@ -93,35 +88,32 @@ div.bordered p:last-child {
 }
 
 div.bordered, input, button {
-	border: 8px solid #fff;
-	border-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAD///+l2Z/dAAAAAXRSTlMAQObYZgAAACFJREFUCNdjsP//B4z///8PxkAeGH9g4CcFw/TBzIGZCwAelSW9WQqVDAAAAABJRU5ErkJggg==) 8 repeat;
+	border: .375em solid #fff;
+	border-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASAQMAAABsABwUAAAABlBMVEUAAAD///+l2Z/dAAAAAXRSTlMAQObYZgAAACBJREFUCNdjsP/PAMb//x8A4z/8EPyBGRuGy8PUw/QDALOEIU9PetX7AAAAAElFTkSuQmCC) 6 repeat;
+}
+
+button:active, input:focus {
+	border-color: #ff0;
+	border-image-source: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASAQMAAABsABwUAAAABlBMVEUAAAD//wCI23BQAAAAAXRSTlMAQObYZgAAACBJREFUCNdjsP/PAMb//x8A4z/8EPyBGRuGy8PUw/QDALOEIU9PetX7AAAAAElFTkSuQmCC);
 }
 
 a.active .option-content {
-	border-bottom: 2px solid #fff;
+	border-bottom: .125em solid #fff;
 }
 
 div.bordered {
-	margin-bottom: 8px;
-	padding: 8px;
-}
-
-input {
-	padding: 0 8px;
-}
-
-button {
-	padding: 0 6px;
+	margin-bottom: 1rem;
+	padding: .625rem;
 }
 
 input, button {
+	padding: .125rem .625rem;
 	outline: none;
-	padding-top: 2px;
 	color: #fff;
 	background-color: #000;
 	font-family: 'PressStart2P', 'sans-serif';
 	line-height: 1;
-	font-size: 16px;
+	font-size: 1em;
 	text-transform: uppercase;
 }
 
@@ -150,7 +142,7 @@ input::placeholder {
 }
 
 #app-container {
-	margin: 2em auto;
+	margin: 2rem auto;
 	max-width: 1080px;
 	min-width: 640px;
 }
