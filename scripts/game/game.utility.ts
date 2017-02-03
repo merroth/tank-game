@@ -429,7 +429,7 @@ module tanks {
 			Sound.Sounds.push(this);
 		}
 		public play(force: boolean = false) {
-			if(tankApp.Options.soundEnabled) {
+			if (tankApp.Options.soundEnabled) {
 				for (var soundBankIndex = 0; soundBankIndex < this.soundBanks.length; soundBankIndex++) {
 					var soundBank = this.soundBanks[soundBankIndex];
 					if (soundBank.paused) {
@@ -469,6 +469,7 @@ module tanks {
 	new Resource({ fileLocation: "resources/sfx/menu_select.m4a", id: "sfxMenuSelect" });
 	new Resource({ fileLocation: "resources/sfx/bullet_bounce.m4a", id: "sfxBulletBounce" });
 	new Resource({ fileLocation: "resources/sfx/bullet_spawn.m4a", id: "sfxBulletSpawn" });
+	new Resource({ fileLocation: "resources/sfx/flamethrower_spawn.m4a", id: "sfxFlamethrowerSpawn" });
 	new Resource({ fileLocation: "resources/sfx/bullet_hit.m4a", id: "sfxBulletHit" });
 	new Resource({ fileLocation: "resources/sfx/tank_die.m4a", id: "sfxTankDie" });
 	//Sound
@@ -476,6 +477,7 @@ module tanks {
 	new Sound({ id: "sfxMenuSelect", resource: Resource.get("sfxMenuSelect") });
 	new Sound({ id: "sfxBulletBounce", resource: Resource.get("sfxBulletBounce") });
 	new Sound({ id: "sfxBulletSpawn", resource: Resource.get("sfxBulletSpawn"), soundBankCount: 10 });
+	new Sound({ id: "sfxFlamethrowerSpawn", resource: Resource.get("sfxFlamethrowerSpawn"), soundBankCount: 10});
 	new Sound({ id: "sfxBulletHit", resource: Resource.get("sfxBulletHit"), soundBankCount: 4 });
 	new Sound({ id: "sfxTankDie", resource: Resource.get("sfxTankDie"), soundBankCount: 4 });
 }

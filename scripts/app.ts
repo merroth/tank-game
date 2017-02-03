@@ -33,7 +33,7 @@ module tanks {
 			$scope.soundEnabled = tankApp.Options.soundEnabled;
 
 			$scope.setOption = function($option, $value) {
-				if(tankApp.Options.hasOwnProperty($option)) {
+				if (tankApp.Options.hasOwnProperty($option)) {
 					tankApp.Options[$option] = $value;
 				}
 				Sound.get('sfxMenuSelect').play(true);

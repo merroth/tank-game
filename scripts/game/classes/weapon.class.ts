@@ -47,6 +47,7 @@ module tanks {
 		public render: boolean = false;
 		//Speed of projectiles fired by this weapon
 		public speed: number = 4;
+
 		constructor(parameters: IWeapon = { owner: null }) {
 			super(parameters);
 			for (var key in parameters) {
@@ -78,8 +79,6 @@ module tanks {
 				var cos = Math.cos(Angle.degreetoRadian(degrees));
 				var sin = Math.sin(Angle.degreetoRadian(degrees));
 
-				Sound.get('sfxBulletSpawn').play();
-
 				var projectile = new self.projectileType({
 					lifespan: self.lifespan,
 					owner: self,
@@ -90,6 +89,10 @@ module tanks {
 
 				self.owner.projectiles.push(projectile);
 				self.projectiles.push(projectile);
+
+				if (projectile.sfx.spawn != null) {
+					projectile.sfx.spawn.play();
+				}
 			}
 			return this;
 		}
@@ -100,14 +103,7 @@ module tanks {
 		public fireRateMax: number = 20;
 		public speed: number = 1.3;
 		public fireArc: Angle = new Angle(45);
-		constructor(parameters: IWeapon = { owner: null }) {
-			super(parameters);
-			for (var key in parameters) {
-				if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
-					this[key] = parameters[key];
-				}
-			}
-		}
+		public projectileType = FlameThrowerProjectile;
 	}
 
 	export class WeaponTankMainGun extends Weapon {
@@ -115,14 +111,6 @@ module tanks {
 		public fireRateMax: number = 200;
 		public speed: number = 4;
 		public fireArc: Angle = new Angle(10);
-		constructor(parameters: IWeapon = { owner: null }) {
-			super(parameters);
-			for (var key in parameters) {
-				if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
-					this[key] = parameters[key];
-				}
-			}
-		}
 	}
 
 }

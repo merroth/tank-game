@@ -495,6 +495,7 @@ var tanks;
     new tanks.Resource({ fileLocation: "resources/sfx/menu_select.m4a", id: "sfxMenuSelect" });
     new tanks.Resource({ fileLocation: "resources/sfx/bullet_bounce.m4a", id: "sfxBulletBounce" });
     new tanks.Resource({ fileLocation: "resources/sfx/bullet_spawn.m4a", id: "sfxBulletSpawn" });
+    new tanks.Resource({ fileLocation: "resources/sfx/flamethrower_spawn.m4a", id: "sfxFlamethrowerSpawn" });
     new tanks.Resource({ fileLocation: "resources/sfx/bullet_hit.m4a", id: "sfxBulletHit" });
     new tanks.Resource({ fileLocation: "resources/sfx/tank_die.m4a", id: "sfxTankDie" });
     //Sound
@@ -502,6 +503,7 @@ var tanks;
     new tanks.Sound({ id: "sfxMenuSelect", resource: tanks.Resource.get("sfxMenuSelect") });
     new tanks.Sound({ id: "sfxBulletBounce", resource: tanks.Resource.get("sfxBulletBounce") });
     new tanks.Sound({ id: "sfxBulletSpawn", resource: tanks.Resource.get("sfxBulletSpawn"), soundBankCount: 10 });
+    new tanks.Sound({ id: "sfxFlamethrowerSpawn", resource: tanks.Resource.get("sfxFlamethrowerSpawn"), soundBankCount: 10 });
     new tanks.Sound({ id: "sfxBulletHit", resource: tanks.Resource.get("sfxBulletHit"), soundBankCount: 4 });
     new tanks.Sound({ id: "sfxTankDie", resource: tanks.Resource.get("sfxTankDie"), soundBankCount: 4 });
 })(tanks || (tanks = {}));
@@ -910,6 +912,7 @@ var tanks;
             _this.sprite = tanks.Resource.get("bulletSprite");
             _this.anim = { name: "idle", count: 0 };
             _this.zIndex = tanks.EZindex.projectile;
+            _this.sfx = { spawn: tanks.Sound.get("sfxBulletSpawn"), hit: tanks.Sound.get("sfxBulletHit"), bounce: tanks.Sound.get("sfxBulletBounce") };
             for (var key in parameters) {
                 if (parameters.hasOwnProperty(key) && _this.hasOwnProperty(key)) {
                     _this[key] = parameters[key];
@@ -923,11 +926,11 @@ var tanks;
             self.lifespan--;
             self.anim.count += 1;
             if (self.lifespan < 1) {
-                if (self.hit) {
-                    tanks.Sound.get('sfxBulletHit').play();
+                if (self.hit && self.sfx.hit != null) {
+                    self.sfx.hit.play();
                 }
-                else {
-                    tanks.Sound.get('sfxBulletBounce').play();
+                else if (self.sfx.bounce != null) {
+                    self.sfx.bounce.play();
                 }
                 self.die();
                 return false;
@@ -948,6 +951,18 @@ var tanks;
     }(tanks.Actor));
     Projectile.repeatFire = false;
     tanks.Projectile = Projectile;
+    var FlameThrowerProjectile = (function (_super) {
+        __extends(FlameThrowerProjectile, _super);
+        function FlameThrowerProjectile() {
+            var _this = _super.apply(this, arguments) || this;
+            _this.damage = 10;
+            _this.sprite = tanks.Resource.get("bulletBurningSprite");
+            _this.sfx = { spawn: tanks.Sound.get("sfxFlamethrowerSpawn"), hit: tanks.Sound.get("sfxBulletHit"), bounce: null };
+            return _this;
+        }
+        return FlameThrowerProjectile;
+    }(Projectile));
+    tanks.FlameThrowerProjectile = FlameThrowerProjectile;
 })(tanks || (tanks = {}));
 /// <reference path="../game.utility.ts" />
 /// <reference path="../game.core.ts" />
@@ -1014,7 +1029,6 @@ var tanks;
                 var degrees = self.owner.angle.degree + self.angle.degree + arcDegree;
                 var cos = Math.cos(tanks.Angle.degreetoRadian(degrees));
                 var sin = Math.sin(tanks.Angle.degreetoRadian(degrees));
-                tanks.Sound.get('sfxBulletSpawn').play();
                 var projectile = new self.projectileType({
                     lifespan: self.lifespan,
                     owner: self,
@@ -1022,6 +1036,9 @@ var tanks;
                     angle: new tanks.Angle(degrees),
                     momentum: new tanks.Vector(new tanks.Coord(cos * self.speed, sin * self.speed), self.speed, 1)
                 });
+                if (projectile.sfx.spawn != null) {
+                    projectile.sfx.spawn.play();
+                }
                 self.owner.projectiles.push(projectile);
                 self.projectiles.push(projectile);
             }
@@ -1032,18 +1049,13 @@ var tanks;
     tanks.Weapon = Weapon;
     var WeaponTankFlameThrower = (function (_super) {
         __extends(WeaponTankFlameThrower, _super);
-        function WeaponTankFlameThrower(parameters) {
-            if (parameters === void 0) { parameters = { owner: null }; }
-            var _this = _super.call(this, parameters) || this;
+        function WeaponTankFlameThrower() {
+            var _this = _super.apply(this, arguments) || this;
             _this.lifespan = 20;
             _this.fireRateMax = 20;
             _this.speed = 1.3;
             _this.fireArc = new tanks.Angle(45);
-            for (var key in parameters) {
-                if (parameters.hasOwnProperty(key) && _this.hasOwnProperty(key)) {
-                    _this[key] = parameters[key];
-                }
-            }
+            _this.projectileType = tanks.FlameThrowerProjectile;
             return _this;
         }
         return WeaponTankFlameThrower;
@@ -1051,18 +1063,12 @@ var tanks;
     tanks.WeaponTankFlameThrower = WeaponTankFlameThrower;
     var WeaponTankMainGun = (function (_super) {
         __extends(WeaponTankMainGun, _super);
-        function WeaponTankMainGun(parameters) {
-            if (parameters === void 0) { parameters = { owner: null }; }
-            var _this = _super.call(this, parameters) || this;
+        function WeaponTankMainGun() {
+            var _this = _super.apply(this, arguments) || this;
             _this.lifespan = 100;
             _this.fireRateMax = 200;
             _this.speed = 4;
             _this.fireArc = new tanks.Angle(10);
-            for (var key in parameters) {
-                if (parameters.hasOwnProperty(key) && _this.hasOwnProperty(key)) {
-                    _this[key] = parameters[key];
-                }
-            }
             return _this;
         }
         return WeaponTankMainGun;

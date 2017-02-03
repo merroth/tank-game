@@ -23,6 +23,10 @@ module tanks {
 		public anim: IActorAnimation = { name: "idle", count: 0 };
 		public zIndex: EZindex = EZindex.projectile;
 		public collision: Basics.Circle | Basics.Rect;
+		//Sound effects associated with the projectile, can be set to 'null' to make no sound.
+		//Perhaps the check for null should be moved to the Sound class as a more general solution
+		//instead of just checking wherever when we're just about to use it.
+		public sfx = { spawn: Sound.get("sfxBulletSpawn"), hit: Sound.get("sfxBulletHit"), bounce: Sound.get("sfxBulletBounce") };
 
 		constructor(parameters: IProjectile = { owner: null }) {
 			super(parameters);
@@ -38,10 +42,10 @@ module tanks {
 			self.lifespan--;
 			self.anim.count += 1;
 			if (self.lifespan < 1) {
-				if (self.hit) {
-					Sound.get('sfxBulletHit').play();
-				} else {
-					Sound.get('sfxBulletBounce').play();
+				if (self.hit && self.sfx.hit != null) {
+					self.sfx.hit.play();
+				} else if (self.sfx.bounce != null) {
+					self.sfx.bounce.play();
 				}
 
 				self.die();
@@ -59,5 +63,11 @@ module tanks {
 			//die
 			self._die();
 		}
+	}
+
+	export class FlameThrowerProjectile extends Projectile {
+		public damage: number = 10;
+		public sprite: Resource = Resource.get("bulletBurningSprite");
+		public sfx = { spawn: Sound.get("sfxFlamethrowerSpawn"), hit: Sound.get("sfxBulletHit"), bounce: null };
 	}
 }
