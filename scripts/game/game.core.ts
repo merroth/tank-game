@@ -6,16 +6,22 @@ module tanks {
 
 	interface IWorldSettings {
 		resolution?: number;
+		drawCollisionShapes?: boolean
 	}
 
 	export class World {
 		public static worldActive: boolean = false;
-		public static settings: IWorldSettings = {}
+		public static settings: IWorldSettings = {
+			drawCollisionShapes: true
+		}
 		public static canvas: HTMLCanvasElement = null;
 		private static updatehandle;
 		public static players: Player[] = [];
 		public static frame: number = 0;
-		public static create(canvas: HTMLCanvasElement = null) {
+		public static create(canvas: HTMLCanvasElement = null, settings: IWorldSettings = this.settings) {
+
+			World.settings = settings;
+
 			World.canvas = canvas;
 			//Generate players
 			World.players.push(
@@ -33,6 +39,7 @@ module tanks {
 					angle: new Angle(180)
 				})
 			);
+
 			//Start "World"
 			//event listener
 			window.addEventListener("keydown", World.listener, false);
@@ -126,6 +133,7 @@ module tanks {
 					if (actor === collisionSuspect) { //Shouldn't be possible but just in case:
 						continue;
 					}
+					/* */
 					//Test if collision shapes overlap
 					if (Basics.shapeOverlap(collisionSuspect.collision, actor.collision)) {
 						//If Projectile on Player collision
@@ -153,6 +161,7 @@ module tanks {
 									)
 								))
 							);
+
 							//Align the force
 							if (actor.position.x < collisionSuspect.position.x) {
 								force.x *= -1
@@ -160,12 +169,23 @@ module tanks {
 							if (actor.position.y < collisionSuspect.position.y) {
 								force.y *= -1
 							}
+							//Half the force if is to be distributed between two objects
+							//Each object will get half of the force. Future implementations could consider mass.
+							if (actor.moveable && collisionSuspect.moveable) {
+								force.y *= 0.5;
+								force.x *= 0.5;
+							}
 							//Add the force to the colliding actor
-							actor.momentum.addForce(force);
+							if (actor.moveable) {
+								actor.momentum.addForce(force);
+							}
 							//Add an equal and opposite force to the collisionSuspect
-							collisionSuspect.momentum.addForce(new Coord(force.x * -1, force.y * -1));
+							if (collisionSuspect.moveable) {
+								collisionSuspect.momentum.addForce(new Coord(force.x * -1, force.y * -1));
+							}
 						}
 					}
+					/* */
 				}
 				//Run update and listen for changes
 				changes = (actor.update() ? true : changes);
@@ -200,6 +220,48 @@ module tanks {
 
 			for (var actorIndex = 0; actorIndex < actorsToDraw.length; actorIndex++) {
 				var actor = actorsToDraw[actorIndex];
+
+				if (this.settings.drawCollisionShapes === true) {
+					if (actor.collision instanceof Basics.Polygon) {
+						actor.collision.setAngle(actor.angle);
+						actor.collision.buildEdges();
+
+						ctx.beginPath();
+						ctx.moveTo(
+							actor.collision.edges[0].start.x + actor.position.x,
+							actor.collision.edges[0].start.y + actor.position.y
+						);
+						for (let edgieIndex = 0; edgieIndex < actor.collision.edges.length; edgieIndex++) {
+							let edge = actor.collision.edges[edgieIndex];
+							ctx.moveTo(
+								edge.start.x + actor.position.x,
+								edge.start.y + actor.position.y
+							);
+							ctx.lineTo(
+								edge.end.x + actor.position.x,
+								edge.end.y + actor.position.y
+							);
+						}
+						ctx.moveTo(
+							actor.collision.edges[0].start.x + actor.position.x,
+							actor.collision.edges[0].start.y + actor.position.y
+						);
+						ctx.lineTo(
+							actor.collision.edges[0].end.x + actor.position.x,
+							actor.collision.edges[0].end.y + actor.position.y
+						);
+						ctx.stroke();
+						ctx.closePath();
+					} else {
+
+					}
+				}
+
+				//If actor has an abstract drawing method
+				if (actor.draw != void 0) {
+					actor.draw(ctx);
+					continue;
+				}
 
 				//Move and rotate canvas to object
 				ctx.translate(actor.position.x, actor.position.y);
