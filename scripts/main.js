@@ -54,8 +54,7 @@ var tanks;
             var det, gamma, lamb;
             det = (l1x2 - l1x1) * (l2y2 - l2y1) - (l2x2 - l2x1) * (l1y2 - l1y1);
             if (det === 0) {
-                //Return overlapping circle
-                return (angleBetweenPoints(l1x1, l1y1, l1x2, l1y2) == 0);
+                return false;
             }
             else {
                 //lamb is progess over x axis 
@@ -567,7 +566,7 @@ var tanks;
             }
             var c1 = new Circle(new Coord(10, 10), 10);
             var c2 = new Circle(new Coord(10, 10), 10);
-            var r1 = new Rect(new Coord(15, 15), 15, 15);
+            var r1 = new Rect(new Coord(15, 15), 15, 15, new Angle(0.05));
             var r2 = new Rect(new Coord(14, 14), 15, 15);
             assert("Shape overlap 1", shapeOverlap(c1, c2));
             assert("Shape overlap 2", shapeOverlap(r1, r2));
@@ -778,11 +777,12 @@ var tanks;
             World.canvas = canvas;
             //Generate players
             World.players.push(new tanks.Player({
-                position: new tanks.Coord(40, 40)
+                position: new tanks.Coord(40, 40),
+                angle: new tanks.Angle(Math.random() * 2 - 1)
             }), new tanks.Player({
                 sprite: tanks.Resource.get("tankBlueSprite"),
                 position: new tanks.Coord(parseInt(canvas.getAttribute("width")) - 40, parseInt(canvas.getAttribute("height")) - 40),
-                angle: new tanks.Angle(180)
+                angle: new tanks.Angle(179 + Math.random() * 2)
             }));
             //Start "World"
             //event listener
@@ -867,6 +867,12 @@ var tanks;
                 .sort(function (a, b) {
                 return b.zIndex - a.zIndex;
             });
+            for (var actorIndex = 0; actorIndex < collisionSuspects.length; actorIndex++) {
+                var actor = collisionSuspects[actorIndex];
+                if (actor.collision instanceof tanks.Basics.Polygon) {
+                    actor.collision.distributePoints();
+                }
+            }
             var _loop_1 = function (actorIndex) {
                 var actor = actors[actorIndex];
                 //Remove current actor from collision suspects
@@ -1172,6 +1178,9 @@ var tanks;
             _this.sprite = tanks.Resource.get("bulletSprite");
             _this.anim = { name: "idle", count: 0 };
             _this.zIndex = tanks.EZindex.projectile;
+            //Sound effects associated with the projectile, can be set to 'null' to make no sound.
+            //Perhaps the check for null should be moved to the Sound class as a more general solution
+            //instead of just checking wherever when we're just about to use it.
             _this.sfx = { spawn: tanks.Sound.get("sfxBulletSpawn"), hit: tanks.Sound.get("sfxBulletHit"), bounce: tanks.Sound.get("sfxBulletBounce") };
             for (var key in parameters) {
                 if (parameters.hasOwnProperty(key) && _this.hasOwnProperty(key)) {
@@ -1214,7 +1223,7 @@ var tanks;
     var FlameThrowerProjectile = (function (_super) {
         __extends(FlameThrowerProjectile, _super);
         function FlameThrowerProjectile() {
-            var _this = _super.apply(this, arguments) || this;
+            var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.damage = 10;
             _this.sprite = tanks.Resource.get("bulletBurningSprite");
             _this.sfx = { spawn: tanks.Sound.get("sfxFlamethrowerSpawn"), hit: tanks.Sound.get("sfxBulletHit"), bounce: null };
@@ -1296,11 +1305,11 @@ var tanks;
                     angle: new tanks.Angle(degrees),
                     momentum: new tanks.Vector(new tanks.Coord(cos * self.speed, sin * self.speed), self.speed, 1)
                 });
+                self.owner.projectiles.push(projectile);
+                self.projectiles.push(projectile);
                 if (projectile.sfx.spawn != null) {
                     projectile.sfx.spawn.play();
                 }
-                self.owner.projectiles.push(projectile);
-                self.projectiles.push(projectile);
             }
             return this;
         };
@@ -1310,7 +1319,7 @@ var tanks;
     var WeaponTankFlameThrower = (function (_super) {
         __extends(WeaponTankFlameThrower, _super);
         function WeaponTankFlameThrower() {
-            var _this = _super.apply(this, arguments) || this;
+            var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.lifespan = 20;
             _this.fireRateMax = 20;
             _this.speed = 1.3;
@@ -1324,7 +1333,7 @@ var tanks;
     var WeaponTankMainGun = (function (_super) {
         __extends(WeaponTankMainGun, _super);
         function WeaponTankMainGun() {
-            var _this = _super.apply(this, arguments) || this;
+            var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.lifespan = 100;
             _this.fireRateMax = 200;
             _this.speed = 4;
@@ -1368,7 +1377,7 @@ var tanks;
                     _this[key] = parameters[key];
                 }
             }
-            _this.collision = new tanks.Basics.Rect(_this.position, _this.size * 0.9, _this.size * 0.7);
+            _this.collision = new tanks.Basics.Rect(_this.position, _this.size * 0.9, _this.size * 0.7, _this.angle);
             //These are "Proof of concept" for gunplacement and gun modification.
             //Real implementations should have a derived subclass to reference directly
             //instead of modifying the existing one directly
@@ -1384,6 +1393,7 @@ var tanks;
                 owner: _this,
                 position: new tanks.Coord(10, 10)
             }));
+            _this.collision.distributePoints();
             return _this;
         }
         Player.prototype.update = function () {

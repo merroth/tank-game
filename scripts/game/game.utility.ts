@@ -45,8 +45,9 @@ module tanks {
 			var det: number, gamma: number, lamb: number;
 			det = (l1x2 - l1x1) * (l2y2 - l2y1) - (l2x2 - l2x1) * (l1y2 - l1y1);
 			if (det === 0) {
+				return false;
 				//Return overlapping circle
-				return (angleBetweenPoints(l1x1, l1y1, l1x2, l1y2) == 0);
+				//return (angleBetweenPoints(l1x1, l1y1, l1x2, l1y2) == 0);
 			} else {
 				//lamb is progess over x axis 
 				lamb = ((l2y2 - l2y1) * (l2x2 - l1x1) + (l2x1 - l2x2) * (l2y2 - l1y1)) / det;
@@ -338,7 +339,7 @@ module tanks {
 				this.buildEdges();
 				return this;
 			}
-			private distributePoints() {
+			public distributePoints() {
 				this.points = [
 					//Top Left
 					new Coord(-0.5 * this.width, -0.5 * this.height),
@@ -480,7 +481,6 @@ module tanks {
 		/* */
 		//Calculate if a Circle overlaps a Rect
 		export function overlapCircleRect(c: Circle, r: Rect): boolean {
-
 			//If distance between origo is more than Circle radius + (0.5 * Rect diagonal) away, then there is no way they overlap
 			if (c.radius + (r.diagonal() / 2) < Coord.distanceBetweenCoords(c.origo, r.origo)) {
 				return false;
@@ -535,7 +535,7 @@ module tanks {
 			if (!runTests) { return false; }
 			var c1 = new Circle(new Coord(10, 10), 10);
 			var c2 = new Circle(new Coord(10, 10), 10);
-			var r1 = new Rect(new Coord(15, 15), 15, 15);
+			var r1 = new Rect(new Coord(15, 15), 15, 15, new Angle(0.05));
 			var r2 = new Rect(new Coord(14, 14), 15, 15);
 			assert("Shape overlap 1", shapeOverlap(c1, c2));
 			assert("Shape overlap 2", shapeOverlap(r1, r2));
@@ -746,7 +746,7 @@ module tanks {
 	new Sound({ id: "sfxMenuSelect", resource: Resource.get("sfxMenuSelect") });
 	new Sound({ id: "sfxBulletBounce", resource: Resource.get("sfxBulletBounce") });
 	new Sound({ id: "sfxBulletSpawn", resource: Resource.get("sfxBulletSpawn"), soundBankCount: 10 });
-	new Sound({ id: "sfxFlamethrowerSpawn", resource: Resource.get("sfxFlamethrowerSpawn"), soundBankCount: 10});
+	new Sound({ id: "sfxFlamethrowerSpawn", resource: Resource.get("sfxFlamethrowerSpawn"), soundBankCount: 10 });
 	new Sound({ id: "sfxBulletHit", resource: Resource.get("sfxBulletHit"), soundBankCount: 4 });
 	new Sound({ id: "sfxTankDie", resource: Resource.get("sfxTankDie"), soundBankCount: 4 });
 }

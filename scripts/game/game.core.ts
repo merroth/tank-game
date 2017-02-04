@@ -28,7 +28,8 @@ module tanks {
 				new Player({
 					position: new Coord(
 						40, 40
-					)
+					),
+					angle: new Angle(Math.random() * 2 - 1)
 				}),
 				new Player({
 					sprite: Resource.get("tankBlueSprite"),
@@ -36,7 +37,7 @@ module tanks {
 						parseInt(canvas.getAttribute("width")) - 40,
 						parseInt(canvas.getAttribute("height")) - 40
 					),
-					angle: new Angle(180)
+					angle: new Angle(179 + Math.random() * 2)
 				})
 			);
 
@@ -108,6 +109,13 @@ module tanks {
 				.sort(function (a, b) {
 					return b.zIndex - a.zIndex;
 				});
+
+			for (let actorIndex = 0; actorIndex < collisionSuspects.length; actorIndex++) {
+				let actor = collisionSuspects[actorIndex];
+				if (actor.collision instanceof Basics.Polygon) {
+					actor.collision.distributePoints();
+				}
+			}
 
 			for (let actorIndex = 0; actorIndex < actors.length; actorIndex++) {
 				let actor = actors[actorIndex];

@@ -42,7 +42,7 @@ module tanks {
 					this[key] = parameters[key];
 				}
 			}
-			this.collision = new Basics.Rect(this.position, this.size * 0.9, this.size * 0.7);
+			this.collision = new Basics.Rect(this.position, this.size * 0.9, this.size * 0.7, this.angle);
 
 			//These are "Proof of concept" for gunplacement and gun modification.
 			//Real implementations should have a derived subclass to reference directly
@@ -60,6 +60,8 @@ module tanks {
 					position: new Coord(10, 10),
 				})
 			);
+
+			this.collision.distributePoints();
 		}
 		public update(): boolean {
 			var self = this;
