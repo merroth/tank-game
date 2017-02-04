@@ -16,7 +16,8 @@ module tanks {
 	}
 
 	//Testing
-	function assert(label: string = "Unlabeled", statement: any, exptected: any = true) {
+	export var runTests = true;
+	export function assert(label: string = "Unlabeled", statement: any, exptected: any = true) {
 		var str = label + " exptected " + exptected + " found " + statement;
 		if (statement != exptected) {
 			console.warn(label, "exptected", exptected, "found", statement);
@@ -37,6 +38,29 @@ module tanks {
 			}
 			return angle;
 		}
+		//Would two lines intersect
+		//http://stackoverflow.com/questions/9043805/test-if-two-lines-intersect-javascript-function#24392281
+		export function intersects(l1x1, l1y1, l1x2, l1y2, l2x1, l2y1, l2x2, l2y2): boolean | { lamb: number, gamma: number } {
+
+			var det: number, gamma: number, lamb: number;
+			det = (l1x2 - l1x1) * (l2y2 - l2y1) - (l2x2 - l2x1) * (l1y2 - l1y1);
+			if (det === 0) {
+				//Return overlapping circle
+				return (angleBetweenPoints(l1x1, l1y1, l1x2, l1y2) == 0);
+			} else {
+				//lamb is progess over x axis 
+				lamb = ((l2y2 - l2y1) * (l2x2 - l1x1) + (l2x1 - l2x2) * (l2y2 - l1y1)) / det;
+				//gamma is progess over y axis 
+				gamma = ((l1y1 - l1y2) * (l2x2 - l1x1) + (l1x2 - l1x1) * (l2y2 - l1y1)) / det;
+				if ((0 < lamb && lamb < 1) && (0 < gamma && gamma < 1)) {
+					return {
+						lamb: lamb, gamma: gamma
+					}
+				} else {
+					return false;
+				}
+			}
+		};
 	}
 
 	//Defines the concept of an "angle" and utility functions
@@ -45,6 +69,10 @@ module tanks {
 			this.degree = this.degree % 360;
 		}
 		public set(degree: number): Angle {
+			this.degree = degree % 360;
+			return this;
+		}
+		public add(degree: number): Angle {
 			this.degree = (this.degree + degree) % 360;
 			return this;
 		}
@@ -124,6 +152,232 @@ module tanks {
 
 			}
 		}
+
+		export class Line {
+			static intersects(a: Line, b: Line): boolean {
+				return Basics.intersects(
+					a.start.x,
+					a.start.y,
+					a.end.x,
+					a.end.y,
+					b.start.x,
+					b.start.y,
+					b.end.x,
+					b.end.y
+				) !== false
+			}
+			constructor(public start: Coord, public end: Coord) {
+
+			}
+		}
+
+		//Polygons are always closed shapes
+		export class Polygon extends Shape {
+			static intersects(p1: Polygon, p2: Polygon) {
+				for (let p1EdgeIndex = 0; p1EdgeIndex < p1.edges.length; p1EdgeIndex++) {
+					let p1Edge = p1.edges[p1EdgeIndex];
+					for (let p2EdgeIndex = 0; p2EdgeIndex < p2.edges.length; p2EdgeIndex++) {
+						let p2Edge = p2.edges[p2EdgeIndex];
+
+						let intersection = Line.intersects(p1Edge, p2Edge);
+						if (intersection !== false) {
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+			static containsPoint(pol: Polygon, point: Coord): boolean {
+				var e = pol.buildEdges().getExtremes(true);
+				var count = 0;
+				var lineA = new Line(
+					new Coord(e.left - pol.origo.x, point.y - pol.origo.y),
+					new Coord(point.x - pol.origo.x, point.y - pol.origo.y)
+				);
+				var lineB = new Line(
+					new Coord(point.x - pol.origo.x, e.top - pol.origo.y),
+					new Coord(point.x - pol.origo.x, point.y - pol.origo.y)
+				);
+				for (let edgeIndex = 0; edgeIndex < pol.edges.length; edgeIndex++) {
+					if (Line.intersects(lineA, pol.edges[edgeIndex]) === true) {
+						count++;
+					}
+				}
+				if (count > 0 && count % 2 === 1) {
+					return count % 2 === 1;
+				}
+				count = 0;
+				for (let edgeIndex = 0; edgeIndex < pol.edges.length; edgeIndex++) {
+					if (Line.intersects(lineB, pol.edges[edgeIndex]) === true) {
+						count++;
+					}
+				}
+
+				if (count > 0 && count % 2 === 1) {
+					return count % 2 === 1;
+				}
+
+				return false;
+			}
+			public edges: Line[] = [];
+			constructor(public origo: Coord = new Coord(), public points: Coord[] = [], public angle: Angle = new Angle()) {
+				super();
+				this.buildEdges();
+			}
+			public buildEdges() {
+				var theta = Angle.degreetoRadian(this.angle.get());
+				this.edges = [];
+
+				for (let indexa = 0; indexa < this.points.length; indexa++) {
+					let a = this.points[indexa];
+					let b = this.points[(indexa + 1) % this.points.length];
+
+					this.edges.push(
+						new Line(
+							new Coord(
+								a.x * Math.cos(theta) - a.y * Math.sin(theta),
+								a.x * Math.sin(theta) + a.y * Math.cos(theta)
+							),
+							new Coord(
+								b.x * Math.cos(theta) - b.y * Math.sin(theta),
+								b.x * Math.sin(theta) + b.y * Math.cos(theta)
+							)
+						)
+					);
+				}
+				return this;
+			}
+			public getExtremes(applyOrigo = true) {
+				this.buildEdges();
+				var returner = {
+					top: 0,
+					left: 0,
+					bottom: 0,
+					right: 0
+				}
+				for (var index = 0; index < this.edges.length; index++) {
+					var edge = this.edges[index];
+
+					if (Math.min(edge.start.x, edge.end.x) < returner.left) {
+						returner.left = Math.min(edge.start.x, edge.end.x);
+					}
+					if (Math.max(edge.start.x, edge.end.x) > returner.right) {
+						returner.right = Math.max(edge.start.x, edge.end.x);
+					}
+
+					if (Math.min(edge.start.y, edge.end.y) < returner.top) {
+						returner.top = Math.min(edge.start.y, edge.end.y);
+					}
+					if (Math.max(edge.start.y, edge.end.y) > returner.bottom) {
+						returner.bottom = Math.max(edge.start.y, edge.end.y);
+					}
+				}
+				if (applyOrigo === true) {
+					returner.top += this.origo.y
+					returner.bottom += this.origo.y
+					returner.left += this.origo.x
+					returner.right += this.origo.x
+				}
+				return returner;
+			}
+		}
+		(function unitTest() {
+			if (!runTests) { return false; }
+			var p1 = new Polygon(
+				new Coord(100, 100),
+				[
+					new Coord(-10, -10),
+					new Coord(0, 10),
+					new Coord(10, -10)
+				],
+				new Angle(45)
+			);
+			var p2 = new Polygon(
+				new Coord(100, 100),
+				[
+					new Coord(-50, -5),
+					new Coord(50, -5),
+				],
+				new Angle(45)
+			);
+			var p3 = new Polygon(
+				new Coord(100, 100),
+				[
+					new Coord(-50, -50),
+					new Coord(50, -50),
+				],
+				new Angle(45)
+			);
+			assert("Polygons intersect", Polygon.intersects(p1, p2), true);
+			assert("Polygons does not intersect", Polygon.intersects(p1, p3), false);
+			assert("Polygon contain point", Polygon.containsPoint(p1, p1.origo), true);
+			assert("Polygon does not contain point", Polygon.containsPoint(p1, new Coord(p1.origo.x + 1000, p1.origo.y)), false);
+		})()
+
+		export class Rect extends Polygon {
+			constructor(public origo: Coord = new Coord(), public width: number = 0, public height: number = 0, public angle: Angle = new Angle()) {
+				super(origo);
+				this.distributePoints();
+			}
+			public setWidth(value: number = this.width) {
+				this.width = Math.abs(value);
+				this.buildEdges();
+				return this;
+			}
+			public setHeight(value: number = this.height) {
+				this.height = Math.abs(value);
+				this.buildEdges();
+				return this;
+			}
+			public setAngle(value: number | Angle = this.angle) {
+				if (value instanceof Angle) {
+					this.angle.set(value.degree)
+				} else {
+					this.angle.set(value)
+				}
+				this.buildEdges();
+				return this;
+			}
+			private distributePoints() {
+				this.points = [
+					//Top Left
+					new Coord(-0.5 * this.width, -0.5 * this.height),
+					//Top Right
+					new Coord(0.5 * this.width, -0.5 * this.height),
+					//Bottom Right
+					new Coord(0.5 * this.width, 0.5 * this.height),
+					//Bottom Left
+					new Coord(-0.5 * this.width, 0.5 * this.height),
+
+				];
+				this.buildEdges();
+			}
+			public circumference(): number {
+				return 2 * (
+					Basics.distance(0, 0, 0, this.height) +
+					Basics.distance(0, 0, this.width, 0)
+				)
+			}
+			public area(): number {
+				return Basics.distance(0, 0, 0, this.height) *
+					Basics.distance(0, 0, this.width, 0)
+			}
+			//Diagonal length of box
+			public diagonal(): number {
+				return Basics.distance(0, 0, this.width, this.height);
+
+			}
+
+		}
+		/* */ // Unit Tests 
+		(function unitTest() {
+			if (!runTests) { return false; }
+			var c = new Rect(new Coord(10, 20), 10, 10);
+			assert("Area of rect is 100", Math.floor(c.area()), 100);
+			assert("Circumference of rect is 40", Math.floor(c.circumference()), 40);
+			assert("Diagonal of rect is 14", Math.floor(c.diagonal()), 14);
+		})();
+		/* */
 		//Circle contains mathematical formulars and data for a circle
 		//This can easily be used for range factors and collisions
 		export class Circle extends Shape {
@@ -139,43 +393,31 @@ module tanks {
 				return Math.PI * (this.radius * this.radius);
 			}
 			//korde
-			public chord(v: number = 1): number {
-				return 2 * this.radius * Math.sin(Angle.degreetoRadian(v) / 2);
+			public chord(vinkel: number = 1): number {
+				//https://www.regneregler.dk/cirkel-korde
+				return 2 * this.radius * Math.sin(Angle.degreetoRadian(vinkel) / 2);
 			}
 			constructor(public origo: Coord = new Coord(), public radius: number = 0) {
 				super();
 			}
 		}
-		//Rect contains mathematical formulars and data for a rectangle
-		export class Rect extends Shape {
-			//omkreds
-			public circumference(): number {
-				return 2 * (
-					Basics.distance(this.left, this.top, this.left, this.bottom) +
-					Basics.distance(this.left, this.top, this.right, this.top)
-				)
-			}
-			//areal
-			public area(): number {
-				return Basics.distance(this.left, this.top, this.left, this.bottom) *
-					Basics.distance(this.left, this.top, this.right, this.top)
-			}
-			//Diagonal length of box
-			public diagonal(): number {
-				return Basics.distance(this.left, this.top, this.right, this.bottom);
-
-			}
-			constructor(public top: number, public right: number, public bottom: number, public left: number, public angle: Angle = new Angle()) {
-				super();
-			}
-		}
-
+		/* // Unit Tests */
+		(function unitTest() {
+			if (!runTests) { return false; }
+			var c = new Circle(new Coord(100, 100), 10);
+			assert("Area of circle is 314", Math.floor(c.area()), 314);
+			assert("Circumference of circle is 62", Math.floor(c.circumference()), 62);
+			assert("Chord of circle is radius * 2 (10 * 2)", Math.floor(c.chord(180)), 20);
+		})()
+		/* */
+		//Enum settings for bounce
 		enum EBounce {
 			//Moving in negative direction
 			"substractive",
 			//Moving in positive direction
 			"additive",
 		}
+		//Determine angle of bounceof
 		export function bounce(incomingAngle: number, angleOfCollisionTarget: number, solution: EBounce = EBounce.additive): number {
 			//The Normal is tangent to the angleOfCollisionTarget
 			var normal = (solution == EBounce.additive ? angleOfCollisionTarget - 90 : angleOfCollisionTarget + 90);
@@ -191,16 +433,18 @@ module tanks {
 			return result % 360;
 		}
 		/* // Unit Tests */
-		assert("45 on 0 is 315", bounce(45, 0), 315);
-		assert("135 on 0 is 225", bounce(135, 0), 225);
-		assert("225 on 0 is 135", bounce(225, 0), 135);
-		assert("315 on 0 is 45", bounce(315, 0), 45);
+		(function unitTest() {
+			if (!runTests) { return false; }
+			assert("45 on 0 is 315", bounce(45, 0), 315);
+			assert("135 on 0 is 225", bounce(135, 0), 225);
+			assert("225 on 0 is 135", bounce(225, 0), 135);
+			assert("315 on 0 is 45", bounce(315, 0), 45);
 
-		assert("45 on 90 is 135", bounce(45, 90), 135);
-		assert("135 on 90 is 45", bounce(135, 90), 45);
-		assert("225 on 90 is 315", bounce(225, 90), 315);
-		assert("315 on 90 is 225", bounce(315, 90), 225);
-
+			assert("45 on 90 is 135", bounce(45, 90), 135);
+			assert("135 on 90 is 45", bounce(135, 90), 45);
+			assert("225 on 90 is 315", bounce(225, 90), 315);
+			assert("315 on 90 is 225", bounce(315, 90), 225);
+		})();
 		/* */
 
 		//Shortest length between any point on a line and and a circle
@@ -233,50 +477,75 @@ module tanks {
 			var dy = circleOrigo.y - yy;
 			return Math.sqrt(dx * dx + dy * dy);
 		}
-
+		/* */
 		//Calculate if a Circle overlaps a Rect
 		export function overlapCircleRect(c: Circle, r: Rect): boolean {
 
-			//If topleft of Rect is more than Circle radius + Rect diagonal away, then there is no way they overlap
-			if (c.radius + r.diagonal() > Coord.distanceBetweenCoords(c.origo, new Coord(r.left, r.top))) {
+			//If distance between origo is more than Circle radius + (0.5 * Rect diagonal) away, then there is no way they overlap
+			if (c.radius + (r.diagonal() / 2) < Coord.distanceBetweenCoords(c.origo, r.origo)) {
 				return false;
 			}
 
-			//if Circle origo is inside rect, return true
-			if (r.left <= c.origo.x && c.origo.x <= r.right && c.origo.y >= r.top && c.origo.y <= r.bottom) {
+			//if Circle origo is inside Rect or Rect origo inside Circle, return true
+			//if (er.left <= c.origo.x && c.origo.x <= er.right && c.origo.y >= er.top && c.origo.y <= er.bottom) {
+			if (Polygon.containsPoint(r, c.origo) || Coord.distanceBetweenCoords(c.origo, r.origo) < c.radius) {
 				return true;
 			}
-			//if any wall intersects the circle
-			if (shortestDistanceBetweenLineAndCircle(c.origo, new Coord(r.left, r.top), new Coord(r.right, r.top)) < c.radius) {//Top line
-				return true;
-			} else if (shortestDistanceBetweenLineAndCircle(c.origo, new Coord(r.left, r.top), new Coord(r.left, r.bottom)) < c.radius) {//Left line
-				return true;
-			} else if (shortestDistanceBetweenLineAndCircle(c.origo, new Coord(r.left, r.bottom), new Coord(r.right, r.bottom)) < c.radius) {//Bottom line
-				return true;
-			} else if (shortestDistanceBetweenLineAndCircle(c.origo, new Coord(r.right, r.top), new Coord(r.right, r.bottom)) < c.radius) {//Right line
-				return true;
+			//Check collisions on all edges
+			for (let edgeIndex = 0; edgeIndex < r.edges.length; edgeIndex++) {
+				let edge = r.edges[edgeIndex];
+				if (shortestDistanceBetweenLineAndCircle(c.origo, edge.start, edge.end) < c.radius) {
+					return true;
+				}
 			}
 			//Return false if no overlap found
 			return false;
 		}
+		/* // Unit Tests */
+		(function unitTest() {
+			if (!runTests) { return false; }
+			var c = new Circle(new Coord(6, 6), 10);
+			var r = new Rect(new Coord(5, 15), 15, 15);
+			assert("Circle and Rect overlap", overlapCircleRect(c, r));
+			r.origo.x = 100;
+			r.buildEdges();
+			assert("Circle and Rect dont overlap", overlapCircleRect(c, r), false);
+		})()
+		/* */
 
 		//Shape overlap
 		//Used for collisions
+		/* */
 		export function shapeOverlap(objA: Shape, objB: Shape): boolean {
 
 			if (objA instanceof Rect && objB instanceof Rect) {
-				return objA.right >= objB.left && objA.bottom >= objB.top
-					&& objB.right >= objA.left && objB.bottom >= objA.top;
+				return Polygon.intersects(objA, objB) || Polygon.containsPoint(objA, objB.origo) || Polygon.containsPoint(objB, objA.origo)
 			} else if (objA instanceof Circle && objB instanceof Circle) {
 				return Coord.distanceBetweenCoords(objA.origo, objB.origo) <= objA.radius + objB.radius;
 			} else if (objA instanceof Rect && objB instanceof Circle) {
-				return overlapCircleRect(objB, objA);
+				return overlapCircleRect(objB, objA) || Polygon.containsPoint(objA, objB.origo)
 			} else if (objA instanceof Circle && objB instanceof Rect) {
-				return overlapCircleRect(objA, objB);
+				return overlapCircleRect(objA, objB) || Polygon.containsPoint(objB, objA.origo)
 			}
 
 			return false;
 		}
+		/* // Unit Tests */
+		(function unitTest() {
+			if (!runTests) { return false; }
+			var c1 = new Circle(new Coord(10, 10), 10);
+			var c2 = new Circle(new Coord(10, 10), 10);
+			var r1 = new Rect(new Coord(15, 15), 15, 15);
+			var r2 = new Rect(new Coord(14, 14), 15, 15);
+			assert("Shape overlap 1", shapeOverlap(c1, c2));
+			assert("Shape overlap 2", shapeOverlap(r1, r2));
+			assert("Shape overlap 2.5", shapeOverlap(r1, r2));
+			assert("Shape overlap 3", shapeOverlap(c1, r1));
+			assert("Shape overlap 4", shapeOverlap(c1, r2));
+			assert("Shape overlap 5", shapeOverlap(c2, r1));
+			assert("Shape overlap 6", shapeOverlap(c2, r2));
+		})()
+		/* */
 	}
 
 	export interface IDescriptorAnimation {

@@ -42,7 +42,7 @@ module tanks {
 					this[key] = parameters[key];
 				}
 			}
-			this.collision = new Basics.Circle(this.position, this.size / 2.2);
+			this.collision = new Basics.Rect(this.position, this.size * 0.9, this.size * 0.7);
 
 			//These are "Proof of concept" for gunplacement and gun modification.
 			//Real implementations should have a derived subclass to reference directly
@@ -110,7 +110,7 @@ module tanks {
 					self.anim.count += turn;
 				}
 
-				self.angle.set(self.turnrate * turn);
+				self.angle.add(self.turnrate * turn);
 
 				changes = true;
 			}

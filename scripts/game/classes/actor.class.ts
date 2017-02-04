@@ -21,6 +21,7 @@ module tanks {
 		zIndex?: EZindex;
 		render?: boolean;
 		collision?: Basics.Circle | Basics.Rect;
+		moveable?: boolean;
 	}
 
 	export class Actor {
@@ -35,6 +36,7 @@ module tanks {
 		public turnrate: number = 1;
 		public zIndex: EZindex = EZindex.actor;
 		public render: boolean = true;
+		public moveable: boolean = true;
 		public collision: Basics.Circle | Basics.Rect = null;
 
 		constructor(parameters: IActor = {}) {
