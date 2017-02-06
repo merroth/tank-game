@@ -15,4 +15,4 @@ Online at: https://merroth.github.io/tank-game/#/
   - Tile class
 
 ###Sound###
-  - Audio mixing (A BIT LOUD!)
+  - ~~Audio mixing (A BIT LOUD!)~~
