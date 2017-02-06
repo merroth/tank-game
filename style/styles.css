@@ -94,14 +94,30 @@ div.bordered p:last-child {
 	margin-bottom: 0;
 }
 
-div.bordered, input, button {
+input, textarea {
+	width: 20rem;
+}
+
+div.bordered, input, button, textarea {
 	border: .375em solid #fff;
 	border-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASAQMAAABsABwUAAAABlBMVEUAAAD///+l2Z/dAAAAAXRSTlMAQObYZgAAACBJREFUCNdjsP/PAMb//x8A4z/8EPyBGRuGy8PUw/QDALOEIU9PetX7AAAAAElFTkSuQmCC) 6 repeat;
 }
 
-button:active, input:focus {
+button:active, input:focus, textarea:focus {
 	border-color: #ff0;
 	border-image-source: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASAQMAAABsABwUAAAABlBMVEUAAAD//wCI23BQAAAAAXRSTlMAQObYZgAAACBJREFUCNdjsP/PAMb//x8A4z/8EPyBGRuGy8PUw/QDALOEIU9PetX7AAAAAElFTkSuQmCC);
+}
+
+textarea {
+	resize: none;
+	margin: 0;
+    -ms-overflow-style: none;
+    overflow: -moz-scrollbars-none;
+    height: 3rem;
+}
+
+textarea::-webkit-scrollbar {
+    display: none;
 }
 
 a.active .option-content {
@@ -113,7 +129,7 @@ div.bordered {
 	padding: .625rem;
 }
 
-input, button {
+input, button, textarea {
 	padding: .125rem .625rem;
 	outline: none;
 	color: #fff;
@@ -130,21 +146,20 @@ button::-moz-focus-inner {
     padding: 0;
 }
 
-input::-moz-placeholder,
-input:-moz-placeholder {
+input::-moz-placeholder, textarea::-moz-placeholder {
 	color: #777;
 	opacity: 1;
 }
 
-input::-webkit-input-placeholder {
+input::-webkit-input-placeholder, textarea::-webkit-input-placeholder {
 	color: #777;
 }
 
-input:-ms-input-placeholder {
+input:-ms-input-placeholder, textarea:-ms-input-placeholder {
 	color: #777;
 }
 
-input::placeholder {
+input::placeholder, textarea::placeholder {
 	color: #777;
 }
 
