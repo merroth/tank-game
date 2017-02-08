@@ -49,9 +49,9 @@ module tanks {
 				//Return overlapping circle
 				//return (angleBetweenPoints(l1x1, l1y1, l1x2, l1y2) == 0);
 			} else {
-				//lamb is progess over x axis 
+				//lamb is progess over x axis
 				lamb = ((l2y2 - l2y1) * (l2x2 - l1x1) + (l2x1 - l2x2) * (l2y2 - l1y1)) / det;
-				//gamma is progess over y axis 
+				//gamma is progess over y axis
 				gamma = ((l1y1 - l1y2) * (l2x2 - l1x1) + (l1x2 - l1x1) * (l2y2 - l1y1)) / det;
 				if ((0 < lamb && lamb < 1) && (0 < gamma && gamma < 1)) {
 					return {
@@ -370,7 +370,7 @@ module tanks {
 			}
 
 		}
-		/* */ // Unit Tests 
+		/* */ // Unit Tests
 		(function unitTest() {
 			if (!runTests) { return false; }
 			var c = new Rect(new Coord(10, 20), 10, 10);
@@ -731,6 +731,7 @@ module tanks {
 	//Resources
 	new Resource({ fileLocation: "resources/single-tank-red.png", descriptorLocation: "resources/single-tank-red.json", id: "tankRedSprite" });
 	new Resource({ fileLocation: "resources/single-tank-blue.png", descriptorLocation: "resources/single-tank-red.json", id: "tankBlueSprite" });
+	new Resource({ fileLocation: "resources/single-tank-green.png", descriptorLocation: "resources/single-tank-red.json", id: "tankGreenSprite" });
 	new Resource({ fileLocation: "resources/bullet_normal.png", descriptorLocation: "resources/bullet_normal.json", id: "bulletSprite" });
 	new Resource({ fileLocation: "resources/bullet_burning.png", descriptorLocation: "resources/bullet_normal.json", id: "bulletBurningSprite" });
 	new Resource({ fileLocation: "resources/wall.png", id: "wallSprite" });

@@ -1,6 +1,6 @@
 /// <reference path="../game.utility.ts" />
 /// <reference path="../game.core.ts" />
-//This file contains the base gameo bject class for the game engine.
+//This file contains the base game object class for the game engine.
 //This "Actor" class holds information relevant to every kind of object in the game world
 module tanks {
 

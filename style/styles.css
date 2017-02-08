@@ -15,11 +15,20 @@ html, head, body {
 	padding: 0;
 
 	image-rendering: -moz-crisp-edges;
-	image-rendering:   -o-crisp-edges;
+	image-rendering: -o-crisp-edges;
 	image-rendering: -webkit-optimize-contrast;
 	image-rendering: pixelated;
 	image-rendering: crisp-edges;
 	-ms-interpolation-mode: nearest-neighbor;
+
+	-webkit-font-smoothing: none;
+	-moz-osx-font-smoothing: unset;
+	font-smooth: never;
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 body {
@@ -31,9 +40,19 @@ body {
 	line-height: 1;
 }
 
-li {
+li, a, div.option-container, div.indented {
 	margin-top: 1rem;
 	margin-bottom: 1rem;
+}
+
+hr {
+	border: .125rem solid #fff;
+}
+
+div.bordered > hr {
+	margin-left: -.875rem;
+	margin-right: -.875rem;
+	height: 0;
 }
 
 ol, ul {
@@ -66,9 +85,22 @@ ul ul > li:before {
 	margin-right: 1rem;
 }
 
+ul.unstyled, ol.unstyled {
+	margin-right: 0;
+	content: '';
+}
+
+ul.unstyled > li:before, ol.unstyled > li:before {
+	margin-right: 0;
+	content: '';
+}
+
 a {
 	text-decoration: none;
 	color: #fff;
+}
+
+a, button:hover {
 	cursor: pointer;
 }
 
@@ -82,8 +114,13 @@ a:hover:before {
 	content: '\25b6\00a0';
 }
 
-a:hover, button:active {
+a:hover, button:active, button.active {
 	color: #ff0;
+}
+
+button {
+	min-width: 8rem;
+	text-align: left;
 }
 
 div.bordered p:first-child {
@@ -103,7 +140,7 @@ div.bordered, input, button, textarea {
 	border-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASAQMAAABsABwUAAAABlBMVEUAAAD///+l2Z/dAAAAAXRSTlMAQObYZgAAACBJREFUCNdjsP/PAMb//x8A4z/8EPyBGRuGy8PUw/QDALOEIU9PetX7AAAAAElFTkSuQmCC) 6 repeat;
 }
 
-button:active, input:focus, textarea:focus {
+button:active, button.active, input:focus, textarea:focus {
 	border-color: #ff0;
 	border-image-source: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASAQMAAABsABwUAAAABlBMVEUAAAD//wCI23BQAAAAAXRSTlMAQObYZgAAACBJREFUCNdjsP/PAMb//x8A4z/8EPyBGRuGy8PUw/QDALOEIU9PetX7AAAAAElFTkSuQmCC);
 }
@@ -111,13 +148,13 @@ button:active, input:focus, textarea:focus {
 textarea {
 	resize: none;
 	margin: 0;
-    -ms-overflow-style: none;
-    overflow: -moz-scrollbars-none;
-    height: 3rem;
+	-ms-overflow-style: none;
+	overflow: -moz-scrollbars-none;
+	height: 3rem;
 }
 
 textarea::-webkit-scrollbar {
-    display: none;
+	display: none;
 }
 
 a.active .option-content {
@@ -127,6 +164,16 @@ a.active .option-content {
 div.bordered {
 	margin-bottom: 1rem;
 	padding: .625rem;
+}
+
+div.indented {
+	margin-left: 2rem;
+}
+
+.right-labels label {
+	display: inline-block;
+	min-width: 8rem;
+	text-align: right;
 }
 
 input, button, textarea {
@@ -142,8 +189,8 @@ input, button, textarea {
 
 input::-moz-focus-inner,
 button::-moz-focus-inner {
-    border: 0;
-    padding: 0;
+	border: 0;
+	padding: 0;
 }
 
 input::-moz-placeholder, textarea::-moz-placeholder {

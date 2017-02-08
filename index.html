@@ -12,52 +12,105 @@
 	<body>
 		<div id="app-container" ng-app="tankApp">
 			<div ui-view>
-				No JavaScript?
+				<div class="bordered">
+					<p>Uh-oh! Seems like the game couldn't load, likely causes are:</p>
+					<ul>
+						<li>JavaScript is disabled</li>
+						<li>Your browser is not supported</li>
+						<li>Our code is a buggy mess</li>
+					</ul>
+					<p>Press "F5" to refresh, or just give up and go outside...</p>
+				</div>
 			</div>
 			<!-- views -->
 			<script type="text/ng-template" id="view/frontpage">
-				<p><a ng-click="menuLink()" href="#/game">Start</a></p>
-				<p><a ng-click="menuLink()" href="#/options">Options</a></p>
+				<p>Main Menu</p>
+				<div class="bordered">
+					<p><a ng-click="menuLink()" href="#/game">Start</a></p>
+					<p><a ng-click="menuLink()" href="#/options">Options</a></p>
+				</div>
 			</script>
 			<script type="text/ng-template" id="view/options">
 				<p>Options</p>
 				<div class="bordered">
 					<p>Sound</p>
-					<a ng-class="{active: soundEnabled == true}" exclusive-select ng-click="setOption('soundEnabled', 1)"><span class="option-content">On</span></a>
-					<a ng-class="{active: soundEnabled == false}" exclusive-select ng-click="setOption('soundEnabled', 0)"><span class="option-content">Off</span></a>
+					<div class="option-container">
+						<a ng-class="{active: Options.soundEnabled == true}" ng-click="setOption('soundEnabled', 1)"><span class="option-content">On</span></a>
+						<a ng-class="{active: Options.soundEnabled == false}" ng-click="setOption('soundEnabled', 0)"><span class="option-content">Off</span></a>
+					</div>
 				</div>
+
 				<div class="bordered">
-					<p>Instructions</p>
-					<ul>
-						<li>This is just to test out some styling components</li>
-						<li>Don't take anything you read here too seriously!</li>
+					<p>Player Settings</p>
+					<div class="option-container">
+						<a ng-class="{active: Options.playerOptionsIndex == 0}" ng-click="getPlayerSettings(0)"><span class="option-content">Player 1</span></a>
+						<a ng-class="{active: Options.playerOptionsIndex == 1}" ng-click="getPlayerSettings(1)"><span class="option-content">Player 2</span></a>
+						<a ng-class="{active: Options.playerOptionsIndex == 2}" ng-click="getPlayerSettings(2)"><span class="option-content">Player 3</span></a>
+					</div>
+
+					<hr>
+
+					<p>Controls</p>
+					<div class="option-container">
+						<ul class="unstyled right-labels">
+							<li>
+								<label>Forward:</label>
+								<button ng-class="{active: activeKeyBinding == 'forward'}" ng-click="listenForKey($event, 'forward')">
+									{{buttonLabelForward}}
+								</button>
+							</li>
+							<li>
+								<label>Reverse:</label>
+								<button ng-class="{active: activeKeyBinding == 'backward'}" ng-click="listenForKey($event, 'backward')">
+									{{buttonLabelBackward}}
+								</button>
+							</li>
+							<li>
+								<label>Left:</label>
+								<button ng-class="{active: activeKeyBinding == 'left'}" ng-click="listenForKey($event, 'left')">
+									{{buttonLabelLeft}}
+								</button>
+							</li>
+							<li>
+								<label>Right:</label>
+								<button ng-class="{active: activeKeyBinding == 'right'}" ng-click="listenForKey($event, 'right')">
+									{{buttonLabelRight}}
+								</button>
+							</li>
+							<li>
+								<label>Fire:</label>
+								<button ng-class="{active: activeKeyBinding == 'shoot'}" ng-click="listenForKey($event, 'shoot')">
+									{{buttonLabelShoot}}
+								</button>
+							</li>
 						<ul>
-							<li>Especially this bit</li>
-						</ul>
-					</ul>
-					<p>Type something:<p>
-					<input placeholder="Something" type="text" name="nonsense">
-					<p>Type something more:</p>
-					<textarea placeholder="Something more"></textarea>
+					</div>
+
+					<hr>
+
+					<p>Colour</p>
+					<div class="option-container">
+						<a ng-class="{active: Options.playerColors[Options.playerOptionsIndex] == 'red'}" ng-click="setColor('red')"><span class="option-content">Red</span></a>
+						<a ng-class="{active: Options.playerColors[Options.playerOptionsIndex] == 'blue'}" ng-click="setColor('blue')"><span class="option-content">Blue</span></a>
+						<a ng-class="{active: Options.playerColors[Options.playerOptionsIndex] == 'green'}" ng-click="setColor('green')"><span class="option-content">Green</span></a>
+					</div>
 				</div>
 				<div class="bordered">
-					<p>Password</p>
-					<ol>
-						<li>Make a password
-							<ol>
-								<li>Enter a password</li>
-								<li>Press "OK"</li>
-							</ol>
-						</li>
-						<li>Verify a password
-							<ol>
-								<li>Enter a password</li>
-								<li>Press "OK"</li>
-							</ol>
-						</li>
-					</ol>
-					<input type="password" name="password">
-					<button>OK</button>
+					<p>Number of players</p>
+					<div class="option-container">
+						<a ng-class="{active: Options.playerCount == 1}" ng-click="setOption('playerCount', 1)"><span class="option-content">1</span></a>
+						<a ng-class="{active: Options.playerCount == 2}" ng-click="setOption('playerCount', 2)"><span class="option-content">2</span></a>
+						<a ng-class="{active: Options.playerCount == 3}" ng-click="setOption('playerCount', 3)"><span class="option-content">3</span></a>
+					</div>
+				</div>
+				<div class="bordered">
+					<p>Health</p>
+					<div class="option-container">
+						<a ng-class="{active: Options.playerHealth == 1}" ng-click="setOption('playerHealth', 1)"><span class="option-content">1</span></a>
+						<a ng-class="{active: Options.playerHealth == 20}" ng-click="setOption('playerHealth', 20)"><span class="option-content">20</span></a>
+						<a ng-class="{active: Options.playerHealth == 100}" ng-click="setOption('playerHealth', 100)"><span class="option-content">100</span></a>
+						<a ng-class="{active: Options.playerHealth == 200}" ng-click="setOption('playerHealth', 200)"><span class="option-content">200</span></a>
+					</div>
 				</div>
 				<p><a ng-click="backLink()" href="#/">Back</a></p>
 			</script>

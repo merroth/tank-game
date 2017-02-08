@@ -25,7 +25,7 @@ module tanks {
 		public acceleration: number = 0.05;
 		public size: number = 32;
 		public turnrate: number = 1;
-		public hitPoints: number = 100;
+		public hitPoints: number = tankApp.Options.playerHealth;
 		public controls: IPlayerControls = {
 			forward: false,
 			backward: false,
@@ -44,7 +44,7 @@ module tanks {
 			}
 			this.collision = new Basics.Rect(this.position, this.size * 0.9, this.size * 0.7, this.angle);
 
-			//These are "Proof of concept" for gunplacement and gun modification.
+			//These are "Proof of concept" for gun placement and gun modification.
 			//Real implementations should have a derived subclass to reference directly
 			//instead of modifying the existing one directly
 			this.weaponBanks.push(

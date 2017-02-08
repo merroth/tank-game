@@ -18,28 +18,37 @@ module tanks {
 		private static updatehandle;
 		public static players: Player[] = [];
 		public static frame: number = 0;
+		//CLEANUP: spawnPoints should probably be defined in a Level class or something once we make one.
+		public static spawnPoints = [];
 		public static create(canvas: HTMLCanvasElement = null, settings: IWorldSettings = this.settings) {
 
 			World.settings = settings;
 
-			World.canvas = canvas;
-			//Generate players
-			World.players.push(
-				new Player({
-					position: new Coord(
-						40, 40
-					),
-					angle: new Angle(Math.random() * 2 - 1)
-				}),
-				new Player({
-					sprite: Resource.get("tankBlueSprite"),
-					position: new Coord(
-						parseInt(canvas.getAttribute("width")) - 40,
-						parseInt(canvas.getAttribute("height")) - 40
-					),
-					angle: new Angle(179 + Math.random() * 2)
-				})
+			World.spawnPoints.push(
+				{angle: new Angle(0), position: new Coord(40, 40)},
+				{angle: new Angle(180), position: new Coord(parseInt(canvas.getAttribute("width")) - 40, parseInt(canvas.getAttribute("height")) - 40)},
+				{angle: new Angle(270), position: new Coord(40, parseInt(canvas.getAttribute("height")) - 40)},
+				{angle: new Angle(90), position: new Coord(parseInt(canvas.getAttribute("width")) - 40, 40)},
 			);
+
+			World.canvas = canvas;
+
+			//Generate players
+			for (var i = 0; i < tankApp.Options.playerCount; i++) {
+				//TODO: Possibly assign players randomly to spawnPoints, using something like this:
+				//World.spawnPoints.splice(Math.floor(Math.random() * World.spawnPoints.length), 1)
+
+				//CLEANUP: capitalizeFirstLetter function might be an idea at this point...
+				var color = tankApp.Options.playerColors[i].charAt(0).toUpperCase() + tankApp.Options.playerColors[i].slice(1);
+
+				World.players.push(
+					new Player({
+						position: World.spawnPoints[i].position,
+						angle: World.spawnPoints[i].angle,
+						sprite: Resource.get("tank" + color +"Sprite")
+					})
+				);
+			}
 
 			//Start "World"
 			//event listener
@@ -57,20 +66,29 @@ module tanks {
 		}
 		public static listener(evt: KeyboardEvent) {
 			var value: boolean = (evt.type == "keydown" ? true : false);
+			var keyBindings = tankApp.Options.playerKeyBindings;
 
 			switch (evt.keyCode) {
 				//Player 1
-				case 38: World.players[0].controls.forward = value; break;
-				case 40: World.players[0].controls.backward = value; break;
-				case 37: World.players[0].controls.left = value; break;
-				case 39: World.players[0].controls.right = value; break;
-				case 16: World.players[0].controls.shoot = value; break;
+				case keyBindings[0].forward: World.players[0].controls.forward = value; break;
+				case keyBindings[0].backward: World.players[0].controls.backward = value; break;
+				case keyBindings[0].left: World.players[0].controls.left = value; break;
+				case keyBindings[0].right: World.players[0].controls.right = value; break;
+				case keyBindings[0].shoot: World.players[0].controls.shoot = value; break;
+
 				//Player 2
-				case 87: World.players[1].controls.forward = value; break;
-				case 83: World.players[1].controls.backward = value; break;
-				case 65: World.players[1].controls.left = value; break;
-				case 68: World.players[1].controls.right = value; break;
-				case 32: World.players[1].controls.shoot = value; break;
+				case keyBindings[1].forward: World.players[1].controls.forward = value; break;
+				case keyBindings[1].backward: World.players[1].controls.backward = value; break;
+				case keyBindings[1].left: World.players[1].controls.left = value; break;
+				case keyBindings[1].right: World.players[1].controls.right = value; break;
+				case keyBindings[1].shoot: World.players[1].controls.shoot = value; break;
+
+				//Player 3
+				case keyBindings[2].forward: World.players[2].controls.forward = value; break;
+				case keyBindings[2].backward: World.players[2].controls.backward = value; break;
+				case keyBindings[2].left: World.players[2].controls.left = value; break;
+				case keyBindings[2].right: World.players[2].controls.right = value; break;
+				case keyBindings[2].shoot: World.players[2].controls.shoot = value; break;
 			}
 		}
 		public static update(changes: boolean = World.frame % 15 === 0): World {
@@ -222,8 +240,7 @@ module tanks {
 				})
 				.sort(function (actorA, actorB) {
 					return actorA.zIndex - actorB.zIndex;
-				})
-				;
+				});
 
 
 			for (var actorIndex = 0; actorIndex < actorsToDraw.length; actorIndex++) {

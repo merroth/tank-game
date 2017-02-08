@@ -3,7 +3,7 @@ Online at: https://merroth.github.io/tank-game/#/
 ##TODO##
 ###Graphics###
   - ~~Barriers/Walls~~
-  - Tile variants
+  - Tile variants (First pass done)
   - Transition tiles (grass-to-sand, etc.)
 
 ###Simulation###
@@ -13,6 +13,13 @@ Online at: https://merroth.github.io/tank-game/#/
   - ~~Weapon class~~
   - Wall class
   - Tile class
+
+###Configuration###
+  - ~~Controls~~
+  - ~~Number of players~~
+  - ~~Player colour~~
+  - ~~Player health~~
+  - Save settings
 
 ###Sound###
   - ~~Audio mixing (A BIT LOUD!)~~
