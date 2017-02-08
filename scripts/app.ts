@@ -66,6 +66,8 @@ module tanks {
 					$scope.buttonLabelLeft = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[$playerIndex].left];
 					$scope.buttonLabelRight = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[$playerIndex].right];
 					$scope.buttonLabelShoot = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[$playerIndex].shoot];
+
+					$scope.activeKeyBinding = null;
 				}
 
 				Sound.get('sfxMenuSelect').play(true);

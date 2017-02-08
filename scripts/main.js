@@ -1106,6 +1106,7 @@ var tanks;
                     $scope.buttonLabelLeft = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].left];
                     $scope.buttonLabelRight = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].right];
                     $scope.buttonLabelShoot = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].shoot];
+                    $scope.activeKeyBinding = null;
                 }
                 tanks.Sound.get('sfxMenuSelect').play(true);
             };
