@@ -1078,11 +1078,11 @@ var tanks;
         }])
         .controller('optionsCtrl', ['$scope', function ($scope) {
             $scope.Options = tanks.tankApp.Options;
-            $scope.buttonLabelForward = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex].forward];
-            $scope.buttonLabelBackward = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex].backward];
-            $scope.buttonLabelLeft = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex].left];
-            $scope.buttonLabelRight = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex].right];
-            $scope.buttonLabelShoot = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex].shoot];
+            $scope.buttonLabelForward = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex].forward] || '------';
+            $scope.buttonLabelBackward = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex].backward] || '------';
+            $scope.buttonLabelLeft = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex].left] || '------';
+            $scope.buttonLabelRight = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex].right] || '------';
+            $scope.buttonLabelShoot = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex].shoot] || '------';
             $scope.setOption = function ($option, $value) {
                 if (tanks.tankApp.Options.hasOwnProperty($option)) {
                     tanks.tankApp.Options[$option] = $value;
@@ -1101,11 +1101,11 @@ var tanks;
             $scope.getPlayerSettings = function ($playerIndex) {
                 if (tanks.tankApp.Options.playerKeyBindings.hasOwnProperty($playerIndex)) {
                     tanks.tankApp.Options.playerOptionsIndex = $playerIndex;
-                    $scope.buttonLabelForward = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].forward];
-                    $scope.buttonLabelBackward = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].backward];
-                    $scope.buttonLabelLeft = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].left];
-                    $scope.buttonLabelRight = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].right];
-                    $scope.buttonLabelShoot = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].shoot];
+                    $scope.buttonLabelForward = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].forward] || '------';
+                    $scope.buttonLabelBackward = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].backward] || '------';
+                    $scope.buttonLabelLeft = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].left] || '------';
+                    $scope.buttonLabelRight = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].right] || '------';
+                    $scope.buttonLabelShoot = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].shoot] || '------';
                     $scope.activeKeyBinding = null;
                 }
                 tanks.Sound.get('sfxMenuSelect').play(true);
@@ -1119,6 +1119,17 @@ var tanks;
             $scope.setKey = function ($key, $code) {
                 if (tanks.tankApp.keyCodeName.hasOwnProperty($code)) {
                     var label = 'buttonLabel' + $key.charAt(0).toUpperCase() + $key.slice(1);
+                    tanks.tankApp.Options.playerKeyBindings.forEach(function (playerBindings, playerIndex) {
+                        //CLEANUP: This should probably be made into a generalized function
+                        for (var bindingName in playerBindings) {
+                            if (playerBindings[bindingName] == $code) {
+                                tanks.tankApp.Options.playerKeyBindings[playerIndex][bindingName] = null;
+                                if (playerIndex == tanks.tankApp.Options.playerOptionsIndex && $key != bindingName) {
+                                    $scope['buttonLabel' + bindingName.charAt(0).toUpperCase() + bindingName.slice(1)] = '------';
+                                }
+                            }
+                        }
+                    });
                     tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex][$key] = $code;
                     $scope[label] = tanks.tankApp.keyCodeName[$code];
                     tanks.Sound.get('sfxMenuSelect').play(true);

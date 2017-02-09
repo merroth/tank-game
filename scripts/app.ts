@@ -23,18 +23,18 @@ module tanks {
 					url: '/',
 					templateUrl: 'view/frontpage',
 					controller: 'homeCtrl'
-				})
+				});
 		}])
 
 		////Options-page
 		//Controller
 		.controller('optionsCtrl', ['$scope', function ($scope) {
 			$scope.Options = tankApp.Options;
-			$scope.buttonLabelForward = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex].forward];
-			$scope.buttonLabelBackward = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex].backward];
-			$scope.buttonLabelLeft = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex].left];
-			$scope.buttonLabelRight = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex].right];
-			$scope.buttonLabelShoot = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex].shoot];
+			$scope.buttonLabelForward = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex].forward] || '------';
+			$scope.buttonLabelBackward = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex].backward] || '------';
+			$scope.buttonLabelLeft = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex].left] || '------';
+			$scope.buttonLabelRight = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex].right] || '------';
+			$scope.buttonLabelShoot = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex].shoot] || '------';
 
 			$scope.setOption = function($option, $value) {
 				if (tankApp.Options.hasOwnProperty($option)) {
@@ -61,11 +61,11 @@ module tanks {
 				if (tankApp.Options.playerKeyBindings.hasOwnProperty($playerIndex)) {
 					tankApp.Options.playerOptionsIndex = $playerIndex;
 
-					$scope.buttonLabelForward = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[$playerIndex].forward];
-					$scope.buttonLabelBackward = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[$playerIndex].backward];
-					$scope.buttonLabelLeft = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[$playerIndex].left];
-					$scope.buttonLabelRight = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[$playerIndex].right];
-					$scope.buttonLabelShoot = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[$playerIndex].shoot];
+					$scope.buttonLabelForward = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[$playerIndex].forward] || '------';
+					$scope.buttonLabelBackward = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[$playerIndex].backward] || '------';
+					$scope.buttonLabelLeft = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[$playerIndex].left] || '------';
+					$scope.buttonLabelRight = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[$playerIndex].right] || '------';
+					$scope.buttonLabelShoot = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[$playerIndex].shoot] || '------';
 
 					$scope.activeKeyBinding = null;
 				}
@@ -84,6 +84,19 @@ module tanks {
 			$scope.setKey = function($key, $code) {
 				if (tankApp.keyCodeName.hasOwnProperty($code)) {
 					var label = 'buttonLabel' + $key.charAt(0).toUpperCase() + $key.slice(1);
+
+					tankApp.Options.playerKeyBindings.forEach(function(playerBindings, playerIndex) {
+						//CLEANUP: This should probably be made into a generalized function
+						for (var bindingName in playerBindings) {
+							if (playerBindings[bindingName] == $code) {
+								tankApp.Options.playerKeyBindings[playerIndex][bindingName] = null;
+
+								if(playerIndex == tankApp.Options.playerOptionsIndex && $key != bindingName) {
+									$scope['buttonLabel' + bindingName.charAt(0).toUpperCase() + bindingName.slice(1)] = '------';
+								}
+							}
+						}
+					});
 
 					tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex][$key] = $code;
 
@@ -134,7 +147,7 @@ module tanks {
 					url: '/game',
 					templateUrl: 'view/gamepage',
 					controller: 'gameCtrl'
-				})
+				});
 		}]);
 
 	tankApp.run(function($rootScope) {

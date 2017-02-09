@@ -55,31 +55,31 @@
 						<ul class="unstyled right-labels">
 							<li>
 								<label>Forward:</label>
-								<button ng-class="{active: activeKeyBinding == 'forward'}" ng-click="listenForKey($event, 'forward')">
+								<button ng-class="{active: activeKeyBinding == 'forward', invalid: buttonLabelForward == '------'}" ng-click="listenForKey($event, 'forward')">
 									{{buttonLabelForward}}
 								</button>
 							</li>
 							<li>
-								<label>Reverse:</label>
-								<button ng-class="{active: activeKeyBinding == 'backward'}" ng-click="listenForKey($event, 'backward')">
+								<label>Backward:</label>
+								<button ng-class="{active: activeKeyBinding == 'backward', invalid: buttonLabelBackward == '------'}" ng-click="listenForKey($event, 'backward')">
 									{{buttonLabelBackward}}
 								</button>
 							</li>
 							<li>
 								<label>Left:</label>
-								<button ng-class="{active: activeKeyBinding == 'left'}" ng-click="listenForKey($event, 'left')">
+								<button ng-class="{active: activeKeyBinding == 'left', invalid: buttonLabelLeft == '------'}" ng-click="listenForKey($event, 'left')">
 									{{buttonLabelLeft}}
 								</button>
 							</li>
 							<li>
 								<label>Right:</label>
-								<button ng-class="{active: activeKeyBinding == 'right'}" ng-click="listenForKey($event, 'right')">
+								<button ng-class="{active: activeKeyBinding == 'right', invalid: buttonLabelRight == '------'}" ng-click="listenForKey($event, 'right')">
 									{{buttonLabelRight}}
 								</button>
 							</li>
 							<li>
-								<label>Fire:</label>
-								<button ng-class="{active: activeKeyBinding == 'shoot'}" ng-click="listenForKey($event, 'shoot')">
+								<label>Shoot:</label>
+								<button ng-class="{active: activeKeyBinding == 'shoot', invalid: buttonLabelShoot == '------'}" ng-click="listenForKey($event, 'shoot')">
 									{{buttonLabelShoot}}
 								</button>
 							</li>

@@ -140,6 +140,11 @@ div.bordered, input, button, textarea {
 	border-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASAQMAAABsABwUAAAABlBMVEUAAAD///+l2Z/dAAAAAXRSTlMAQObYZgAAACBJREFUCNdjsP/PAMb//x8A4z/8EPyBGRuGy8PUw/QDALOEIU9PetX7AAAAAElFTkSuQmCC) 6 repeat;
 }
 
+button.invalid, input:invalid, textarea:invalid {
+	color: #f00;
+	border-image-source: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASAQMAAABsABwUAAAABlBMVEUAAAD/AAAb/40iAAAAAXRSTlMAQObYZgAAACBJREFUCNdjsP/PAMb//x8A4z/8EPyBGRuGy8PUw/QDALOEIU9PetX7AAAAAElFTkSuQmCC);
+}
+
 button:active, button.active, input:focus, textarea:focus {
 	border-color: #ff0;
 	border-image-source: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASAQMAAABsABwUAAAABlBMVEUAAAD//wCI23BQAAAAAXRSTlMAQObYZgAAACBJREFUCNdjsP/PAMb//x8A4z/8EPyBGRuGy8PUw/QDALOEIU9PetX7AAAAAElFTkSuQmCC);
@@ -172,7 +177,7 @@ div.indented {
 
 .right-labels label {
 	display: inline-block;
-	min-width: 8rem;
+	min-width: 9rem;
 	text-align: right;
 }
 
