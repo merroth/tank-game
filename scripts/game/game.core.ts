@@ -19,33 +19,32 @@ module tanks {
 		public static players: Player[] = [];
 		public static frame: number = 0;
 		//CLEANUP: spawnPoints should probably be defined in a Level class or something once we make one.
-		public static spawnPoints = [];
+		public static spawnPoints: { angle: Angle, position: Coord }[] = [];
 		public static create(canvas: HTMLCanvasElement = null, settings: IWorldSettings = this.settings) {
-
 			World.settings = settings;
 
 			World.spawnPoints.push(
-				{angle: new Angle(0), position: new Coord(40, 40)},
-				{angle: new Angle(180), position: new Coord(parseInt(canvas.getAttribute("width")) - 40, parseInt(canvas.getAttribute("height")) - 40)},
-				{angle: new Angle(270), position: new Coord(40, parseInt(canvas.getAttribute("height")) - 40)},
-				{angle: new Angle(90), position: new Coord(parseInt(canvas.getAttribute("width")) - 40, 40)},
+				{ angle: new Angle(0), position: new Coord(40, 40) },
+				{ angle: new Angle(180), position: new Coord(parseInt(canvas.getAttribute("width")) - 40, parseInt(canvas.getAttribute("height")) - 40) },
+				{ angle: new Angle(270), position: new Coord(40, parseInt(canvas.getAttribute("height")) - 40) },
+				{ angle: new Angle(90), position: new Coord(parseInt(canvas.getAttribute("width")) - 40, 40) },
 			);
 
 			World.canvas = canvas;
 
 			//Generate players
-			for (var i = 0; i < tankApp.Options.playerCount; i++) {
+			for (let i = 0; i < tankApp.Options.playerCount; i++) {
 				//TODO: Possibly assign players randomly to spawnPoints, using something like this:
 				//World.spawnPoints.splice(Math.floor(Math.random() * World.spawnPoints.length), 1)
 
 				//CLEANUP: capitalizeFirstLetter function might be an idea at this point...
-				var color = tankApp.Options.playerColors[i].charAt(0).toUpperCase() + tankApp.Options.playerColors[i].slice(1);
+				let color = tankApp.Options.playerColors[i].charAt(0).toUpperCase() + tankApp.Options.playerColors[i].slice(1);
 
 				World.players.push(
 					new Player({
 						position: World.spawnPoints[i].position,
 						angle: World.spawnPoints[i].angle,
-						sprite: Resource.get("tank" + color +"Sprite")
+						sprite: Resource.get("tank" + color + "Sprite")
 					})
 				);
 			}
@@ -109,6 +108,7 @@ module tanks {
 					return actor.collision != null;
 				});
 
+
 			//Return the largest collision radius to test against
 			//We can use this to filter later
 			var maxCollisonDistanceToCheck = collisionSuspects
@@ -128,6 +128,7 @@ module tanks {
 					return b.zIndex - a.zIndex;
 				});
 
+
 			for (let actorIndex = 0; actorIndex < collisionSuspects.length; actorIndex++) {
 				let actor = collisionSuspects[actorIndex];
 				if (actor.collision instanceof Basics.Polygon) {
@@ -135,12 +136,14 @@ module tanks {
 				}
 			}
 
+
 			for (let actorIndex = 0; actorIndex < actors.length; actorIndex++) {
 				let actor = actors[actorIndex];
 
 				//Remove current actor from collision suspects
 				//This way we greatly reduces the amount of checks from n^n to n^log(n)
-				collisionSuspects.splice(collisionSuspects.indexOf(actor), 1);
+				var splices = collisionSuspects.splice(collisionSuspects.indexOf(actor), 1);
+				
 
 				//Only test collision on object within a realistic vicinity
 				let localCollisionSuspects = collisionSuspects
@@ -155,6 +158,7 @@ module tanks {
 				for (let collisionSuspectsIndex = 0; collisionSuspectsIndex < localCollisionSuspects.length; collisionSuspectsIndex++) {
 					//current suspect
 					let collisionSuspect = localCollisionSuspects[collisionSuspectsIndex];
+
 
 					if (actor === collisionSuspect) { //Shouldn't be possible but just in case:
 						continue;
@@ -342,6 +346,7 @@ module tanks {
 			//Destroy World
 			cancelAnimationFrame(World.updatehandle);
 			World.worldActive = false;
+			World.spawnPoints = [];
 			World.players = [];
 			World.frame = 0;
 			Actor._actors = [];

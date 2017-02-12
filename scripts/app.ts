@@ -4,7 +4,29 @@
 /// <reference path="game/game.core.ts" />
 
 module tanks {
-	export var tankApp;
+
+	//Interfaces
+	interface ITankAppOptions {
+		soundEnabled: boolean,
+		playerOptionsIndex: number,
+		playerKeyBindings: {
+			forward: number,
+			backward: number,
+			left: number,
+			right: number,
+			shoot: number
+		}[],
+		playerCount: number,
+		playerHealth: number,
+		playerColors: string[]
+	}
+
+	interface ITank extends ng.IModule {
+		Options?: ITankAppOptions,
+		keyCodeName?: any
+	}
+
+	export var tankApp: ITank;
 	tankApp = angular
 		.module('tankApp', [
 			'ui.router',
@@ -30,13 +52,14 @@ module tanks {
 		//Controller
 		.controller('optionsCtrl', ['$scope', function ($scope) {
 			$scope.Options = tankApp.Options;
-			$scope.buttonLabelForward = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex].forward] || '------';
-			$scope.buttonLabelBackward = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex].backward] || '------';
-			$scope.buttonLabelLeft = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex].left] || '------';
-			$scope.buttonLabelRight = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex].right] || '------';
-			$scope.buttonLabelShoot = tankApp.keyCodeName[tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex].shoot] || '------';
+			var p1Ctrl = tankApp.Options.playerKeyBindings[tankApp.Options.playerOptionsIndex];
+			$scope.buttonLabelForward = tankApp.keyCodeName[p1Ctrl.forward] || '------';
+			$scope.buttonLabelBackward = tankApp.keyCodeName[p1Ctrl.backward] || '------';
+			$scope.buttonLabelLeft = tankApp.keyCodeName[p1Ctrl.left] || '------';
+			$scope.buttonLabelRight = tankApp.keyCodeName[p1Ctrl.right] || '------';
+			$scope.buttonLabelShoot = tankApp.keyCodeName[p1Ctrl.shoot] || '------';
 
-			$scope.setOption = function($option, $value) {
+			$scope.setOption = function ($option, $value) {
 				if (tankApp.Options.hasOwnProperty($option)) {
 					tankApp.Options[$option] = $value;
 				}
@@ -44,7 +67,7 @@ module tanks {
 				Sound.get('sfxMenuSelect').play(true);
 			}
 
-			$scope.setColor = function($color) {
+			$scope.setColor = function ($color) {
 				var oldColor = tankApp.Options.playerColors[tankApp.Options.playerOptionsIndex];
 				var sameColorPlayer = tankApp.Options.playerColors.indexOf($color);
 
@@ -57,7 +80,7 @@ module tanks {
 				Sound.get('sfxMenuSelect').play(true);
 			}
 
-			$scope.getPlayerSettings = function($playerIndex) {
+			$scope.getPlayerSettings = function ($playerIndex) {
 				if (tankApp.Options.playerKeyBindings.hasOwnProperty($playerIndex)) {
 					tankApp.Options.playerOptionsIndex = $playerIndex;
 
@@ -73,25 +96,25 @@ module tanks {
 				Sound.get('sfxMenuSelect').play(true);
 			}
 
-			$scope.listenForKey = function($event, $key) {
+			$scope.listenForKey = function ($event, $key) {
 				$scope.activeKeyBinding = $key;
 
-				angular.element($event.target).one('keydown', function(e) {
+				angular.element($event.target).one('keydown', function (e) {
 					$scope.setKey($key, e.which)
 				});
 			}
 
-			$scope.setKey = function($key, $code) {
+			$scope.setKey = function ($key, $code) {
 				if (tankApp.keyCodeName.hasOwnProperty($code)) {
 					var label = 'buttonLabel' + $key.charAt(0).toUpperCase() + $key.slice(1);
 
-					tankApp.Options.playerKeyBindings.forEach(function(playerBindings, playerIndex) {
+					tankApp.Options.playerKeyBindings.forEach(function (playerBindings, playerIndex) {
 						//CLEANUP: This should probably be made into a generalized function
-						for (var bindingName in playerBindings) {
+						for (let bindingName in playerBindings) {
 							if (playerBindings[bindingName] == $code) {
 								tankApp.Options.playerKeyBindings[playerIndex][bindingName] = null;
 
-								if(playerIndex == tankApp.Options.playerOptionsIndex && $key != bindingName) {
+								if (playerIndex == tankApp.Options.playerOptionsIndex && $key != bindingName) {
 									$scope['buttonLabel' + bindingName.charAt(0).toUpperCase() + bindingName.slice(1)] = '------';
 								}
 							}
@@ -128,7 +151,7 @@ module tanks {
 		.controller('gameCtrl', ['$scope', function ($scope) {
 
 			//Generate world paramenters
-			var canvas: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById("gameCanvas");
+			var canvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById("gameCanvas");
 
 			//Create world
 			var world = World.create(canvas);
@@ -150,25 +173,25 @@ module tanks {
 				});
 		}]);
 
-	tankApp.run(function($rootScope) {
-		$rootScope.menuLink = function() {
+	tankApp.run(function ($rootScope) {
+		$rootScope.menuLink = function () {
 			Sound.get('sfxMenuSelect').play(true);
 		}
 
-		$rootScope.backLink = function() {
+		$rootScope.backLink = function () {
 			Sound.get('sfxMenuBack').play(true);
 		}
 	});
 
-	tankApp.directive('exclusiveSelect', function() {
-	    return {
-	        link: function(scope, element, attrs) {
-	            element.bind('click', function() {
-	                element.parent().children().removeClass('active');
-	                element.addClass('active');
-	            });
-	        },
-	    }
+	tankApp.directive('exclusiveSelect', function () {
+		return {
+			link: function (scope, element, attrs) {
+				element.bind('click', function () {
+					element.parent().children().removeClass('active');
+					element.addClass('active');
+				});
+			},
+		}
 	});
 
 	tankApp.Options = {
@@ -195,7 +218,7 @@ module tanks {
 				shoot: 13
 			}
 		],
-		playerCount: 2,
+		playerCount: 3,
 		playerHealth: 100,
 		playerColors: [
 			'red',
