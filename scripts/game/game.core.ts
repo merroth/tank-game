@@ -32,12 +32,12 @@ module tanks {
 			World.canvas = canvas;
 
 			//Generate players
-			for (let i = 0; i < tankApp.Options.playerCount; i++) {
+			for (let i = 0; i < tankApp.userOptions.playerCount; i++) {
 				//TODO: Possibly assign players randomly to spawnPoints, using something like this:
 				//World.spawnPoints.splice(Math.floor(Math.random() * World.spawnPoints.length), 1)
 
 				//CLEANUP: capitalizeFirstLetter function might be an idea at this point...
-				let color = tankApp.Options.playerColors[i].charAt(0).toUpperCase() + tankApp.Options.playerColors[i].slice(1);
+				let color = tankApp.userOptions.playerColors[i].charAt(0).toUpperCase() + tankApp.userOptions.playerColors[i].slice(1);
 
 				World.players.push(
 					new Player({
@@ -142,7 +142,7 @@ module tanks {
 				//Remove current actor from collision suspects
 				//This way we greatly reduces the amount of checks from n^n to n^log(n)
 				var splices = collisionSuspects.splice(collisionSuspects.indexOf(actor), 1);
-				
+
 
 				//Only test collision on object within a realistic vicinity
 				let localCollisionSuspects = collisionSuspects

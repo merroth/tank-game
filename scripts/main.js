@@ -1083,16 +1083,15 @@ var tanks;
     ////Front-page
     //Controller
     tanks.tankApp.controller('homeCtrl', ['$scope', function ($scope) {
-        }]);
-    ////Options-page
-    //Controller
-    tanks.tankApp.controller('optionsCtrl', ['$scope', '$cookies', function ($scope, $cookies) {
-            $scope.userOptions = tanks.tankApp.userOptions;
-            $scope.buttonLabelForward = tanks.tankApp.keyCodeName[tanks.tankApp.userOptions.playerKeyBindings[tanks.tankApp.userOptions.playerOptionsIndex].forward] || '------';
-            $scope.buttonLabelBackward = tanks.tankApp.keyCodeName[tanks.tankApp.userOptions.playerKeyBindings[tanks.tankApp.userOptions.playerOptionsIndex].backward] || '------';
-            $scope.buttonLabelLeft = tanks.tankApp.keyCodeName[tanks.tankApp.userOptions.playerKeyBindings[tanks.tankApp.userOptions.playerOptionsIndex].left] || '------';
-            $scope.buttonLabelRight = tanks.tankApp.keyCodeName[tanks.tankApp.userOptions.playerKeyBindings[tanks.tankApp.userOptions.playerOptionsIndex].right] || '------';
-            $scope.buttonLabelShoot = tanks.tankApp.keyCodeName[tanks.tankApp.userOptions.playerKeyBindings[tanks.tankApp.userOptions.playerOptionsIndex].shoot] || '------';
+        }])
+        .controller('optionsCtrl', ['$scope', '$cookies', function ($scope, $cookies) {
+            $scope.Options = tanks.tankApp.userOptions;
+            var p1Ctrl = tanks.tankApp.userOptions.playerKeyBindings[tanks.tankApp.userOptions.playerOptionsIndex];
+            $scope.buttonLabelForward = tanks.tankApp.keyCodeName[p1Ctrl.forward] || '------';
+            $scope.buttonLabelBackward = tanks.tankApp.keyCodeName[p1Ctrl.backward] || '------';
+            $scope.buttonLabelLeft = tanks.tankApp.keyCodeName[p1Ctrl.left] || '------';
+            $scope.buttonLabelRight = tanks.tankApp.keyCodeName[p1Ctrl.right] || '------';
+            $scope.buttonLabelShoot = tanks.tankApp.keyCodeName[p1Ctrl.shoot] || '------';
             $scope.setOption = function (option, value) {
                 if (tanks.tankApp.userOptions.hasOwnProperty(option)) {
                     tanks.tankApp.userOptions[option] = value;
@@ -1415,7 +1414,7 @@ var tanks;
     var FlameThrowerProjectile = (function (_super) {
         __extends(FlameThrowerProjectile, _super);
         function FlameThrowerProjectile() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
+            var _this = _super.apply(this, arguments) || this;
             _this.damage = 10;
             _this.sprite = tanks.Resource.get("bulletBurningSprite");
             _this.sfx = { spawn: tanks.Sound.get("sfxFlamethrowerSpawn"), hit: tanks.Sound.get("sfxBulletHit"), bounce: null };
@@ -1511,7 +1510,7 @@ var tanks;
     var WeaponTankFlameThrower = (function (_super) {
         __extends(WeaponTankFlameThrower, _super);
         function WeaponTankFlameThrower() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
+            var _this = _super.apply(this, arguments) || this;
             _this.lifespan = 20;
             _this.fireRateMax = 20;
             _this.speed = 1.3;
@@ -1525,7 +1524,7 @@ var tanks;
     var WeaponTankMainGun = (function (_super) {
         __extends(WeaponTankMainGun, _super);
         function WeaponTankMainGun() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
+            var _this = _super.apply(this, arguments) || this;
             _this.lifespan = 100;
             _this.fireRateMax = 200;
             _this.speed = 4;

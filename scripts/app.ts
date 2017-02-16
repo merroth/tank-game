@@ -19,7 +19,7 @@ module tanks {
 	}
 
 	interface ITank extends ng.IModule {
-		Options?: ITankAppOptions,
+		userOptions?: ITankAppOptions,
 		keyCodeName?: any
 	}
 
@@ -54,13 +54,13 @@ module tanks {
 		//Controller
 	tankApp.controller('homeCtrl', ['$scope', function ($scope) {
 
-		}]);
+		}])
 
 		////Options-page
 		//Controller
-		.controller('optionsCtrl', ['$scope', function ($scope) {
+		.controller('optionsCtrl', ['$scope', '$cookies', function ($scope, $cookies) {
 			$scope.Options = tankApp.userOptions;
-			var p1Ctrl = tankApp.Options.playerKeyBindings[tankApp.userOptions.playerOptionsIndex];
+			var p1Ctrl = tankApp.userOptions.playerKeyBindings[tankApp.userOptions.playerOptionsIndex];
 			$scope.buttonLabelForward = tankApp.keyCodeName[p1Ctrl.forward] || '------';
 			$scope.buttonLabelBackward = tankApp.keyCodeName[p1Ctrl.backward] || '------';
 			$scope.buttonLabelLeft = tankApp.keyCodeName[p1Ctrl.left] || '------';
