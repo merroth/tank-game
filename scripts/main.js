@@ -898,7 +898,7 @@ var tanks;
                 var actor = actors[actorIndex];
                 //Remove current actor from collision suspects
                 //This way we greatly reduces the amount of checks from n^n to n^log(n)
-                collisionSuspects.splice(collisionSuspects.indexOf(actor), 1);
+                splices = collisionSuspects.splice(collisionSuspects.indexOf(actor), 1);
                 //Only test collision on object within a realistic vicinity
                 var localCollisionSuspects = collisionSuspects
                     .filter(function (suspect) {
@@ -950,6 +950,7 @@ var tanks;
                 //Run update and listen for changes
                 changes = (actor.update() ? true : changes);
             };
+            var splices;
             for (var actorIndex = 0; actorIndex < actors.length; actorIndex++) {
                 _loop_1(actorIndex);
             }
@@ -1035,6 +1036,7 @@ var tanks;
             //Destroy World
             cancelAnimationFrame(World.updatehandle);
             World.worldActive = false;
+            World.spawnPoints = [];
             World.players = [];
             World.frame = 0;
             tanks.Actor._actors = [];
@@ -1413,7 +1415,7 @@ var tanks;
     var FlameThrowerProjectile = (function (_super) {
         __extends(FlameThrowerProjectile, _super);
         function FlameThrowerProjectile() {
-            var _this = _super.apply(this, arguments) || this;
+            var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.damage = 10;
             _this.sprite = tanks.Resource.get("bulletBurningSprite");
             _this.sfx = { spawn: tanks.Sound.get("sfxFlamethrowerSpawn"), hit: tanks.Sound.get("sfxBulletHit"), bounce: null };
@@ -1509,7 +1511,7 @@ var tanks;
     var WeaponTankFlameThrower = (function (_super) {
         __extends(WeaponTankFlameThrower, _super);
         function WeaponTankFlameThrower() {
-            var _this = _super.apply(this, arguments) || this;
+            var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.lifespan = 20;
             _this.fireRateMax = 20;
             _this.speed = 1.3;
@@ -1523,7 +1525,7 @@ var tanks;
     var WeaponTankMainGun = (function (_super) {
         __extends(WeaponTankMainGun, _super);
         function WeaponTankMainGun() {
-            var _this = _super.apply(this, arguments) || this;
+            var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.lifespan = 100;
             _this.fireRateMax = 200;
             _this.speed = 4;
