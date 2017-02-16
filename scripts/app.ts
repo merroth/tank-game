@@ -59,13 +59,13 @@ module tanks {
 		////Options-page
 		//Controller
 		.controller('optionsCtrl', ['$scope', '$cookies', function ($scope, $cookies) {
-			$scope.Options = tankApp.userOptions;
-			var p1Ctrl = tankApp.userOptions.playerKeyBindings[tankApp.userOptions.playerOptionsIndex];
-			$scope.buttonLabelForward = tankApp.keyCodeName[p1Ctrl.forward] || '------';
-			$scope.buttonLabelBackward = tankApp.keyCodeName[p1Ctrl.backward] || '------';
-			$scope.buttonLabelLeft = tankApp.keyCodeName[p1Ctrl.left] || '------';
-			$scope.buttonLabelRight = tankApp.keyCodeName[p1Ctrl.right] || '------';
-			$scope.buttonLabelShoot = tankApp.keyCodeName[p1Ctrl.shoot] || '------';
+			$scope.userOptions = tankApp.userOptions;
+			var pCtrl = tankApp.userOptions.playerKeyBindings[tankApp.userOptions.playerOptionsIndex];
+			$scope.buttonLabelForward = tankApp.keyCodeName[pCtrl.forward] || '------';
+			$scope.buttonLabelBackward = tankApp.keyCodeName[pCtrl.backward] || '------';
+			$scope.buttonLabelLeft = tankApp.keyCodeName[pCtrl.left] || '------';
+			$scope.buttonLabelRight = tankApp.keyCodeName[pCtrl.right] || '------';
+			$scope.buttonLabelShoot = tankApp.keyCodeName[pCtrl.shoot] || '------';
 
 			$scope.setOption = function(option, value) {
 				if (tankApp.userOptions.hasOwnProperty(option)) {
@@ -79,8 +79,8 @@ module tanks {
 			}
 
 			$scope.setColor = function(color) {
-				var oldColor = tankApp.userOptions.playerColors[tankApp.userOptions.playerOptionsIndex];
-				var sameColorPlayer = tankApp.userOptions.playerColors.indexOf(color);
+				let oldColor = tankApp.userOptions.playerColors[tankApp.userOptions.playerOptionsIndex];
+				let sameColorPlayer = tankApp.userOptions.playerColors.indexOf(color);
 
 				if (sameColorPlayer !== -1) {
 					tankApp.userOptions.playerColors[sameColorPlayer] = oldColor;
@@ -115,13 +115,11 @@ module tanks {
 				angular.element(event.target).one('keydown', function(e) {
 					$scope.setKey(key, e.which)
 				});
-
-				$scope.$apply();
 			}
 
 			$scope.setKey = function(key, code) {
 				if (tankApp.keyCodeName.hasOwnProperty(code)) {
-					var label = 'buttonLabel' + key.charAt(0).toUpperCase() + key.slice(1);
+					let label = 'buttonLabel' + key.charAt(0).toUpperCase() + key.slice(1);
 
 					tankApp.userOptions.playerKeyBindings.forEach(function(playerBindings, playerIndex) {
 						//CLEANUP: This should probably be made into a generalized function
@@ -220,7 +218,7 @@ module tanks {
 			tankApp.userOptions = defaultOptions;
 		}
 
-		var d = new Date();
+		let d = new Date();
 		d.setTime(d.getTime()+(24*60*60*1000));
 
 		$cookies.putObject('userOptions', tankApp.userOptions, {'expires': d.toUTCString()});

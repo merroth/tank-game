@@ -1085,13 +1085,13 @@ var tanks;
     tanks.tankApp.controller('homeCtrl', ['$scope', function ($scope) {
         }])
         .controller('optionsCtrl', ['$scope', '$cookies', function ($scope, $cookies) {
-            $scope.Options = tanks.tankApp.userOptions;
-            var p1Ctrl = tanks.tankApp.userOptions.playerKeyBindings[tanks.tankApp.userOptions.playerOptionsIndex];
-            $scope.buttonLabelForward = tanks.tankApp.keyCodeName[p1Ctrl.forward] || '------';
-            $scope.buttonLabelBackward = tanks.tankApp.keyCodeName[p1Ctrl.backward] || '------';
-            $scope.buttonLabelLeft = tanks.tankApp.keyCodeName[p1Ctrl.left] || '------';
-            $scope.buttonLabelRight = tanks.tankApp.keyCodeName[p1Ctrl.right] || '------';
-            $scope.buttonLabelShoot = tanks.tankApp.keyCodeName[p1Ctrl.shoot] || '------';
+            $scope.userOptions = tanks.tankApp.userOptions;
+            var pCtrl = tanks.tankApp.userOptions.playerKeyBindings[tanks.tankApp.userOptions.playerOptionsIndex];
+            $scope.buttonLabelForward = tanks.tankApp.keyCodeName[pCtrl.forward] || '------';
+            $scope.buttonLabelBackward = tanks.tankApp.keyCodeName[pCtrl.backward] || '------';
+            $scope.buttonLabelLeft = tanks.tankApp.keyCodeName[pCtrl.left] || '------';
+            $scope.buttonLabelRight = tanks.tankApp.keyCodeName[pCtrl.right] || '------';
+            $scope.buttonLabelShoot = tanks.tankApp.keyCodeName[pCtrl.shoot] || '------';
             $scope.setOption = function (option, value) {
                 if (tanks.tankApp.userOptions.hasOwnProperty(option)) {
                     tanks.tankApp.userOptions[option] = value;
@@ -1126,7 +1126,6 @@ var tanks;
                 angular.element(event.target).one('keydown', function (e) {
                     $scope.setKey(key, e.which);
                 });
-                $scope.$apply();
             };
             $scope.setKey = function (key, code) {
                 if (tanks.tankApp.keyCodeName.hasOwnProperty(code)) {
