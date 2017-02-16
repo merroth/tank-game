@@ -1,0 +1,33 @@
+{
+  "name": "tank-game",
+  "version": "0.1.0",
+  "description": "A volatile, sporadic and bumbling attempt at a game inspired by 1981's \"Battle Tanks\" for the Intellivision",
+  "main": "index.html",
+  "devDependencies": {
+    "@types/angular": "^1.6.5",
+    "@types/angular-cookies": "^1.4.3",
+    "@types/angular-ui-router": "^1.1.36",
+    "@types/jquery": "^2.0.40",
+    "grunt": "^1.0.1",
+    "grunt-bower-concat": "^1.0.0",
+    "grunt-contrib-uglify": "^2.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/merroth/tank-game.git"
+  },
+  "keywords": [
+    "game"
+  ],
+  "author": "merroth",
+  "contributors": [
+    {
+      "name": "Ashenfactory"
+    }
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/merroth/tank-game/issues"
+  },
+  "homepage": "https://github.com/merroth/tank-game#readme"
+}

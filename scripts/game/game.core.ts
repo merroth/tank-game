@@ -1,5 +1,4 @@
 /// <reference path="game.utility.ts" />
-/// <reference path="game.utility.ts" />
 //This file contains core classes for the game engine.
 //This file is dependent upon "game.utility.ts", which describes utility elements like "Angle"
 module tanks {
@@ -34,12 +33,12 @@ module tanks {
 			World.canvas = canvas;
 
 			//Generate players
-			for (var i = 0; i < tankApp.Options.playerCount; i++) {
+			for (var i = 0; i < tankApp.userOptions.playerCount; i++) {
 				//TODO: Possibly assign players randomly to spawnPoints, using something like this:
 				//World.spawnPoints.splice(Math.floor(Math.random() * World.spawnPoints.length), 1)
 
 				//CLEANUP: capitalizeFirstLetter function might be an idea at this point...
-				var color = tankApp.Options.playerColors[i].charAt(0).toUpperCase() + tankApp.Options.playerColors[i].slice(1);
+				var color = tankApp.userOptions.playerColors[i].charAt(0).toUpperCase() + tankApp.userOptions.playerColors[i].slice(1);
 
 				World.players.push(
 					new Player({
@@ -66,7 +65,7 @@ module tanks {
 		}
 		public static listener(evt: KeyboardEvent) {
 			var value: boolean = (evt.type == "keydown" ? true : false);
-			var keyBindings = tankApp.Options.playerKeyBindings;
+			var keyBindings = tankApp.userOptions.playerKeyBindings;
 
 			switch (evt.keyCode) {
 				//Player 1

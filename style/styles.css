@@ -167,6 +167,10 @@ a.active .option-content {
 	border-bottom: .125em solid #fff;
 }
 
+a.active:hover .option-content {
+	border-bottom-color: #ff0;
+}
+
 div.bordered {
 	margin-bottom: 1rem;
 	padding: .625rem;

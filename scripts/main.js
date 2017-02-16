@@ -704,7 +704,7 @@ var tanks;
         };
         Sound.prototype.play = function (force) {
             if (force === void 0) { force = false; }
-            if (tanks.tankApp.Options.soundEnabled) {
+            if (tanks.tankApp.userOptions.soundEnabled) {
                 for (var soundBankIndex = 0; soundBankIndex < this.soundBanks.length; soundBankIndex++) {
                     var soundBank = this.soundBanks[soundBankIndex];
                     if (soundBank.paused) {
@@ -763,7 +763,6 @@ var tanks;
     new tanks.Sound({ id: "sfxTankDie", resource: tanks.Resource.get("sfxTankDie"), soundBankCount: 4 });
 })(tanks || (tanks = {}));
 /// <reference path="game.utility.ts" />
-/// <reference path="game.utility.ts" />
 //This file contains core classes for the game engine.
 //This file is dependent upon "game.utility.ts", which describes utility elements like "Angle"
 var tanks;
@@ -778,11 +777,11 @@ var tanks;
             World.spawnPoints.push({ angle: new tanks.Angle(0), position: new tanks.Coord(40, 40) }, { angle: new tanks.Angle(180), position: new tanks.Coord(parseInt(canvas.getAttribute("width")) - 40, parseInt(canvas.getAttribute("height")) - 40) }, { angle: new tanks.Angle(270), position: new tanks.Coord(40, parseInt(canvas.getAttribute("height")) - 40) }, { angle: new tanks.Angle(90), position: new tanks.Coord(parseInt(canvas.getAttribute("width")) - 40, 40) });
             World.canvas = canvas;
             //Generate players
-            for (var i = 0; i < tanks.tankApp.Options.playerCount; i++) {
+            for (var i = 0; i < tanks.tankApp.userOptions.playerCount; i++) {
                 //TODO: Possibly assign players randomly to spawnPoints, using something like this:
                 //World.spawnPoints.splice(Math.floor(Math.random() * World.spawnPoints.length), 1)
                 //CLEANUP: capitalizeFirstLetter function might be an idea at this point...
-                var color = tanks.tankApp.Options.playerColors[i].charAt(0).toUpperCase() + tanks.tankApp.Options.playerColors[i].slice(1);
+                var color = tanks.tankApp.userOptions.playerColors[i].charAt(0).toUpperCase() + tanks.tankApp.userOptions.playerColors[i].slice(1);
                 World.players.push(new tanks.Player({
                     position: World.spawnPoints[i].position,
                     angle: World.spawnPoints[i].angle,
@@ -804,7 +803,7 @@ var tanks;
         };
         World.listener = function (evt) {
             var value = (evt.type == "keydown" ? true : false);
-            var keyBindings = tanks.tankApp.Options.playerKeyBindings;
+            var keyBindings = tanks.tankApp.userOptions.playerKeyBindings;
             switch (evt.keyCode) {
                 //Player 1
                 case keyBindings[0].forward:
@@ -1055,83 +1054,96 @@ var tanks;
     World.spawnPoints = [];
     tanks.World = World;
 })(tanks || (tanks = {}));
-/// <reference path="definitions/jquery/jquery.d.ts" />
-/// <reference path="definitions/angularjs/angular.d.ts" />
-/// <reference path="definitions/angular-ui-router/angular-ui-router.d.ts" />
 /// <reference path="game/game.core.ts" />
 var tanks;
 (function (tanks) {
-    tanks.tankApp = angular
-        .module('tankApp', [
-        'ui.router',
-    ])
-        .controller('homeCtrl', ['$scope', function ($scope) {
-        }])
-        .config(['$urlRouterProvider', '$stateProvider', function ($urlRouterProvider, $stateProvider) {
-            $urlRouterProvider.otherwise('/');
-            $stateProvider
-                .state('home', {
-                url: '/',
-                templateUrl: 'view/frontpage',
-                controller: 'homeCtrl'
-            });
-        }])
-        .controller('optionsCtrl', ['$scope', function ($scope) {
-            $scope.Options = tanks.tankApp.Options;
-            $scope.buttonLabelForward = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex].forward] || '------';
-            $scope.buttonLabelBackward = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex].backward] || '------';
-            $scope.buttonLabelLeft = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex].left] || '------';
-            $scope.buttonLabelRight = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex].right] || '------';
-            $scope.buttonLabelShoot = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex].shoot] || '------';
-            $scope.setOption = function ($option, $value) {
-                if (tanks.tankApp.Options.hasOwnProperty($option)) {
-                    tanks.tankApp.Options[$option] = $value;
+    tanks.tankApp = angular.module('tankApp', ['ui.router', 'ngCookies']);
+    //Route
+    tanks.tankApp.config(function ($urlRouterProvider, $stateProvider) {
+        $urlRouterProvider.otherwise('/');
+        $stateProvider
+            .state('home', {
+            url: '/',
+            templateUrl: 'view/home',
+            controller: 'homeCtrl'
+        })
+            .state('options', {
+            url: '/options',
+            templateUrl: 'view/options',
+            controller: 'optionsCtrl'
+        })
+            .state('game', {
+            url: '/game',
+            templateUrl: 'view/gamepage',
+            controller: 'gameCtrl'
+        });
+    });
+    ////Front-page
+    //Controller
+    tanks.tankApp.controller('homeCtrl', ['$scope', function ($scope) {
+        }]);
+    ////Options-page
+    //Controller
+    tanks.tankApp.controller('optionsCtrl', ['$scope', '$cookies', function ($scope, $cookies) {
+            $scope.userOptions = tanks.tankApp.userOptions;
+            $scope.buttonLabelForward = tanks.tankApp.keyCodeName[tanks.tankApp.userOptions.playerKeyBindings[tanks.tankApp.userOptions.playerOptionsIndex].forward] || '------';
+            $scope.buttonLabelBackward = tanks.tankApp.keyCodeName[tanks.tankApp.userOptions.playerKeyBindings[tanks.tankApp.userOptions.playerOptionsIndex].backward] || '------';
+            $scope.buttonLabelLeft = tanks.tankApp.keyCodeName[tanks.tankApp.userOptions.playerKeyBindings[tanks.tankApp.userOptions.playerOptionsIndex].left] || '------';
+            $scope.buttonLabelRight = tanks.tankApp.keyCodeName[tanks.tankApp.userOptions.playerKeyBindings[tanks.tankApp.userOptions.playerOptionsIndex].right] || '------';
+            $scope.buttonLabelShoot = tanks.tankApp.keyCodeName[tanks.tankApp.userOptions.playerKeyBindings[tanks.tankApp.userOptions.playerOptionsIndex].shoot] || '------';
+            $scope.setOption = function (option, value) {
+                if (tanks.tankApp.userOptions.hasOwnProperty(option)) {
+                    tanks.tankApp.userOptions[option] = value;
+                    $cookies.putObject('userOptions', tanks.tankApp.userOptions);
                 }
                 tanks.Sound.get('sfxMenuSelect').play(true);
             };
-            $scope.setColor = function ($color) {
-                var oldColor = tanks.tankApp.Options.playerColors[tanks.tankApp.Options.playerOptionsIndex];
-                var sameColorPlayer = tanks.tankApp.Options.playerColors.indexOf($color);
+            $scope.setColor = function (color) {
+                var oldColor = tanks.tankApp.userOptions.playerColors[tanks.tankApp.userOptions.playerOptionsIndex];
+                var sameColorPlayer = tanks.tankApp.userOptions.playerColors.indexOf(color);
                 if (sameColorPlayer !== -1) {
-                    tanks.tankApp.Options.playerColors[sameColorPlayer] = oldColor;
+                    tanks.tankApp.userOptions.playerColors[sameColorPlayer] = oldColor;
                 }
-                tanks.tankApp.Options.playerColors[tanks.tankApp.Options.playerOptionsIndex] = $color;
+                tanks.tankApp.userOptions.playerColors[tanks.tankApp.userOptions.playerOptionsIndex] = color;
+                $cookies.putObject('userOptions', tanks.tankApp.userOptions);
                 tanks.Sound.get('sfxMenuSelect').play(true);
             };
-            $scope.getPlayerSettings = function ($playerIndex) {
-                if (tanks.tankApp.Options.playerKeyBindings.hasOwnProperty($playerIndex)) {
-                    tanks.tankApp.Options.playerOptionsIndex = $playerIndex;
-                    $scope.buttonLabelForward = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].forward] || '------';
-                    $scope.buttonLabelBackward = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].backward] || '------';
-                    $scope.buttonLabelLeft = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].left] || '------';
-                    $scope.buttonLabelRight = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].right] || '------';
-                    $scope.buttonLabelShoot = tanks.tankApp.keyCodeName[tanks.tankApp.Options.playerKeyBindings[$playerIndex].shoot] || '------';
+            $scope.getPlayerSettings = function (playerIndex) {
+                if (tanks.tankApp.userOptions.playerKeyBindings.hasOwnProperty(playerIndex)) {
+                    tanks.tankApp.userOptions.playerOptionsIndex = playerIndex;
+                    $scope.buttonLabelForward = tanks.tankApp.keyCodeName[tanks.tankApp.userOptions.playerKeyBindings[playerIndex].forward] || '------';
+                    $scope.buttonLabelBackward = tanks.tankApp.keyCodeName[tanks.tankApp.userOptions.playerKeyBindings[playerIndex].backward] || '------';
+                    $scope.buttonLabelLeft = tanks.tankApp.keyCodeName[tanks.tankApp.userOptions.playerKeyBindings[playerIndex].left] || '------';
+                    $scope.buttonLabelRight = tanks.tankApp.keyCodeName[tanks.tankApp.userOptions.playerKeyBindings[playerIndex].right] || '------';
+                    $scope.buttonLabelShoot = tanks.tankApp.keyCodeName[tanks.tankApp.userOptions.playerKeyBindings[playerIndex].shoot] || '------';
                     $scope.activeKeyBinding = null;
                 }
                 tanks.Sound.get('sfxMenuSelect').play(true);
             };
-            $scope.listenForKey = function ($event, $key) {
-                $scope.activeKeyBinding = $key;
-                angular.element($event.target).one('keydown', function (e) {
-                    $scope.setKey($key, e.which);
+            $scope.listenForKey = function (event, key) {
+                $scope.activeKeyBinding = key;
+                angular.element(event.target).one('keydown', function (e) {
+                    $scope.setKey(key, e.which);
                 });
+                $scope.$apply();
             };
-            $scope.setKey = function ($key, $code) {
-                if (tanks.tankApp.keyCodeName.hasOwnProperty($code)) {
-                    var label = 'buttonLabel' + $key.charAt(0).toUpperCase() + $key.slice(1);
-                    tanks.tankApp.Options.playerKeyBindings.forEach(function (playerBindings, playerIndex) {
+            $scope.setKey = function (key, code) {
+                if (tanks.tankApp.keyCodeName.hasOwnProperty(code)) {
+                    var label = 'buttonLabel' + key.charAt(0).toUpperCase() + key.slice(1);
+                    tanks.tankApp.userOptions.playerKeyBindings.forEach(function (playerBindings, playerIndex) {
                         //CLEANUP: This should probably be made into a generalized function
                         for (var bindingName in playerBindings) {
-                            if (playerBindings[bindingName] == $code) {
-                                tanks.tankApp.Options.playerKeyBindings[playerIndex][bindingName] = null;
-                                if (playerIndex == tanks.tankApp.Options.playerOptionsIndex && $key != bindingName) {
+                            if (playerBindings[bindingName] == code) {
+                                tanks.tankApp.userOptions.playerKeyBindings[playerIndex][bindingName] = null;
+                                if (playerIndex == tanks.tankApp.userOptions.playerOptionsIndex && key != bindingName) {
                                     $scope['buttonLabel' + bindingName.charAt(0).toUpperCase() + bindingName.slice(1)] = '------';
                                 }
                             }
                         }
                     });
-                    tanks.tankApp.Options.playerKeyBindings[tanks.tankApp.Options.playerOptionsIndex][$key] = $code;
-                    $scope[label] = tanks.tankApp.keyCodeName[$code];
+                    tanks.tankApp.userOptions.playerKeyBindings[tanks.tankApp.userOptions.playerOptionsIndex][key] = code;
+                    $scope[label] = tanks.tankApp.keyCodeName[code];
+                    $cookies.putObject('userOptions', tanks.tankApp.userOptions);
                     tanks.Sound.get('sfxMenuSelect').play(true);
                 }
                 else {
@@ -1140,15 +1152,6 @@ var tanks;
                 $scope.activeKeyBinding = null;
                 $scope.$apply();
             };
-        }])
-        .config(['$urlRouterProvider', '$stateProvider', function ($urlRouterProvider, $stateProvider) {
-            $urlRouterProvider.otherwise('/');
-            $stateProvider
-                .state('options', {
-                url: '/options',
-                templateUrl: 'view/options',
-                controller: 'optionsCtrl'
-            });
         }])
         .controller('gameCtrl', ['$scope', function ($scope) {
             //Generate world paramenters
@@ -1160,23 +1163,137 @@ var tanks;
                 //Kill world
                 tanks.World.kill();
             });
-        }])
-        .config(['$urlRouterProvider', '$stateProvider', function ($urlRouterProvider, $stateProvider) {
-            $urlRouterProvider.otherwise('/');
-            $stateProvider
-                .state('game', {
-                url: '/game',
-                templateUrl: 'view/gamepage',
-                controller: 'gameCtrl'
-            });
         }]);
-    tanks.tankApp.run(function ($rootScope) {
+    tanks.tankApp.run(function ($rootScope, $cookies) {
         $rootScope.menuLink = function () {
             tanks.Sound.get('sfxMenuSelect').play(true);
         };
         $rootScope.backLink = function () {
             tanks.Sound.get('sfxMenuBack').play(true);
         };
+        var defaultOptions = {
+            soundEnabled: true,
+            playerOptionsIndex: 0,
+            playerKeyBindings: [
+                {
+                    forward: 38,
+                    backward: 40,
+                    left: 37,
+                    right: 39,
+                    shoot: 16
+                }, {
+                    forward: 87,
+                    backward: 83,
+                    left: 65,
+                    right: 68,
+                    shoot: 32
+                }, {
+                    forward: 73,
+                    backward: 75,
+                    left: 74,
+                    right: 76,
+                    shoot: 13
+                }
+            ],
+            playerCount: 2,
+            playerHealth: 100,
+            playerColors: [
+                'red',
+                'blue',
+                'green'
+            ]
+        };
+        tanks.tankApp.userOptions = $cookies.getObject('userOptions');
+        //TODO: Fill an existing userOptions object from a old cookie with default values from defaultOptions
+        //	in case they are undefined
+        if (tanks.tankApp.userOptions === undefined) {
+            tanks.tankApp.userOptions = defaultOptions;
+        }
+        var d = new Date();
+        d.setTime(d.getTime() + (24 * 60 * 60 * 1000));
+        $cookies.putObject('userOptions', tanks.tankApp.userOptions, { 'expires': d.toUTCString() });
+        tanks.tankApp.keyCodeName = {
+            9: "Tab",
+            13: "Enter",
+            16: "Shift",
+            17: "Ctrl",
+            18: "Alt",
+            27: "Esc",
+            32: "Space",
+            33: "PgUp",
+            34: "PgDwn",
+            35: "End",
+            36: "Home",
+            37: "Left",
+            38: "Up",
+            39: "Right",
+            40: "Down",
+            45: "Insert",
+            46: "Delete",
+            48: "0",
+            49: "1",
+            50: "2",
+            51: "3",
+            52: "4",
+            53: "5",
+            54: "6",
+            55: "7",
+            56: "8",
+            57: "9",
+            60: "<",
+            65: "A",
+            66: "B",
+            67: "C",
+            68: "D",
+            69: "E",
+            70: "F",
+            71: "G",
+            72: "H",
+            73: "I",
+            74: "J",
+            75: "K",
+            76: "L",
+            77: "M",
+            78: "N",
+            79: "O",
+            80: "P",
+            81: "Q",
+            82: "R",
+            83: "S",
+            84: "T",
+            85: "U",
+            86: "V",
+            87: "W",
+            88: "X",
+            89: "Y",
+            90: "Z",
+            96: "Num0",
+            97: "Num1",
+            98: "Num2",
+            99: "Num3",
+            100: "Num4",
+            101: "Num5",
+            102: "Num6",
+            103: "Num7",
+            104: "Num8",
+            105: "Num9",
+            106: "Num*",
+            107: "Num+",
+            109: "Num-",
+            110: "Num.",
+            111: "Num/",
+            160: "¨",
+            171: "+",
+            173: "-",
+            188: ",",
+            190: ".",
+            192: "´",
+            222: "'"
+        };
+        new tanks.Resource({ fileLocation: "resources/sfx/menu_select.m4a", id: "sfxMenuSelect" });
+        new tanks.Resource({ fileLocation: "resources/sfx/menu_back.m4a", id: "sfxMenuBack" });
+        new tanks.Sound({ id: "sfxMenuSelect", resource: tanks.Resource.get("sfxMenuSelect") });
+        new tanks.Sound({ id: "sfxMenuBack", resource: tanks.Resource.get("sfxMenuBack") });
     });
     tanks.tankApp.directive('exclusiveSelect', function () {
         return {
@@ -1188,120 +1305,6 @@ var tanks;
             }
         };
     });
-    tanks.tankApp.Options = {
-        soundEnabled: true,
-        playerOptionsIndex: 0,
-        playerKeyBindings: [
-            {
-                forward: 38,
-                backward: 40,
-                left: 37,
-                right: 39,
-                shoot: 16
-            }, {
-                forward: 87,
-                backward: 83,
-                left: 65,
-                right: 68,
-                shoot: 32
-            }, {
-                forward: 73,
-                backward: 75,
-                left: 74,
-                right: 76,
-                shoot: 13
-            }
-        ],
-        playerCount: 2,
-        playerHealth: 100,
-        playerColors: [
-            'red',
-            'blue',
-            'green'
-        ]
-    };
-    tanks.tankApp.keyCodeName = {
-        9: "Tab",
-        13: "Enter",
-        16: "Shift",
-        17: "Ctrl",
-        18: "Alt",
-        27: "Esc",
-        32: "Space",
-        33: "PgUp",
-        34: "PgDwn",
-        35: "End",
-        36: "Home",
-        37: "Left",
-        38: "Up",
-        39: "Right",
-        40: "Down",
-        45: "Insert",
-        46: "Delete",
-        48: "0",
-        49: "1",
-        50: "2",
-        51: "3",
-        52: "4",
-        53: "5",
-        54: "6",
-        55: "7",
-        56: "8",
-        57: "9",
-        60: "<",
-        65: "A",
-        66: "B",
-        67: "C",
-        68: "D",
-        69: "E",
-        70: "F",
-        71: "G",
-        72: "H",
-        73: "I",
-        74: "J",
-        75: "K",
-        76: "L",
-        77: "M",
-        78: "N",
-        79: "O",
-        80: "P",
-        81: "Q",
-        82: "R",
-        83: "S",
-        84: "T",
-        85: "U",
-        86: "V",
-        87: "W",
-        88: "X",
-        89: "Y",
-        90: "Z",
-        96: "Num0",
-        97: "Num1",
-        98: "Num2",
-        99: "Num3",
-        100: "Num4",
-        101: "Num5",
-        102: "Num6",
-        103: "Num7",
-        104: "Num8",
-        105: "Num9",
-        106: "Num*",
-        107: "Num+",
-        109: "Num-",
-        110: "Num.",
-        111: "Num/",
-        160: "¨",
-        171: "+",
-        173: "-",
-        188: ",",
-        190: ".",
-        192: "´",
-        222: "'"
-    };
-    new tanks.Resource({ fileLocation: "resources/sfx/menu_select.m4a", id: "sfxMenuSelect" });
-    new tanks.Resource({ fileLocation: "resources/sfx/menu_back.m4a", id: "sfxMenuBack" });
-    new tanks.Sound({ id: "sfxMenuSelect", resource: tanks.Resource.get("sfxMenuSelect") });
-    new tanks.Sound({ id: "sfxMenuBack", resource: tanks.Resource.get("sfxMenuBack") });
 })(tanks || (tanks = {}));
 /// <reference path="../game.utility.ts" />
 /// <reference path="../game.core.ts" />
@@ -1551,7 +1554,7 @@ var tanks;
             _this.acceleration = 0.05;
             _this.size = 32;
             _this.turnrate = 1;
-            _this.hitPoints = tanks.tankApp.Options.playerHealth;
+            _this.hitPoints = tanks.tankApp.userOptions.playerHealth;
             _this.controls = {
                 forward: false,
                 backward: false,

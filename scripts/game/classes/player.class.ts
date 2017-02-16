@@ -25,7 +25,7 @@ module tanks {
 		public acceleration: number = 0.05;
 		public size: number = 32;
 		public turnrate: number = 1;
-		public hitPoints: number = tankApp.Options.playerHealth;
+		public hitPoints: number = tankApp.userOptions.playerHealth;
 		public controls: IPlayerControls = {
 			forward: false,
 			backward: false,

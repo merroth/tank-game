@@ -698,7 +698,7 @@ module tanks {
 			Sound.Sounds.push(this);
 		}
 		public play(force: boolean = false) {
-			if (tankApp.Options.soundEnabled) {
+			if (tankApp.userOptions.soundEnabled) {
 				for (var soundBankIndex = 0; soundBankIndex < this.soundBanks.length; soundBankIndex++) {
 					var soundBank = this.soundBanks[soundBankIndex];
 					if (soundBank.paused) {
