@@ -30,19 +30,24 @@
 			<script type="text/ng-template" id="view/options">
 				<p>Options</p>
 				<div class="bordered">
-					<p>Sound</p>
+					<p>Sound volume</p>
 					<div class="option-container">
-						<a ng-class="{active: userOptions.soundEnabled == true}" ng-click="setOption('soundEnabled', 1)"><span class="option-content">On</span></a>
-						<a ng-class="{active: userOptions.soundEnabled == false}" ng-click="setOption('soundEnabled', 0)"><span class="option-content">Off</span></a>
+						<a ng-class="{active: userOptions.soundVolume == 0.00}" ng-click="setOption('soundVolume', 0.00)"><span class="option-content">Off</span></a>
+						<a ng-class="{active: userOptions.soundVolume == 0.25}" ng-click="setOption('soundVolume', 0.25)"><span class="option-content">25%</span></a>
+						<a ng-class="{active: userOptions.soundVolume == 0.50}" ng-click="setOption('soundVolume', 0.50)"><span class="option-content">50%</span></a>
+						<a ng-class="{active: userOptions.soundVolume == 0.75}" ng-click="setOption('soundVolume', 0.75)"><span class="option-content">75%</span></a>
+						<a ng-class="{active: userOptions.soundVolume == 1.00}" ng-click="setOption('soundVolume', 1.00)"><span class="option-content">100%</span></a>
 					</div>
 				</div>
 
 				<div class="bordered">
-					<p>Player Settings</p>
+					<p>Player settings</p>
 					<div class="option-container">
 						<a ng-class="{active: userOptions.playerOptionsIndex == 0}" ng-click="getPlayerSettings(0)"><span class="option-content">Player 1</span></a>
 						<a ng-class="{active: userOptions.playerOptionsIndex == 1}" ng-click="getPlayerSettings(1)"><span class="option-content">Player 2</span></a>
 						<a ng-class="{active: userOptions.playerOptionsIndex == 2}" ng-click="getPlayerSettings(2)"><span class="option-content">Player 3</span></a>
+
+						<a ng-click="resetControls()">Reset controls</a>
 					</div>
 
 					<hr>

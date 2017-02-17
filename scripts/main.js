@@ -704,10 +704,11 @@ var tanks;
         };
         Sound.prototype.play = function (force) {
             if (force === void 0) { force = false; }
-            if (tanks.tankApp.userOptions.soundEnabled) {
+            if (tanks.tankApp.userOptions.soundVolume > 0) {
                 for (var soundBankIndex = 0; soundBankIndex < this.soundBanks.length; soundBankIndex++) {
                     var soundBank = this.soundBanks[soundBankIndex];
                     if (soundBank.paused) {
+                        soundBank.volume = tanks.tankApp.userOptions.soundVolume;
                         soundBank.play();
                         return this;
                     }
@@ -1093,10 +1094,8 @@ var tanks;
             $scope.buttonLabelRight = tanks.tankApp.keyCodeName[pCtrl.right] || '------';
             $scope.buttonLabelShoot = tanks.tankApp.keyCodeName[pCtrl.shoot] || '------';
             $scope.setOption = function (option, value) {
-                if (tanks.tankApp.userOptions.hasOwnProperty(option)) {
-                    tanks.tankApp.userOptions[option] = value;
-                    $cookies.putObject('userOptions', tanks.tankApp.userOptions);
-                }
+                tanks.tankApp.userOptions[option] = value;
+                $cookies.putObject('userOptions', tanks.tankApp.userOptions);
                 tanks.Sound.get('sfxMenuSelect').play(true);
             };
             $scope.setColor = function (color) {
@@ -1108,6 +1107,12 @@ var tanks;
                 tanks.tankApp.userOptions.playerColors[tanks.tankApp.userOptions.playerOptionsIndex] = color;
                 $cookies.putObject('userOptions', tanks.tankApp.userOptions);
                 tanks.Sound.get('sfxMenuSelect').play(true);
+            };
+            $scope.resetControls = function () {
+                var defaultKeyBindings = angular.copy(tanks.tankApp.defaultOptions.playerKeyBindings);
+                tanks.tankApp.userOptions.playerKeyBindings = defaultKeyBindings;
+                $cookies.putObject('userOptions', tanks.tankApp.userOptions);
+                $scope.getPlayerSettings(tanks.tankApp.userOptions.playerOptionsIndex);
             };
             $scope.getPlayerSettings = function (playerIndex) {
                 if (tanks.tankApp.userOptions.playerKeyBindings.hasOwnProperty(playerIndex)) {
@@ -1171,8 +1176,8 @@ var tanks;
         $rootScope.backLink = function () {
             tanks.Sound.get('sfxMenuBack').play(true);
         };
-        var defaultOptions = {
-            soundEnabled: true,
+        tanks.tankApp.defaultOptions = {
+            soundVolume: 0.50,
             playerOptionsIndex: 0,
             playerKeyBindings: [
                 {
@@ -1207,18 +1212,18 @@ var tanks;
         //TODO: Fill an existing userOptions object from a old cookie with default values from defaultOptions
         //	in case they are undefined
         if (tanks.tankApp.userOptions === undefined) {
-            tanks.tankApp.userOptions = defaultOptions;
+            tanks.tankApp.userOptions = angular.copy(tanks.tankApp.defaultOptions);
         }
         var d = new Date();
         d.setTime(d.getTime() + (24 * 60 * 60 * 1000));
         $cookies.putObject('userOptions', tanks.tankApp.userOptions, { 'expires': d.toUTCString() });
         tanks.tankApp.keyCodeName = {
             9: "Tab",
+            12: "Clear",
             13: "Enter",
             16: "Shift",
             17: "Ctrl",
             18: "Alt",
-            27: "Esc",
             32: "Space",
             33: "PgUp",
             34: "PgDwn",
@@ -1240,7 +1245,7 @@ var tanks;
             55: "7",
             56: "8",
             57: "9",
-            60: "<",
+            60: "\x3C",
             65: "A",
             66: "B",
             67: "C",
@@ -1286,6 +1291,7 @@ var tanks;
             171: "+",
             173: "-",
             188: ",",
+            189: "½",
             190: ".",
             192: "´",
             222: "'"

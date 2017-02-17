@@ -4,7 +4,7 @@ module tanks {
 
 	//Interfaces
 	interface ITankAppOptions {
-		soundEnabled: boolean,
+		soundVolume: number,
 		playerOptionsIndex: number,
 		playerKeyBindings: {
 			forward: number,
@@ -20,6 +20,7 @@ module tanks {
 
 	interface ITank extends ng.IModule {
 		userOptions?: ITankAppOptions,
+		defaultOptions?: ITankAppOptions,
 		keyCodeName?: any
 	}
 
@@ -68,12 +69,9 @@ module tanks {
 			$scope.buttonLabelShoot = tankApp.keyCodeName[pCtrl.shoot] || '------';
 
 			$scope.setOption = function(option, value) {
-				if (tankApp.userOptions.hasOwnProperty(option)) {
+				tankApp.userOptions[option] = value;
 
-					tankApp.userOptions[option] = value;
-
-					$cookies.putObject('userOptions', tankApp.userOptions);
-				}
+				$cookies.putObject('userOptions', tankApp.userOptions);
 
 				Sound.get('sfxMenuSelect').play(true);
 			}
@@ -91,6 +89,16 @@ module tanks {
 				$cookies.putObject('userOptions', tankApp.userOptions);
 
 				Sound.get('sfxMenuSelect').play(true);
+			}
+
+			$scope.resetControls = function() {
+				let defaultKeyBindings = angular.copy(tankApp.defaultOptions.playerKeyBindings);
+
+				tankApp.userOptions.playerKeyBindings = defaultKeyBindings;
+
+				$cookies.putObject('userOptions', tankApp.userOptions);
+
+				$scope.getPlayerSettings(tankApp.userOptions.playerOptionsIndex);
 			}
 
 			$scope.getPlayerSettings = function(playerIndex) {
@@ -177,8 +185,8 @@ module tanks {
 			Sound.get('sfxMenuBack').play(true);
 		}
 
-		var defaultOptions = {
-			soundEnabled: true,
+		tankApp.defaultOptions = {
+			soundVolume: 0.50,
 			playerOptionsIndex: 0,
 			playerKeyBindings: [
 				{
@@ -215,7 +223,7 @@ module tanks {
 		//TODO: Fill an existing userOptions object from a old cookie with default values from defaultOptions
 		//	in case they are undefined
 		if (tankApp.userOptions === undefined) {
-			tankApp.userOptions = defaultOptions;
+			tankApp.userOptions = angular.copy(tankApp.defaultOptions);
 		}
 
 		let d = new Date();
@@ -225,11 +233,11 @@ module tanks {
 
 		tankApp.keyCodeName = {
 			9: "Tab",
+			12: "Clear",
 			13: "Enter",
 			16: "Shift",
 			17: "Ctrl",
 			18: "Alt",
-			27: "Esc",
 			32: "Space",
 			33: "PgUp",
 			34: "PgDwn",
@@ -251,7 +259,7 @@ module tanks {
 			55: "7",
 			56: "8",
 			57: "9",
-			60: "<",
+			60: "\x3C",
 			65: "A",
 			66: "B",
 			67: "C",
@@ -297,6 +305,7 @@ module tanks {
 			171: "+",
 			173: "-",
 			188: ",",
+			189: "½",
 			190: ".",
 			192: "´",
 			222: "'"
