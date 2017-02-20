@@ -9,7 +9,7 @@
     "@types/angular-ui-router": "^1.1.36",
     "@types/jquery": "^2.0.40",
     "grunt": "^1.0.1",
-    "grunt-bower-concat": "^1.0.0",
+    "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-uglify": "^2.1.0"
   },
   "repository": {
@@ -29,5 +29,11 @@
   "bugs": {
     "url": "https://github.com/merroth/tank-game/issues"
   },
-  "homepage": "https://github.com/merroth/tank-game#readme"
+  "homepage": "https://github.com/merroth/tank-game#readme",
+  "dependencies": {
+    "angular": "^1.6.2",
+    "angular-cookies": "^1.6.2",
+    "angular-ui-router": "^0.4.2",
+    "normalize.css": "^5.0.0"
+  }
 }

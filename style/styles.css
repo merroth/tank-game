@@ -137,18 +137,18 @@ input, textarea {
 
 div.bordered, input, button, textarea {
 	border: .375em solid #fff;
-	border-image: url('img/border.png') 6 repeat;
+	border-image: url('..img/border.png') 6 repeat;
 }
 
 button.invalid, input:invalid, textarea:invalid {
 	color: #f00;
 	border-color: #f00;
-	border-image-source: url('img/border-invalid.png');
+	border-image-source: url('..img/border-invalid.png');
 }
 
 button:active, button.active, input:focus, textarea:focus {
 	border-color: #ff0;
-	border-image-source: url('img/border-active.png');
+	border-image-source: url('..img/border-active.png');
 }
 
 textarea {
