@@ -15,6 +15,7 @@ module tanks {
 		"ui"
 	}
 
+
 	//Testing
 	export var runTests = true;
 	export function assert(label: string = "Unlabeled", statement: any, exptected: any = true) {
@@ -143,6 +144,74 @@ module tanks {
 			return Coord.angleBetweenCoords(new Coord(), this.velocity);
 		}
 	}
+
+	//A Hashmap maps 2 dimensional elements to a 1 dimensional array
+	//This way we can use native array methods for faster manipulations if needed
+	export class Hashmap {
+		public data: any[] = [];
+		public size: number = 10
+		public defaultValue: any = null
+		constructor(size: number = 10, defaultValue: any = null) {
+
+			if (defaultValue != this.defaultValue) {
+				this.defaultValue = defaultValue;
+			}
+			if (typeof size == typeof this.size && isFinite(size) && size > 0) {
+				this.size = Math.abs(size);
+			} else {
+				//console.warn("invalid size:", size, "using default", this.size, "instead");
+			}
+			this.data.length = Math.pow(size, 2);
+		}
+		public get(coord: Coord) {
+			let target = coord.x + (coord.y * this.size);
+			if (target >= this.data.length) {
+				//console.warn("out of range: too high", coord.x, ':', coord.y);
+				return false;
+			}
+			if (target < 0) {
+				//console.warn("out of range: only positive values accepted", coord.x, ':', coord.y);
+				return false;
+			}
+			if (this.data[target] == void 0) {
+				return this.defaultValue;
+			}
+
+			return this.data[target];
+		}
+		public getAll(fillEmpty = true) {
+			var arr = this.data.slice(0);
+			for (let arrIndex = 0; arrIndex < arr.length; arrIndex++) {
+				if (arr[arrIndex] == void 0 && fillEmpty == true) {
+					arr[arrIndex] = this.defaultValue;
+				}
+			}
+			return arr;
+		}
+		public set(coord: Coord, value: any) {
+			let target = coord.x + (coord.y * this.size);
+			if (target >= this.data.length) {
+				//console.warn("out of range: too high", coord.x, ':', coord.y);
+				return false;
+			}
+			if (target < 0) {
+				//console.warn("out of range: only positive values accepted", coord.x, ':', coord.y);
+				return false;
+			}
+			this.data[target] = value;
+			return this;
+		}
+		public setDefault(value: any) {
+			this.defaultValue = value;
+			return this;
+		}
+	}
+
+	(function unitTest() {
+		var h = new Hashmap();
+		assert("Hashmap gets negative", h.get(new Coord(-1, -1)), false);
+		assert("Hashmap sets negative", h.set(new Coord(-1, -1), false), false);
+	})()
 
 	//More Basics
 	export module Basics {

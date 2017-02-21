@@ -171,6 +171,75 @@ var tanks;
         return Vector;
     }());
     tanks.Vector = Vector;
+    //A Hashmap maps 2 dimensional elements to a 1 dimensional array
+    //This way we can use native array methods for faster manipulations if needed
+    var Hashmap = (function () {
+        function Hashmap(size, defaultValue) {
+            if (size === void 0) { size = 10; }
+            if (defaultValue === void 0) { defaultValue = null; }
+            this.data = [];
+            this.size = 10;
+            this.defaultValue = null;
+            if (defaultValue != this.defaultValue) {
+                this.defaultValue = defaultValue;
+            }
+            if (typeof size == typeof this.size && isFinite(size) && size > 0) {
+                this.size = Math.abs(size);
+            }
+            else {
+            }
+            this.data.length = Math.pow(size, 2);
+        }
+        Hashmap.prototype.get = function (coord) {
+            var target = coord.x + (coord.y * this.size);
+            if (target >= this.data.length) {
+                //console.warn("out of range: too high", coord.x, ':', coord.y);
+                return false;
+            }
+            if (target < 0) {
+                //console.warn("out of range: only positive values accepted", coord.x, ':', coord.y);
+                return false;
+            }
+            if (this.data[target] == void 0) {
+                return this.defaultValue;
+            }
+            return this.data[target];
+        };
+        Hashmap.prototype.getAll = function (fillEmpty) {
+            if (fillEmpty === void 0) { fillEmpty = true; }
+            var arr = this.data.slice(0);
+            for (var arrIndex = 0; arrIndex < arr.length; arrIndex++) {
+                if (arr[arrIndex] == void 0 && fillEmpty == true) {
+                    arr[arrIndex] = this.defaultValue;
+                }
+            }
+            return arr;
+        };
+        Hashmap.prototype.set = function (coord, value) {
+            var target = coord.x + (coord.y * this.size);
+            if (target >= this.data.length) {
+                //console.warn("out of range: too high", coord.x, ':', coord.y);
+                return false;
+            }
+            if (target < 0) {
+                //console.warn("out of range: only positive values accepted", coord.x, ':', coord.y);
+                return false;
+            }
+            this.data[target] = value;
+            return this;
+        };
+        Hashmap.prototype.setDefault = function (value) {
+            this.defaultValue = value;
+            return this;
+        };
+        return Hashmap;
+    }());
+    tanks.Hashmap = Hashmap;
+    (function unitTest() {
+        var h = new Hashmap();
+        assert("Hashmap gets negative", h.get(new Coord(-1, -1)), false);
+        assert("Hashmap sets negative", h.set(new Coord(-1, -1), false), false);
+    })();
     //More Basics
     (function (Basics) {
         //Shape is a base class for other Shapes
@@ -1419,7 +1488,7 @@ var tanks;
     var FlameThrowerProjectile = (function (_super) {
         __extends(FlameThrowerProjectile, _super);
         function FlameThrowerProjectile() {
-            var _this = _super.apply(this, arguments) || this;
+            var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.damage = 10;
             _this.sprite = tanks.Resource.get("bulletBurningSprite");
             _this.sfx = { spawn: tanks.Sound.get("sfxFlamethrowerSpawn"), hit: tanks.Sound.get("sfxBulletHit"), bounce: null };
@@ -1515,7 +1584,7 @@ var tanks;
     var WeaponTankFlameThrower = (function (_super) {
         __extends(WeaponTankFlameThrower, _super);
         function WeaponTankFlameThrower() {
-            var _this = _super.apply(this, arguments) || this;
+            var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.lifespan = 20;
             _this.fireRateMax = 20;
             _this.speed = 1.3;
@@ -1529,7 +1598,7 @@ var tanks;
     var WeaponTankMainGun = (function (_super) {
         __extends(WeaponTankMainGun, _super);
         function WeaponTankMainGun() {
-            var _this = _super.apply(this, arguments) || this;
+            var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.lifespan = 100;
             _this.fireRateMax = 200;
             _this.speed = 4;
@@ -1659,4 +1728,169 @@ var tanks;
         return Player;
     }(tanks.Actor));
     tanks.Player = Player;
+})(tanks || (tanks = {}));
+/// <reference path="../game.utility.ts" />
+/// <reference path="../game.core.ts" />
+//Projectiles contains classes for each kind of projectile in the game
+//A projectile is a self propelling game object without direct user control, usually intended for dealing damage
+var tanks;
+(function (tanks) {
+    var Tile = (function () {
+        function Tile(parameters) {
+            if (parameters === void 0) { parameters = {}; }
+            //The identifier for this tile.
+            this.id = (function () {
+                var id = 0;
+                while (Tile._tiles.some(function (tile) {
+                    return tile.id == id;
+                })) {
+                    id++;
+                }
+                return id;
+            })();
+            //The secondary identifier for this tile.
+            //Could be "Ice", "Lake" or "Pavement"
+            this.name = "";
+            //Can a player/projectile traverse this tile
+            this.isBlocking = false;
+            //The ressource to draw on this tile
+            this.ressource = null;
+            //On a scale from 0 to 1, how much friction does this tile excert
+            this.friction = 1;
+            //How big should one of these tiles be.
+            this.tileSize = 16;
+            for (var key in parameters) {
+                if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
+                    this[key] = parameters[key];
+                }
+            }
+            if (this.friction > 1) {
+                this.friction = 1;
+            }
+            else if (this.friction < 0) {
+                this.friction = 0;
+            }
+            if (this.tileSize <= 0) {
+                this.tileSize = 1;
+            }
+            Tile._tiles.push(this);
+        }
+        //get Tile By Id
+        Tile.getById = function (id) {
+            if (id === void 0) { id = null; }
+            return this._tiles
+                .filter(function (a) {
+                return a.id == id;
+            })
+                .slice(0)
+                .pop();
+        };
+        //get Tile By name
+        Tile.getByName = function (name) {
+            if (name === void 0) { name = null; }
+            return this._tiles
+                .filter(function (a) {
+                return a.name == name;
+            })
+                .slice(0)
+                .pop();
+        };
+        ;
+        return Tile;
+    }());
+    //List of all tiles in existence
+    Tile._tiles = [];
+    //Running static id number of level
+    Tile._id = 0;
+    tanks.Tile = Tile;
+    var TileIce = (function (_super) {
+        __extends(TileIce, _super);
+        function TileIce(parameters) {
+            if (parameters === void 0) { parameters = {}; }
+            var _this = _super.call(this, parameters) || this;
+            _this.friction = 0.25;
+            return _this;
+        }
+        return TileIce;
+    }(Tile));
+    var TileSand = (function (_super) {
+        __extends(TileSand, _super);
+        function TileSand(parameters) {
+            if (parameters === void 0) { parameters = {}; }
+            var _this = _super.call(this, parameters) || this;
+            _this.friction = 0.25;
+            return _this;
+        }
+        return TileSand;
+    }(Tile));
+    var TileWall = (function (_super) {
+        __extends(TileWall, _super);
+        function TileWall(parameters) {
+            if (parameters === void 0) { parameters = {}; }
+            var _this = _super.call(this, parameters) || this;
+            _this.isBlocking = true;
+            return _this;
+        }
+        return TileWall;
+    }(Tile));
+    var Level = (function () {
+        function Level(parameters) {
+            if (parameters === void 0) { parameters = {}; }
+            //
+            this.id = (function () {
+                var id = 0;
+                while (Level._levels.some(function (lvl) {
+                    return lvl.id == id;
+                })) {
+                    id++;
+                }
+                return id;
+            })();
+            //Default tile to use in this level
+            this.defaultTile = Tile.getByName("ice");
+            //Map size in tiles
+            this.size = 100;
+            //Hashmap over tiles
+            this.tileSet = null;
+            for (var key in parameters) {
+                if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
+                    this[key] = parameters[key];
+                }
+            }
+            this.tileSet = new tanks.Hashmap(this.size, this.defaultTile.id);
+            if (parameters.hasOwnProperty("tilehash")) {
+                this.tileSet.data = parameters["tilehash"];
+            }
+            Level._levels.push(this);
+        }
+        Level.prototype.save = function () {
+            var self = this;
+            var saveObject = {
+                id: this.id.toString(),
+                size: this.size,
+                tilehash: Object.keys(this.tileSet.data)
+                    .filter(function (tile) {
+                    return (self.tileSet.data[tile] != void 0);
+                })
+                    .map(function (tile) {
+                    var obj = {};
+                    obj[tile] = self.tileSet.data[tile];
+                    return obj;
+                }),
+                defaultTile: this.defaultTile.id
+            };
+            return JSON.stringify(saveObject);
+        };
+        return Level;
+    }());
+    //Running static id number of level
+    Level._id = 0;
+    //All levels
+    Level._levels = [];
+    tanks.Level = Level;
+    /* UNIT TESTS - RUN ONLY IN DEVELOPMENT AS THE TILES REGISTER GLOBALLY!
+    var lvl = new Level({ id: "Level 1", size: 6 });
+    lvl.tileSet.set(new Coord(1, 1), 5);
+    console.log(lvl.save());
+    */
 })(tanks || (tanks = {}));

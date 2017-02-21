@@ -9,6 +9,7 @@
         "scripts/game/classes/projectiles.class.ts",
         "scripts/game/classes/weapon.class.ts",
         "scripts/game/classes/player.class.ts",
+        "scripts/game/classes/level.class.ts",
         "scripts/game/game.core.ts"
     ]
 }
