@@ -10,10 +10,7 @@
 	font-style: normal;
 }
 
-html, head, body {
-	margin: 0;
-	padding: 0;
-
+html {
 	image-rendering: -moz-crisp-edges;
 	image-rendering: -o-crisp-edges;
 	image-rendering: -webkit-optimize-contrast;
@@ -21,9 +18,13 @@ html, head, body {
 	image-rendering: crisp-edges;
 	-ms-interpolation-mode: nearest-neighbor;
 
+	line-height: 1;
 	-webkit-font-smoothing: none;
 	-moz-osx-font-smoothing: unset;
 	font-smooth: never;
+
+	font-family: 'PressStart2P', 'sans-serif';
+	font-size: 1rem;
 
 	-webkit-user-select: none;
 	-moz-user-select: none;
@@ -32,12 +33,9 @@ html, head, body {
 }
 
 body {
-	font-family: 'PressStart2P', 'sans-serif';
-	font-size: 1rem;
 	background-color: #000;
 	text-transform: uppercase;
 	color: #fff;
-	line-height: 1;
 }
 
 li, a, .option-container, .indented {
@@ -195,12 +193,6 @@ input, button, textarea {
 	line-height: 1;
 	font-size: 1em;
 	text-transform: uppercase;
-}
-
-input::-moz-focus-inner,
-button::-moz-focus-inner {
-	border: 0;
-	padding: 0;
 }
 
 input::-moz-placeholder, textarea::-moz-placeholder {
