@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
-        "outFile": "scripts/main.js"
+        "outFile": "scripts/main.js",
+        "watch": true
     },
     "files": [
         "scripts/app.ts",

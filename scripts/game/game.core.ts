@@ -115,7 +115,7 @@ module tanks {
 					if (actor.collision instanceof Basics.Circle) {
 						return actor.collision.radius;
 					} else if (actor.collision instanceof Basics.Rect) {
-						return actor.collision.diagonal() / 2;
+						return Math.max(actor.collision.width, actor.collision.height);
 					}
 				})
 				.sort()
@@ -128,21 +128,8 @@ module tanks {
 				});
 
 
-			for (let actorIndex = 0; actorIndex < collisionSuspects.length; actorIndex++) {
-				let actor = collisionSuspects[actorIndex];
-				if (actor.collision instanceof Basics.Polygon) {
-					actor.collision.distributePoints();
-				}
-			}
-
-
 			for (let actorIndex = 0; actorIndex < actors.length; actorIndex++) {
 				let actor = actors[actorIndex];
-
-				//Remove current actor from collision suspects
-				//This way we greatly reduces the amount of checks from n^n to n^log(n)
-				var splices = collisionSuspects.splice(collisionSuspects.indexOf(actor), 1);
-
 
 				//Only test collision on object within a realistic vicinity
 				let localCollisionSuspects = collisionSuspects
@@ -158,8 +145,7 @@ module tanks {
 					//current suspect
 					let collisionSuspect = localCollisionSuspects[collisionSuspectsIndex];
 
-
-					if (actor === collisionSuspect) { //Shouldn't be possible but just in case:
+					if (actor === collisionSuspect) {
 						continue;
 					}
 					/* */
@@ -250,38 +236,24 @@ module tanks {
 				var actor = actorsToDraw[actorIndex];
 
 				if (this.settings.drawCollisionShapes === true) {
-					if (actor.collision instanceof Basics.Polygon) {
-						actor.collision.setAngle(actor.angle);
-						actor.collision.buildEdges();
-
+					if (actor.collision instanceof Basics.Rect) {
+						ctx.strokeRect(
+							actor.collision.origo.x - actor.collision.width / 2,
+							actor.collision.origo.y - actor.collision.height / 2,
+							actor.collision.width,
+							actor.collision.height
+						);
+					} else if (actor.collision instanceof Basics.Circle) {
 						ctx.beginPath();
-						ctx.moveTo(
-							actor.collision.edges[0].start.x + actor.position.x,
-							actor.collision.edges[0].start.y + actor.position.y
-						);
-						for (let edgieIndex = 0; edgieIndex < actor.collision.edges.length; edgieIndex++) {
-							let edge = actor.collision.edges[edgieIndex];
-							ctx.moveTo(
-								edge.start.x + actor.position.x,
-								edge.start.y + actor.position.y
-							);
-							ctx.lineTo(
-								edge.end.x + actor.position.x,
-								edge.end.y + actor.position.y
-							);
-						}
-						ctx.moveTo(
-							actor.collision.edges[0].start.x + actor.position.x,
-							actor.collision.edges[0].start.y + actor.position.y
-						);
-						ctx.lineTo(
-							actor.collision.edges[0].end.x + actor.position.x,
-							actor.collision.edges[0].end.y + actor.position.y
+						ctx.arc(
+							actor.collision.origo.x,
+							actor.collision.origo.y,
+							actor.collision.radius,
+							0,
+							Math.PI * 2
 						);
 						ctx.stroke();
 						ctx.closePath();
-					} else {
-
 					}
 				}
 

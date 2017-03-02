@@ -1,8 +1,13 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 //This file contains utility elements for the game engine.
 var tanks;
 (function (tanks) {
@@ -55,6 +60,8 @@ var tanks;
             det = (l1x2 - l1x1) * (l2y2 - l2y1) - (l2x2 - l2x1) * (l1y2 - l1y1);
             if (det === 0) {
                 return false;
+                //Return overlapping circle
+                //return (angleBetweenPoints(l1x1, l1y1, l1x2, l1y2) == 0);
             }
             else {
                 //lamb is progess over x axis
@@ -187,6 +194,7 @@ var tanks;
                 this.size = Math.abs(size);
             }
             else {
+                //console.warn("invalid size:", size, "using default", this.size, "instead");
             }
             this.data.length = Math.pow(size, 2);
         }
@@ -244,191 +252,37 @@ var tanks;
     (function (Basics) {
         //Shape is a base class for other Shapes
         //This class isn't exported because it shouldn't be used raw
+        /**
+         * Shape
+         */
         var Shape = (function () {
-            function Shape() {
+            function Shape(origo) {
+                if (origo === void 0) { origo = new Coord(); }
+                this.origo = origo;
             }
             return Shape;
         }());
-        var Line = (function () {
-            function Line(start, end) {
-                this.start = start;
-                this.end = end;
-            }
-            Line.intersects = function (a, b) {
-                return Basics.intersects(a.start.x, a.start.y, a.end.x, a.end.y, b.start.x, b.start.y, b.end.x, b.end.y) !== false;
-            };
-            return Line;
-        }());
-        Basics.Line = Line;
-        //Polygons are always closed shapes
-        var Polygon = (function (_super) {
-            __extends(Polygon, _super);
-            function Polygon(origo, points, angle) {
-                if (origo === void 0) { origo = new Coord(); }
-                if (points === void 0) { points = []; }
-                if (angle === void 0) { angle = new Angle(); }
-                var _this = _super.call(this) || this;
-                _this.origo = origo;
-                _this.points = points;
-                _this.angle = angle;
-                _this.edges = [];
-                _this.buildEdges();
-                return _this;
-            }
-            Polygon.intersects = function (p1, p2) {
-                for (var p1EdgeIndex = 0; p1EdgeIndex < p1.edges.length; p1EdgeIndex++) {
-                    var p1Edge = p1.edges[p1EdgeIndex];
-                    for (var p2EdgeIndex = 0; p2EdgeIndex < p2.edges.length; p2EdgeIndex++) {
-                        var p2Edge = p2.edges[p2EdgeIndex];
-                        var intersection = Line.intersects(p1Edge, p2Edge);
-                        if (intersection !== false) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            };
-            Polygon.containsPoint = function (pol, point) {
-                var e = pol.buildEdges().getExtremes(true);
-                var count = 0;
-                var lineA = new Line(new Coord(e.left - pol.origo.x, point.y - pol.origo.y), new Coord(point.x - pol.origo.x, point.y - pol.origo.y));
-                var lineB = new Line(new Coord(point.x - pol.origo.x, e.top - pol.origo.y), new Coord(point.x - pol.origo.x, point.y - pol.origo.y));
-                for (var edgeIndex = 0; edgeIndex < pol.edges.length; edgeIndex++) {
-                    if (Line.intersects(lineA, pol.edges[edgeIndex]) === true) {
-                        count++;
-                    }
-                }
-                if (count > 0 && count % 2 === 1) {
-                    return count % 2 === 1;
-                }
-                count = 0;
-                for (var edgeIndex = 0; edgeIndex < pol.edges.length; edgeIndex++) {
-                    if (Line.intersects(lineB, pol.edges[edgeIndex]) === true) {
-                        count++;
-                    }
-                }
-                if (count > 0 && count % 2 === 1) {
-                    return count % 2 === 1;
-                }
-                return false;
-            };
-            Polygon.prototype.buildEdges = function () {
-                var theta = Angle.degreetoRadian(this.angle.get());
-                this.edges = [];
-                for (var indexa = 0; indexa < this.points.length; indexa++) {
-                    var a = this.points[indexa];
-                    var b = this.points[(indexa + 1) % this.points.length];
-                    this.edges.push(new Line(new Coord(a.x * Math.cos(theta) - a.y * Math.sin(theta), a.x * Math.sin(theta) + a.y * Math.cos(theta)), new Coord(b.x * Math.cos(theta) - b.y * Math.sin(theta), b.x * Math.sin(theta) + b.y * Math.cos(theta))));
-                }
-                return this;
-            };
-            Polygon.prototype.getExtremes = function (applyOrigo) {
-                if (applyOrigo === void 0) { applyOrigo = true; }
-                this.buildEdges();
-                var returner = {
-                    top: 0,
-                    left: 0,
-                    bottom: 0,
-                    right: 0
-                };
-                for (var index = 0; index < this.edges.length; index++) {
-                    var edge = this.edges[index];
-                    if (Math.min(edge.start.x, edge.end.x) < returner.left) {
-                        returner.left = Math.min(edge.start.x, edge.end.x);
-                    }
-                    if (Math.max(edge.start.x, edge.end.x) > returner.right) {
-                        returner.right = Math.max(edge.start.x, edge.end.x);
-                    }
-                    if (Math.min(edge.start.y, edge.end.y) < returner.top) {
-                        returner.top = Math.min(edge.start.y, edge.end.y);
-                    }
-                    if (Math.max(edge.start.y, edge.end.y) > returner.bottom) {
-                        returner.bottom = Math.max(edge.start.y, edge.end.y);
-                    }
-                }
-                if (applyOrigo === true) {
-                    returner.top += this.origo.y;
-                    returner.bottom += this.origo.y;
-                    returner.left += this.origo.x;
-                    returner.right += this.origo.x;
-                }
-                return returner;
-            };
-            return Polygon;
-        }(Shape));
-        Basics.Polygon = Polygon;
-        (function unitTest() {
-            if (!tanks.runTests) {
-                return false;
-            }
-            var p1 = new Polygon(new Coord(100, 100), [
-                new Coord(-10, -10),
-                new Coord(0, 10),
-                new Coord(10, -10)
-            ], new Angle(45));
-            var p2 = new Polygon(new Coord(100, 100), [
-                new Coord(-50, -5),
-                new Coord(50, -5),
-            ], new Angle(45));
-            var p3 = new Polygon(new Coord(100, 100), [
-                new Coord(-50, -50),
-                new Coord(50, -50),
-            ], new Angle(45));
-            assert("Polygons intersect", Polygon.intersects(p1, p2), true);
-            assert("Polygons does not intersect", Polygon.intersects(p1, p3), false);
-            assert("Polygon contain point", Polygon.containsPoint(p1, p1.origo), true);
-            assert("Polygon does not contain point", Polygon.containsPoint(p1, new Coord(p1.origo.x + 1000, p1.origo.y)), false);
-        })();
         var Rect = (function (_super) {
             __extends(Rect, _super);
-            function Rect(origo, width, height, angle) {
+            function Rect(origo, width, height) {
                 if (origo === void 0) { origo = new Coord(); }
                 if (width === void 0) { width = 0; }
                 if (height === void 0) { height = 0; }
-                if (angle === void 0) { angle = new Angle(); }
                 var _this = _super.call(this, origo) || this;
                 _this.origo = origo;
                 _this.width = width;
                 _this.height = height;
-                _this.angle = angle;
-                _this.distributePoints();
                 return _this;
             }
             Rect.prototype.setWidth = function (value) {
                 if (value === void 0) { value = this.width; }
                 this.width = Math.abs(value);
-                this.buildEdges();
                 return this;
             };
             Rect.prototype.setHeight = function (value) {
                 if (value === void 0) { value = this.height; }
                 this.height = Math.abs(value);
-                this.buildEdges();
                 return this;
-            };
-            Rect.prototype.setAngle = function (value) {
-                if (value === void 0) { value = this.angle; }
-                if (value instanceof Angle) {
-                    this.angle.set(value.degree);
-                }
-                else {
-                    this.angle.set(value);
-                }
-                this.buildEdges();
-                return this;
-            };
-            Rect.prototype.distributePoints = function () {
-                this.points = [
-                    //Top Left
-                    new Coord(-0.5 * this.width, -0.5 * this.height),
-                    //Top Right
-                    new Coord(0.5 * this.width, -0.5 * this.height),
-                    //Bottom Right
-                    new Coord(0.5 * this.width, 0.5 * this.height),
-                    //Bottom Left
-                    new Coord(-0.5 * this.width, 0.5 * this.height),
-                ];
-                this.buildEdges();
             };
             Rect.prototype.circumference = function () {
                 return 2 * (Basics.distance(0, 0, 0, this.height) +
@@ -443,7 +297,7 @@ var tanks;
                 return Basics.distance(0, 0, this.width, this.height);
             };
             return Rect;
-        }(Polygon));
+        }(Shape));
         Basics.Rect = Rect;
         /* */ // Unit Tests
         (function unitTest() {
@@ -498,6 +352,54 @@ var tanks;
             assert("Circumference of circle is 62", Math.floor(c.circumference()), 62);
             assert("Chord of circle is radius * 2 (10 * 2)", Math.floor(c.chord(180)), 20);
         })();
+        function RectCircleColliding(circle, rect) {
+            var x = rect.origo.x - 0.5 * rect.width;
+            var y = rect.origo.y - 0.5 * rect.height;
+            //http://stackoverflow.com/a/21096179
+            var distX = Math.abs(circle.origo.x - x - rect.width / 2);
+            var distY = Math.abs(circle.origo.y - y - rect.height / 2);
+            if (distX > (rect.width / 2 + circle.radius)) {
+                return false;
+            }
+            if (distY > (rect.height / 2 + circle.radius)) {
+                return false;
+            }
+            if (distX <= (rect.width / 2)) {
+                return true;
+            }
+            if (distY <= (rect.height / 2)) {
+                return true;
+            }
+            var dx = distX - rect.width / 2;
+            var dy = distY - rect.height / 2;
+            return (dx * dx + dy * dy <= (circle.radius * circle.radius));
+        }
+        function shapeOverlap(shape1, shape2) {
+            if (shape1 instanceof Rect && shape2 instanceof Rect) {
+                return (
+                //Shape1 start before Shape2 ends (x)
+                shape1.origo.x - 0.5 * shape1.width < shape2.origo.x + 0.5 * shape2.width &&
+                    //Shape2 start before Shape1 ends (x)
+                    shape2.origo.x - 0.5 * shape2.width < shape1.origo.x + 0.5 * shape1.width &&
+                    //Shape1 start before Shape2 ends (y)
+                    shape1.origo.y - 0.5 * shape1.height < shape2.origo.y + 0.5 * shape2.height &&
+                    //Shape2 start before Shape1 ends (y)
+                    shape2.origo.y - 0.5 * shape2.height < shape1.origo.y + 0.5 * shape1.height);
+            }
+            else if (shape1 instanceof Circle && shape2 instanceof Circle) {
+                return Coord.distanceBetweenCoords(shape1.origo, shape2.origo) < shape1.radius + shape2.radius;
+            }
+            else if (shape1 instanceof Circle && shape2 instanceof Rect) {
+                return RectCircleColliding(shape1, shape2);
+            }
+            else if (shape1 instanceof Rect && shape2 instanceof Circle) {
+                return RectCircleColliding(shape2, shape1);
+            }
+            else {
+                return false;
+            }
+        }
+        Basics.shapeOverlap = shapeOverlap;
         /* */
         //Enum settings for bounce
         var EBounce;
@@ -542,110 +444,6 @@ var tanks;
             assert("225 on 90 is 315", bounce(225, 90), 315);
             assert("315 on 90 is 225", bounce(315, 90), 225);
         })();
-        /* */
-        //Shortest length between any point on a line and and a circle
-        function shortestDistanceBetweenLineAndCircle(circleOrigo, startPoint, endPoint) {
-            var A = circleOrigo.x - startPoint.x;
-            var B = circleOrigo.y - startPoint.y;
-            var C = endPoint.x - startPoint.x;
-            var D = endPoint.y - startPoint.y;
-            var dot = A * C + B * D;
-            var len_sq = C * C + D * D;
-            var param = -1;
-            if (len_sq != 0) {
-                param = dot / len_sq;
-            }
-            var xx, yy;
-            if (param < 0) {
-                xx = startPoint.x;
-                yy = startPoint.y;
-            }
-            else if (param > 1) {
-                xx = endPoint.x;
-                yy = endPoint.y;
-            }
-            else {
-                xx = startPoint.x + param * C;
-                yy = startPoint.y + param * D;
-            }
-            var dx = circleOrigo.x - xx;
-            var dy = circleOrigo.y - yy;
-            return Math.sqrt(dx * dx + dy * dy);
-        }
-        Basics.shortestDistanceBetweenLineAndCircle = shortestDistanceBetweenLineAndCircle;
-        /* */
-        //Calculate if a Circle overlaps a Rect
-        function overlapCircleRect(c, r) {
-            //If distance between origo is more than Circle radius + (0.5 * Rect diagonal) away, then there is no way they overlap
-            if (c.radius + (r.diagonal() / 2) < Coord.distanceBetweenCoords(c.origo, r.origo)) {
-                return false;
-            }
-            //if Circle origo is inside Rect or Rect origo inside Circle, return true
-            //if (er.left <= c.origo.x && c.origo.x <= er.right && c.origo.y >= er.top && c.origo.y <= er.bottom) {
-            if (Polygon.containsPoint(r, c.origo) || Coord.distanceBetweenCoords(c.origo, r.origo) < c.radius) {
-                return true;
-            }
-            //Check collisions on all edges
-            for (var edgeIndex = 0; edgeIndex < r.edges.length; edgeIndex++) {
-                var edge = r.edges[edgeIndex];
-                if (shortestDistanceBetweenLineAndCircle(c.origo, edge.start, edge.end) < c.radius) {
-                    return true;
-                }
-            }
-            //Return false if no overlap found
-            return false;
-        }
-        Basics.overlapCircleRect = overlapCircleRect;
-        /* // Unit Tests */
-        (function unitTest() {
-            if (!tanks.runTests) {
-                return false;
-            }
-            var c = new Circle(new Coord(6, 6), 10);
-            var r = new Rect(new Coord(5, 15), 15, 15);
-            assert("Circle and Rect overlap", overlapCircleRect(c, r));
-            r.origo.x = 100;
-            r.buildEdges();
-            assert("Circle and Rect dont overlap", overlapCircleRect(c, r), false);
-        })();
-        /* */
-        //Shape overlap
-        //Used for collisions
-        /* */
-        function shapeOverlap(objA, objB) {
-            if (objA instanceof Rect && objB instanceof Rect) {
-                return Polygon.intersects(objA, objB) || Polygon.containsPoint(objA, objB.origo) || Polygon.containsPoint(objB, objA.origo);
-            }
-            else if (objA instanceof Circle && objB instanceof Circle) {
-                return Coord.distanceBetweenCoords(objA.origo, objB.origo) <= objA.radius + objB.radius;
-            }
-            else if (objA instanceof Rect && objB instanceof Circle) {
-                return overlapCircleRect(objB, objA) || Polygon.containsPoint(objA, objB.origo);
-            }
-            else if (objA instanceof Circle && objB instanceof Rect) {
-                return overlapCircleRect(objA, objB) || Polygon.containsPoint(objB, objA.origo);
-            }
-            return false;
-        }
-        Basics.shapeOverlap = shapeOverlap;
-        /* // Unit Tests */
-        (function unitTest() {
-            if (!tanks.runTests) {
-                return false;
-            }
-            var c1 = new Circle(new Coord(10, 10), 10);
-            var c2 = new Circle(new Coord(10, 10), 10);
-            var r1 = new Rect(new Coord(15, 15), 15, 15, new Angle(0.05));
-            var r2 = new Rect(new Coord(14, 14), 15, 15);
-            assert("Shape overlap 1", shapeOverlap(c1, c2));
-            assert("Shape overlap 2", shapeOverlap(r1, r2));
-            assert("Shape overlap 2.5", shapeOverlap(r1, r2));
-            assert("Shape overlap 3", shapeOverlap(c1, r1));
-            assert("Shape overlap 4", shapeOverlap(c1, r2));
-            assert("Shape overlap 5", shapeOverlap(c2, r1));
-            assert("Shape overlap 6", shapeOverlap(c2, r2));
-        })();
-        /* */
     })(Basics = tanks.Basics || (tanks.Basics = {}));
     //Resources consists of a graphic file and optionally a descriptor JSON file
     //Resources are loaded before game launch and referenced by assigned ID
@@ -948,7 +746,7 @@ var tanks;
                     return actor.collision.radius;
                 }
                 else if (actor.collision instanceof tanks.Basics.Rect) {
-                    return actor.collision.diagonal() / 2;
+                    return Math.max(actor.collision.width, actor.collision.height);
                 }
             })
                 .sort()
@@ -958,17 +756,8 @@ var tanks;
                 .sort(function (a, b) {
                 return b.zIndex - a.zIndex;
             });
-            for (var actorIndex = 0; actorIndex < collisionSuspects.length; actorIndex++) {
-                var actor = collisionSuspects[actorIndex];
-                if (actor.collision instanceof tanks.Basics.Polygon) {
-                    actor.collision.distributePoints();
-                }
-            }
             var _loop_1 = function (actorIndex) {
                 var actor = actors[actorIndex];
-                //Remove current actor from collision suspects
-                //This way we greatly reduces the amount of checks from n^n to n^log(n)
-                splices = collisionSuspects.splice(collisionSuspects.indexOf(actor), 1);
                 //Only test collision on object within a realistic vicinity
                 var localCollisionSuspects = collisionSuspects
                     .filter(function (suspect) {
@@ -1016,11 +805,11 @@ var tanks;
                             }
                         }
                     }
+                    /* */
                 }
                 //Run update and listen for changes
                 changes = (actor.update() ? true : changes);
             };
-            var splices;
             for (var actorIndex = 0; actorIndex < actors.length; actorIndex++) {
                 _loop_1(actorIndex);
             }
@@ -1048,22 +837,14 @@ var tanks;
             for (var actorIndex = 0; actorIndex < actorsToDraw.length; actorIndex++) {
                 var actor = actorsToDraw[actorIndex];
                 if (this.settings.drawCollisionShapes === true) {
-                    if (actor.collision instanceof tanks.Basics.Polygon) {
-                        actor.collision.setAngle(actor.angle);
-                        actor.collision.buildEdges();
+                    if (actor.collision instanceof tanks.Basics.Rect) {
+                        ctx.strokeRect(actor.collision.origo.x - actor.collision.width / 2, actor.collision.origo.y - actor.collision.height / 2, actor.collision.width, actor.collision.height);
+                    }
+                    else if (actor.collision instanceof tanks.Basics.Circle) {
                         ctx.beginPath();
-                        ctx.moveTo(actor.collision.edges[0].start.x + actor.position.x, actor.collision.edges[0].start.y + actor.position.y);
-                        for (var edgieIndex = 0; edgieIndex < actor.collision.edges.length; edgieIndex++) {
-                            var edge = actor.collision.edges[edgieIndex];
-                            ctx.moveTo(edge.start.x + actor.position.x, edge.start.y + actor.position.y);
-                            ctx.lineTo(edge.end.x + actor.position.x, edge.end.y + actor.position.y);
-                        }
-                        ctx.moveTo(actor.collision.edges[0].start.x + actor.position.x, actor.collision.edges[0].start.y + actor.position.y);
-                        ctx.lineTo(actor.collision.edges[0].end.x + actor.position.x, actor.collision.edges[0].end.y + actor.position.y);
+                        ctx.arc(actor.collision.origo.x, actor.collision.origo.y, actor.collision.radius, 0, Math.PI * 2);
                         ctx.stroke();
                         ctx.closePath();
-                    }
-                    else {
                     }
                 }
                 //If actor has an abstract drawing method
@@ -1437,7 +1218,7 @@ var tanks;
             var _this = _super.call(this, parameters) || this;
             _this.lifespan = 1;
             _this.owner = null;
-            _this.damage = 34;
+            _this.damage = 0;
             _this.size = 8;
             _this.hit = false;
             _this.sprite = tanks.Resource.get("bulletSprite");
@@ -1485,6 +1266,7 @@ var tanks;
     }(tanks.Actor));
     Projectile.repeatFire = false;
     tanks.Projectile = Projectile;
+    //Instances
     var FlameThrowerProjectile = (function (_super) {
         __extends(FlameThrowerProjectile, _super);
         function FlameThrowerProjectile() {
@@ -1497,6 +1279,16 @@ var tanks;
         return FlameThrowerProjectile;
     }(Projectile));
     tanks.FlameThrowerProjectile = FlameThrowerProjectile;
+    var MainGunProjectile = (function (_super) {
+        __extends(MainGunProjectile, _super);
+        function MainGunProjectile() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.damage = 34;
+            return _this;
+        }
+        return MainGunProjectile;
+    }(Projectile));
+    tanks.MainGunProjectile = MainGunProjectile;
 })(tanks || (tanks = {}));
 /// <reference path="../game.utility.ts" />
 /// <reference path="../game.core.ts" />
@@ -1586,7 +1378,7 @@ var tanks;
         function WeaponTankFlameThrower() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.lifespan = 20;
-            _this.fireRateMax = 20;
+            _this.fireRateMax = 10;
             _this.speed = 1.3;
             _this.fireArc = new tanks.Angle(45);
             _this.projectileType = tanks.FlameThrowerProjectile;
@@ -1602,7 +1394,8 @@ var tanks;
             _this.lifespan = 100;
             _this.fireRateMax = 200;
             _this.speed = 4;
-            _this.fireArc = new tanks.Angle(10);
+            _this.fireArc = new tanks.Angle(1);
+            _this.projectileType = tanks.MainGunProjectile;
             return _this;
         }
         return WeaponTankMainGun;
@@ -1642,7 +1435,7 @@ var tanks;
                     _this[key] = parameters[key];
                 }
             }
-            _this.collision = new tanks.Basics.Rect(_this.position, _this.size * 0.9, _this.size * 0.7, _this.angle);
+            _this.collision = new tanks.Basics.Rect(_this.position, _this.size * 0.7, _this.size * 0.7);
             //These are "Proof of concept" for gun placement and gun modification.
             //Real implementations should have a derived subclass to reference directly
             //instead of modifying the existing one directly
@@ -1658,7 +1451,6 @@ var tanks;
                 owner: _this,
                 position: new tanks.Coord(10, 10)
             }));
-            _this.collision.distributePoints();
             return _this;
         }
         Player.prototype.update = function () {

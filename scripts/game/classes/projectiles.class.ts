@@ -15,7 +15,7 @@ module tanks {
 	export class Projectile extends Actor {
 		public lifespan: number = 1;
 		public owner: Weapon = null;
-		public damage: number = 34;
+		public damage: number = 0;
 		public size = 8;
 		public hit: boolean = false;
 		static repeatFire: boolean = false;
@@ -65,9 +65,15 @@ module tanks {
 		}
 	}
 
+	//Instances
+
 	export class FlameThrowerProjectile extends Projectile {
 		public damage: number = 10;
 		public sprite: Resource = Resource.get("bulletBurningSprite");
 		public sfx = { spawn: Sound.get("sfxFlamethrowerSpawn"), hit: Sound.get("sfxBulletHit"), bounce: null };
+	}
+
+	export class MainGunProjectile extends Projectile {
+		public damage: number = 34;
 	}
 }

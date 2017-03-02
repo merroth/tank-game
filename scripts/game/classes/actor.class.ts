@@ -38,7 +38,7 @@ module tanks {
 		public render: boolean = true;
 		public moveable: boolean = true;
 		public collision: Basics.Circle | Basics.Rect = null;
-
+		public draw: (ctx: CanvasRenderingContext2D) => void;
 		constructor(parameters: IActor = {}) {
 			for (var key in parameters) {
 				if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {

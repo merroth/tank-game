@@ -100,7 +100,7 @@ module tanks {
 
 	export class WeaponTankFlameThrower extends Weapon {
 		public lifespan: number = 20;
-		public fireRateMax: number = 20;
+		public fireRateMax: number = 10;
 		public speed: number = 1.3;
 		public fireArc: Angle = new Angle(45);
 		public projectileType = FlameThrowerProjectile;
@@ -110,7 +110,8 @@ module tanks {
 		public lifespan: number = 100;
 		public fireRateMax: number = 200;
 		public speed: number = 4;
-		public fireArc: Angle = new Angle(10);
+		public fireArc: Angle = new Angle(1);
+		public projectileType = MainGunProjectile;
 	}
 
 }
