@@ -201,6 +201,21 @@ module tanks {
 			this.data[target] = value;
 			return this;
 		}
+		public remove(coord: Coord) {
+			let target = coord.x + (coord.y * this.size);
+			if (target >= this.data.length) {
+				//console.warn("out of range: too high", coord.x, ':', coord.y);
+				return false;
+			}
+			if (target < 0) {
+				//console.warn("out of range: only positive values accepted", coord.x, ':', coord.y);
+				return false;
+			}
+			if (this.data[target] != void 0) {
+				this.data[target] = void 0;
+			}
+			return this;
+		}
 		public setDefault(value: any) {
 			this.defaultValue = value;
 			return this;
@@ -569,6 +584,7 @@ module tanks {
 	new Resource({ fileLocation: "resources/single-tank-green.png", descriptorLocation: "resources/single-tank-red.json", id: "tankGreenSprite" });
 	new Resource({ fileLocation: "resources/bullet_normal.png", descriptorLocation: "resources/bullet_normal.json", id: "bulletSprite" });
 	new Resource({ fileLocation: "resources/bullet_burning.png", descriptorLocation: "resources/bullet_normal.json", id: "bulletBurningSprite" });
+	new Resource({ fileLocation: "resources/tiles_vertical.png", descriptorLocation: "resources/tileset_vertical.json", id: "tileset" });
 	new Resource({ fileLocation: "resources/wall.png", id: "wallSprite" });
 	new Resource({ fileLocation: "resources/sfx/menu_back.m4a", id: "sfxMenuBack" });
 	new Resource({ fileLocation: "resources/sfx/menu_select.m4a", id: "sfxMenuSelect" });

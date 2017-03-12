@@ -236,6 +236,21 @@ var tanks;
             this.data[target] = value;
             return this;
         };
+        Hashmap.prototype.remove = function (coord) {
+            var target = coord.x + (coord.y * this.size);
+            if (target >= this.data.length) {
+                //console.warn("out of range: too high", coord.x, ':', coord.y);
+                return false;
+            }
+            if (target < 0) {
+                //console.warn("out of range: only positive values accepted", coord.x, ':', coord.y);
+                return false;
+            }
+            if (this.data[target] != void 0) {
+                this.data[target] = void 0;
+            }
+            return this;
+        };
         Hashmap.prototype.setDefault = function (value) {
             this.defaultValue = value;
             return this;
@@ -613,6 +628,7 @@ var tanks;
     new tanks.Resource({ fileLocation: "resources/single-tank-green.png", descriptorLocation: "resources/single-tank-red.json", id: "tankGreenSprite" });
     new tanks.Resource({ fileLocation: "resources/bullet_normal.png", descriptorLocation: "resources/bullet_normal.json", id: "bulletSprite" });
     new tanks.Resource({ fileLocation: "resources/bullet_burning.png", descriptorLocation: "resources/bullet_normal.json", id: "bulletBurningSprite" });
+    new tanks.Resource({ fileLocation: "resources/tiles_vertical.png", descriptorLocation: "resources/tileset_vertical.json", id: "tileset" });
     new tanks.Resource({ fileLocation: "resources/wall.png", id: "wallSprite" });
     new tanks.Resource({ fileLocation: "resources/sfx/menu_back.m4a", id: "sfxMenuBack" });
     new tanks.Resource({ fileLocation: "resources/sfx/menu_select.m4a", id: "sfxMenuSelect" });
@@ -929,6 +945,11 @@ var tanks;
             url: '/game',
             templateUrl: 'view/gamepage',
             controller: 'gameCtrl'
+        })
+            .state('editor', {
+            url: '/editor',
+            templateUrl: 'view/worldbuilder',
+            controller: 'worldbuilderCtrl'
         });
     });
     ////Front-page
@@ -1018,6 +1039,110 @@ var tanks;
                 //Kill world
                 tanks.World.kill();
             });
+        }])
+        .controller('worldbuilderCtrl', ['$scope', function ($scope) {
+            //Generate world paramenters
+            var ctx = document.getElementById("gameCanvas").getContext("2d");
+            $scope.canvas = ctx.canvas;
+            var tiles = [tanks.TileGrass, tanks.TileIce, tanks.TileSand, tanks.TileWall];
+            $scope.tiles = tiles;
+            var size = Math.abs(parseInt(prompt("Size of map (in tiles)", "64")));
+            //var size: number = 64;
+            $scope.size = size;
+            /*var defaultTile = tiles[Math.abs(parseInt(prompt(
+                "Pick a default tiletype:\n\n" +
+                tiles.map(function (a, index) {
+                    return a.name + ": " + index
+                }).join("\n"),
+                "0"
+            )))];*/
+            var defaultTile = tiles[2];
+            $scope.defaultTile = defaultTile;
+            //console.log(defaultTile);
+            var currentTile = defaultTile;
+            var hash = new tanks.Hashmap(size, defaultTile.id);
+            hash.set(new tanks.Coord(1, 1), tiles[2].id);
+            function draw() {
+                var defaultPattern = (function () {
+                    if (defaultTile.ressource.descriptor == null) {
+                        return "black";
+                    }
+                    var anim = defaultTile.ressource.descriptor.anim.find(function (a) {
+                        return a.name == defaultTile.animation;
+                    });
+                    var localCanvas = document.createElement("canvas").getContext("2d");
+                    localCanvas.canvas.width = 16;
+                    localCanvas.canvas.height = localCanvas.canvas.width;
+                    localCanvas.drawImage(defaultTile.ressource.resource, 0, 0 - (anim.top * tanks.Tile.tileSize));
+                    return ctx.createPattern(localCanvas.canvas, "repeat");
+                })();
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.fillStyle = defaultPattern;
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                for (var x = 0; x < ctx.canvas.width / tanks.Tile.tileSize; x++) {
+                    var _loop_2 = function (y) {
+                        var tileID = hash.get(new tanks.Coord(x, y));
+                        if (tileID != defaultTile.id) {
+                            var tile_1 = tiles.find(function (a) {
+                                return a.id == tileID;
+                            });
+                            if (tile_1 == void 0) {
+                                return "continue";
+                            }
+                            var anim = tanks.Tile.ressource.descriptor.anim.find(function (a) {
+                                return a.name == tile_1.animation;
+                            });
+                            ctx.drawImage(defaultTile.ressource.resource, 0, anim.top * tanks.Tile.tileSize, tanks.Tile.tileSize, tanks.Tile.tileSize, x * tanks.Tile.tileSize, y * tanks.Tile.tileSize, tanks.Tile.tileSize, tanks.Tile.tileSize);
+                        }
+                    };
+                    for (var y = 0; y < ctx.canvas.height / tanks.Tile.tileSize; y++) {
+                        _loop_2(y);
+                    }
+                }
+                ctx.strokeStyle = "rgba(0,0,0,0.1)";
+                ctx.lineWidth = 1;
+                for (var x = 0; x < ctx.canvas.width; x += tanks.Tile.tileSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, ctx.canvas.height);
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+                for (var y = 0; y < ctx.canvas.height; y += tanks.Tile.tileSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(ctx.canvas.width, y);
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+            }
+            (function () {
+                function initialDraw() {
+                    if (defaultTile.ressource.descriptor == null) {
+                        requestAnimationFrame(initialDraw);
+                    }
+                    else {
+                        draw();
+                    }
+                }
+                initialDraw();
+            })();
+            ctx.canvas.onmousemove = function (e) {
+                //return false;
+                //console.log(123, e);
+                var scaleOffest = (1 / ctx.canvas.width) * ctx.canvas.clientWidth;
+                var x = Math.floor(((e.clientX - e.target.offsetLeft) / scaleOffest) / tanks.Tile.tileSize);
+                var y = Math.floor(((e.clientY - e.target.offsetTop) / scaleOffest) / tanks.Tile.tileSize);
+                var value = document.getElementById("tiles").value;
+                if (e.ctrlKey) {
+                    hash.set(new tanks.Coord(x, y), value);
+                    draw();
+                }
+                else if (e.shiftKey) {
+                    hash.remove(new tanks.Coord(x, y));
+                    draw();
+                }
+            };
         }]);
     tanks.tankApp.run(function ($rootScope, $cookies) {
         $rootScope.menuLink = function () {
@@ -1530,42 +1655,6 @@ var tanks;
     var Tile = (function () {
         function Tile(parameters) {
             if (parameters === void 0) { parameters = {}; }
-            //The identifier for this tile.
-            this.id = (function () {
-                var id = 0;
-                while (Tile._tiles.some(function (tile) {
-                    return tile.id == id;
-                })) {
-                    id++;
-                }
-                return id;
-            })();
-            //The secondary identifier for this tile.
-            //Could be "Ice", "Lake" or "Pavement"
-            this.name = "";
-            //Can a player/projectile traverse this tile
-            this.isBlocking = false;
-            //The ressource to draw on this tile
-            this.ressource = null;
-            //On a scale from 0 to 1, how much friction does this tile excert
-            this.friction = 1;
-            //How big should one of these tiles be.
-            this.tileSize = 16;
-            for (var key in parameters) {
-                if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
-                    this[key] = parameters[key];
-                }
-            }
-            if (this.friction > 1) {
-                this.friction = 1;
-            }
-            else if (this.friction < 0) {
-                this.friction = 0;
-            }
-            if (this.tileSize <= 0) {
-                this.tileSize = 1;
-            }
-            Tile._tiles.push(this);
         }
         //get Tile By Id
         Tile.getById = function (id) {
@@ -1587,59 +1676,84 @@ var tanks;
                 .slice(0)
                 .pop();
         };
-        ;
         return Tile;
     }());
     //List of all tiles in existence
     Tile._tiles = [];
     //Running static id number of level
     Tile._id = 0;
+    //tile image
+    Tile.tileImage = tanks.Resource.get("tileset");
+    //The identifier for this tile.
+    Tile.id = (function () {
+        var id = 0;
+        while (Tile._tiles.some(function (tile) {
+            return tile.id == id;
+        })) {
+            id++;
+        }
+        return id;
+    })();
+    //Can a player/projectile traverse this tile
+    Tile.isBlocking = false;
+    //The ressource to draw on this tile
+    Tile.ressource = tanks.Resource.get("tileset");
+    //Default animation name
+    Tile.animation = "grass1";
+    //On a scale from 0 to 1, how much friction does this tile excert
+    Tile.friction = 1;
+    //How big should one of these tiles be.
+    Tile.tileSize = 16;
     tanks.Tile = Tile;
+    var TileGrass = (function (_super) {
+        __extends(TileGrass, _super);
+        function TileGrass(parameters) {
+            if (parameters === void 0) { parameters = {}; }
+            return _super.call(this, parameters) || this;
+        }
+        return TileGrass;
+    }(Tile));
+    TileGrass.id = "tilegrass1";
+    TileGrass.animation = "grass1";
+    tanks.TileGrass = TileGrass;
     var TileIce = (function (_super) {
         __extends(TileIce, _super);
         function TileIce(parameters) {
             if (parameters === void 0) { parameters = {}; }
-            var _this = _super.call(this, parameters) || this;
-            _this.friction = 0.25;
-            return _this;
+            return _super.call(this, parameters) || this;
         }
         return TileIce;
     }(Tile));
+    TileIce.id = "tileice1";
+    TileIce.animation = "water1";
+    tanks.TileIce = TileIce;
     var TileSand = (function (_super) {
         __extends(TileSand, _super);
         function TileSand(parameters) {
             if (parameters === void 0) { parameters = {}; }
-            var _this = _super.call(this, parameters) || this;
-            _this.friction = 0.25;
-            return _this;
+            return _super.call(this, parameters) || this;
         }
         return TileSand;
     }(Tile));
+    TileSand.id = "tilesand1";
+    TileSand.animation = "sand1";
+    tanks.TileSand = TileSand;
     var TileWall = (function (_super) {
         __extends(TileWall, _super);
         function TileWall(parameters) {
             if (parameters === void 0) { parameters = {}; }
-            var _this = _super.call(this, parameters) || this;
-            _this.isBlocking = true;
-            return _this;
+            return _super.call(this, parameters) || this;
         }
         return TileWall;
     }(Tile));
+    TileWall.id = "tilewall1";
+    TileWall.animation = "grass1";
+    tanks.TileWall = TileWall;
     var Level = (function () {
         function Level(parameters) {
             if (parameters === void 0) { parameters = {}; }
-            //
-            this.id = (function () {
-                var id = 0;
-                while (Level._levels.some(function (lvl) {
-                    return lvl.id == id;
-                })) {
-                    id++;
-                }
-                return id;
-            })();
             //Default tile to use in this level
-            this.defaultTile = Tile.getByName("ice");
+            this.defaultTile = TileSand;
             //Map size in tiles
             this.size = 100;
             //Hashmap over tiles
@@ -1649,11 +1763,13 @@ var tanks;
                     this[key] = parameters[key];
                 }
             }
+            if (this.id == void 0) {
+                this.id = Level._id++;
+            }
             this.tileSet = new tanks.Hashmap(this.size, this.defaultTile.id);
             if (parameters.hasOwnProperty("tilehash")) {
                 this.tileSet.data = parameters["tilehash"];
             }
-            Level._levels.push(this);
         }
         Level.prototype.save = function () {
             var self = this;
@@ -1677,8 +1793,6 @@ var tanks;
     }());
     //Running static id number of level
     Level._id = 0;
-    //All levels
-    Level._levels = [];
     tanks.Level = Level;
     /* UNIT TESTS - RUN ONLY IN DEVELOPMENT AS THE TILES REGISTER GLOBALLY!
     var lvl = new Level({ id: "Level 1", size: 6 });

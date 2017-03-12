@@ -1,0 +1,24 @@
+{
+    "width": 16,
+    "height": 16,
+    "anim": [
+        {
+            "name": "grass1",
+            "count": -1,
+            "rate": 60,
+            "top": 0
+        },
+        {
+            "name": "sand1",
+            "count": -1,
+            "rate": 60,
+            "top": 1
+        },
+        {
+            "name": "water1",
+            "count": 8,
+            "rate": 60,
+            "top": 2
+        }
+    ]
+}

@@ -28,34 +28,39 @@ module tanks {
 
 	tankApp = angular.module('tankApp', ['ui.router', 'ngCookies']);
 
-		//Route
+	//Route
 	tankApp.config(function ($urlRouterProvider, $stateProvider) {
-			$urlRouterProvider.otherwise('/');
-			$stateProvider
-				.state('home', {
-					url: '/',
-					templateUrl: 'view/home',
-					controller: 'homeCtrl'
-				})
+		$urlRouterProvider.otherwise('/');
+		$stateProvider
+			.state('home', {
+				url: '/',
+				templateUrl: 'view/home',
+				controller: 'homeCtrl'
+			})
 
-				.state('options', {
-					url: '/options',
-					templateUrl: 'view/options',
-					controller: 'optionsCtrl'
-				})
+			.state('options', {
+				url: '/options',
+				templateUrl: 'view/options',
+				controller: 'optionsCtrl'
+			})
 
-				.state('game', {
-					url: '/game',
-					templateUrl: 'view/gamepage',
-					controller: 'gameCtrl'
-				});
-		});
+			.state('game', {
+				url: '/game',
+				templateUrl: 'view/gamepage',
+				controller: 'gameCtrl'
+			})
+			.state('editor', {
+				url: '/editor',
+				templateUrl: 'view/worldbuilder',
+				controller: 'worldbuilderCtrl'
+			});
+	});
 
-		////Front-page
-		//Controller
+	////Front-page
+	//Controller
 	tankApp.controller('homeCtrl', ['$scope', function ($scope) {
 
-		}])
+	}])
 
 		////Options-page
 		//Controller
@@ -68,7 +73,7 @@ module tanks {
 			$scope.buttonLabelRight = tankApp.keyCodeName[pCtrl.right] || '------';
 			$scope.buttonLabelShoot = tankApp.keyCodeName[pCtrl.shoot] || '------';
 
-			$scope.setOption = function(option, value) {
+			$scope.setOption = function (option, value) {
 				tankApp.userOptions[option] = value;
 
 				$cookies.putObject('userOptions', tankApp.userOptions);
@@ -76,7 +81,7 @@ module tanks {
 				Sound.get('sfxMenuSelect').play(true);
 			}
 
-			$scope.setColor = function(color) {
+			$scope.setColor = function (color) {
 				let oldColor = tankApp.userOptions.playerColors[tankApp.userOptions.playerOptionsIndex];
 				let sameColorPlayer = tankApp.userOptions.playerColors.indexOf(color);
 
@@ -91,7 +96,7 @@ module tanks {
 				Sound.get('sfxMenuSelect').play(true);
 			}
 
-			$scope.resetControls = function() {
+			$scope.resetControls = function () {
 				let defaultKeyBindings = angular.copy(tankApp.defaultOptions.playerKeyBindings);
 
 				tankApp.userOptions.playerKeyBindings = defaultKeyBindings;
@@ -101,7 +106,7 @@ module tanks {
 				$scope.getPlayerSettings(tankApp.userOptions.playerOptionsIndex);
 			}
 
-			$scope.getPlayerSettings = function(playerIndex) {
+			$scope.getPlayerSettings = function (playerIndex) {
 				if (tankApp.userOptions.playerKeyBindings.hasOwnProperty(playerIndex)) {
 					tankApp.userOptions.playerOptionsIndex = playerIndex;
 
@@ -117,25 +122,25 @@ module tanks {
 				Sound.get('sfxMenuSelect').play(true);
 			}
 
-			$scope.listenForKey = function(event, key) {
+			$scope.listenForKey = function (event, key) {
 				$scope.activeKeyBinding = key;
 
-				angular.element(event.target).one('keydown', function(e) {
+				angular.element(event.target).one('keydown', function (e) {
 					$scope.setKey(key, e.which)
 				});
 			}
 
-			$scope.setKey = function(key, code) {
+			$scope.setKey = function (key, code) {
 				if (tankApp.keyCodeName.hasOwnProperty(code)) {
 					let label = 'buttonLabel' + key.charAt(0).toUpperCase() + key.slice(1);
 
-					tankApp.userOptions.playerKeyBindings.forEach(function(playerBindings, playerIndex) {
+					tankApp.userOptions.playerKeyBindings.forEach(function (playerBindings, playerIndex) {
 						//CLEANUP: This should probably be made into a generalized function
 						for (let bindingName in playerBindings) {
 							if (playerBindings[bindingName] == code) {
 								tankApp.userOptions.playerKeyBindings[playerIndex][bindingName] = null;
 
-								if(playerIndex == tankApp.userOptions.playerOptionsIndex && key != bindingName) {
+								if (playerIndex == tankApp.userOptions.playerOptionsIndex && key != bindingName) {
 									$scope['buttonLabel' + bindingName.charAt(0).toUpperCase() + bindingName.slice(1)] = '------';
 								}
 							}
@@ -174,10 +179,145 @@ module tanks {
 				//Kill world
 				World.kill();
 			});
+		}])
+
+		////Level-editor-page
+		//Controller
+		.controller('worldbuilderCtrl', ['$scope', function ($scope) {
+
+			//Generate world paramenters
+			var ctx: CanvasRenderingContext2D = <CanvasRenderingContext2D>document.getElementById("gameCanvas").getContext("2d");
+
+			$scope.canvas = ctx.canvas;
+
+			var tiles: Tile[] = [TileGrass, TileIce, TileSand, TileWall];
+			$scope.tiles = tiles;
+
+			var size: number = Math.abs(parseInt(prompt("Size of map (in tiles)", "64")));
+			//var size: number = 64;
+			$scope.size = size;
+
+			/*var defaultTile = tiles[Math.abs(parseInt(prompt(
+				"Pick a default tiletype:\n\n" +
+				tiles.map(function (a, index) {
+					return a.name + ": " + index
+				}).join("\n"),
+				"0"
+			)))];*/
+			var defaultTile = tiles[2];
+			$scope.defaultTile = defaultTile;
+
+			//console.log(defaultTile);
+
+			var currentTile = defaultTile;
+
+			var hash: Hashmap = new Hashmap(size, defaultTile.id);
+			hash.set(new Coord(1, 1), tiles[2].id);
+			function draw() {
+				var defaultPattern = (function () {
+					if (defaultTile.ressource.descriptor == null) {
+						return "black"
+					}
+					var anim = defaultTile.ressource.descriptor.anim.find(function (a) {
+						return a.name == defaultTile.animation
+					})
+
+					var localCanvas = document.createElement("canvas").getContext("2d");
+					localCanvas.canvas.width = 16;
+					localCanvas.canvas.height = localCanvas.canvas.width;
+					localCanvas.drawImage(
+						defaultTile.ressource.resource,
+						0,
+						0 - (anim.top * Tile.tileSize)
+					)
+					return ctx.createPattern(localCanvas.canvas, "repeat")
+				})();
+
+				ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+				ctx.fillStyle = defaultPattern;
+				ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+
+				for (let x = 0; x < ctx.canvas.width / Tile.tileSize; x++) {
+					for (let y = 0; y < ctx.canvas.height / Tile.tileSize; y++) {
+						let tileID = hash.get(new Coord(x, y));
+						if (tileID != defaultTile.id) {
+							let tile = tiles.find(function (a) {
+								return a.id == tileID;
+							});
+							if (tile == void 0) {
+								continue;
+							}
+
+							let anim: IDescriptorAnimation = Tile.ressource.descriptor.anim.find(function (a) {
+								return a.name == tile.animation;
+							});
+
+							ctx.drawImage(
+								defaultTile.ressource.resource,
+								0,
+								anim.top * Tile.tileSize,
+								Tile.tileSize,
+								Tile.tileSize,
+								x * Tile.tileSize,
+								y * Tile.tileSize,
+								Tile.tileSize,
+								Tile.tileSize,
+							)
+						}
+
+					}
+
+				}
+
+				ctx.strokeStyle = "rgba(0,0,0,0.1)";
+				ctx.lineWidth = 1;
+
+				for (let x = 0; x < ctx.canvas.width; x += Tile.tileSize) {
+					ctx.beginPath();
+					ctx.moveTo(x, 0);
+					ctx.lineTo(x, ctx.canvas.height);
+					ctx.closePath();
+					ctx.stroke();
+				}
+				for (let y = 0; y < ctx.canvas.height; y += Tile.tileSize) {
+					ctx.beginPath();
+					ctx.moveTo(0, y);
+					ctx.lineTo(ctx.canvas.width, y);
+					ctx.closePath();
+					ctx.stroke();
+				}
+			}
+			(function () {
+				function initialDraw() {
+					if (defaultTile.ressource.descriptor == null) {
+						requestAnimationFrame(initialDraw)
+					} else {
+						draw();
+					}
+				}
+				initialDraw();
+			})()
+
+			ctx.canvas.onmousemove = function (e: MouseEvent) {
+				//return false;
+				//console.log(123, e);
+				var scaleOffest = (1 / ctx.canvas.width) * ctx.canvas.clientWidth;
+				var x = Math.floor(((e.clientX - e.target.offsetLeft) / scaleOffest) / Tile.tileSize);
+				var y = Math.floor(((e.clientY - e.target.offsetTop) / scaleOffest) / Tile.tileSize);
+				var value = document.getElementById("tiles").value;
+				if (e.ctrlKey) {
+					hash.set(new Coord(x, y), value);
+					draw();
+				} else if (e.shiftKey) {
+					hash.remove(new Coord(x, y));
+					draw();
+				}
+			}
+
 		}]);
 
-	tankApp.run(function($rootScope, $cookies) {
-		$rootScope.menuLink = function() {
+	tankApp.run(function ($rootScope, $cookies) {
+		$rootScope.menuLink = function () {
 			Sound.get('sfxMenuSelect').play(true);
 		}
 
@@ -227,9 +367,9 @@ module tanks {
 		}
 
 		let d = new Date();
-		d.setTime(d.getTime()+(24*60*60*1000));
+		d.setTime(d.getTime() + (24 * 60 * 60 * 1000));
 
-		$cookies.putObject('userOptions', tankApp.userOptions, {'expires': d.toUTCString()});
+		$cookies.putObject('userOptions', tankApp.userOptions, { 'expires': d.toUTCString() });
 
 		tankApp.keyCodeName = {
 			9: "Tab",

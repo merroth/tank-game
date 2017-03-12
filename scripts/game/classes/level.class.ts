@@ -11,13 +11,16 @@ module tanks {
 		ressource?: Resource,
 		friction?: number,
 		tileSize?: number
+		animation?: string
 	}
 
 	export class Tile {
 		//List of all tiles in existence
-		static _tiles: Tile[] = [];
+		static _tiles: ITile[] = [];
 		//Running static id number of level
 		static _id = 0;
+		//tile image
+		static tileImage: Resource = Resource.get("tileset");
 		//get Tile By Id
 		static getById(id: number | string = null) {
 			return this._tiles
@@ -38,7 +41,7 @@ module tanks {
 		}
 
 		//The identifier for this tile.
-		public id: string | number = (function () {
+		static id: string | number = (function () {
 			var id = 0;
 			while (Tile._tiles.some(function (tile) {
 				return tile.id == id;
@@ -46,54 +49,51 @@ module tanks {
 				id++;
 			}
 			return id;
-		})();;
-		//The secondary identifier for this tile.
-		//Could be "Ice", "Lake" or "Pavement"
-		public name: string | number = "";
+		})();
 		//Can a player/projectile traverse this tile
-		public isBlocking: boolean = false;
+		static isBlocking: boolean = false;
 		//The ressource to draw on this tile
-		public ressource: Resource = null;
+		static ressource: Resource = Resource.get("tileset");
+		//Default animation name
+		static animation: string | number = "grass1";
 		//On a scale from 0 to 1, how much friction does this tile excert
-		public friction: number = 1;
+		static friction: number = 1;
 		//How big should one of these tiles be.
-		public tileSize: number = 16;
+		static tileSize: number = 16;
 		constructor(parameters: ITile = {}) {
-			for (var key in parameters) {
-				if (parameters.hasOwnProperty(key) && this.hasOwnProperty(key)) {
-					this[key] = parameters[key];
-				}
-			}
-			if (this.friction > 1) {
-				this.friction = 1;
-			} else if (this.friction < 0) {
-				this.friction = 0;
-			}
-			if (this.tileSize <= 0) {
-				this.tileSize = 1;
-			}
-			Tile._tiles.push(this);
 		}
 	}
 
-	class TileIce extends Tile {
+
+	export class TileGrass extends Tile {
+		static id = "tilegrass1";
+		static animation: string | number = "grass1";
 		constructor(parameters: ITile = {}) {
 			super(parameters);
-			this.friction = 0.25;
 		}
 	}
 
-	class TileSand extends Tile {
+	export class TileIce extends Tile {
+		static id = "tileice1";
+		static animation: string | number = "water1";
 		constructor(parameters: ITile = {}) {
 			super(parameters);
-			this.friction = 0.25;
 		}
 	}
 
-	class TileWall extends Tile {
+	export class TileSand extends Tile {
+		static id = "tilesand1"
+		static animation: string | number = "sand1";
 		constructor(parameters: ITile = {}) {
 			super(parameters);
-			this.isBlocking = true;
+		}
+	}
+
+	export class TileWall extends Tile {
+		static id = "tilewall1"
+		static animation: string | number = "grass1";
+		constructor(parameters: ITile = {}) {
+			super(parameters);
 		}
 	}
 
@@ -107,20 +107,9 @@ module tanks {
 	export class Level {
 		//Running static id number of level
 		static _id = 0;
-		//All levels
-		static _levels: Level[] = [];
-		//
-		public id: number | string = (function () {
-			var id = 0;
-			while (Level._levels.some(function (lvl) {
-				return lvl.id == id;
-			})) {
-				id++;
-			}
-			return id;
-		})();
+		public id;
 		//Default tile to use in this level
-		public defaultTile: Tile = Tile.getByName("ice");
+		public defaultTile: ITile = TileSand;
 		//Map size in tiles
 		public size: number = 100;
 		//Hashmap over tiles
@@ -131,11 +120,13 @@ module tanks {
 					this[key] = parameters[key];
 				}
 			}
+			if (this.id == void 0) {
+				this.id = Level._id++;
+			}
 			this.tileSet = new Hashmap(this.size, this.defaultTile.id)
 			if (parameters.hasOwnProperty("tilehash")) {
 				this.tileSet.data = parameters["tilehash"];
 			}
-			Level._levels.push(this);
 		}
 		public save() {
 			var self = this;
